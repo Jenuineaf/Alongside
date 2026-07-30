@@ -1,0 +1,11 @@
+# Buildmates — production dependencies
+#
+# Production runs base only. Nothing extra today; this file exists so the
+# Dockerfile's prod stage has a stable target and the ASGI switch (Phase 5,
+# Channels → uvicorn/daphne) has an obvious home.
+-r base.txt
+
+# Added when Django Channels lands (tech-stack §4):
+# channels~=4.2
+# channels-redis~=4.2
+# uvicorn[standard]~=0.32

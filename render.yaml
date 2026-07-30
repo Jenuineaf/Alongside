@@ -1,0 +1,82 @@
+# Buildmates — Render Blueprint
+#
+# Creates the web service only. Postgres lives on Neon and Redis on Upstash
+# (see docs/deployment.md §3 for why), so they are not declared here — they
+# arrive as environment variables.
+#
+# To use: Render dashboard → New → Blueprint → connect the GitHub repo.
+# Secrets are marked `sync: false`, which means Render prompts for them at
+# creation time and never stores them in git.
+
+services:
+  - type: web
+    name: buildmates
+    runtime: docker
+    plan: free
+    region: singapore          # closest to Bangalore users
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz/
+    autoDeploy: true
+
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DEBUG
+        value: "False"
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: RUN_MIGRATIONS_ON_START
+        value: "True"
+
+      # Free tier runs one web instance and no worker, so tasks execute
+      # inline. Architecture is unchanged; only the executor differs.
+      # See docs/deployment.md §4.
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "True"
+
+      - key: SENTRY_ENVIRONMENT
+        value: production
+      - key: SENTRY_TRACES_SAMPLE_RATE
+        value: "0.1"
+
+      # Render generates a strong value once and keeps it stable across deploys.
+      - key: SECRET_KEY
+        generateValue: true
+
+      # ── Prompted at Blueprint creation, never stored in git ──
+      - key: ALLOWED_HOSTS
+        sync: false            # e.g. buildmates.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false            # e.g. https://buildmates.onrender.com
+      - key: DATABASE_URL
+        sync: false            # Neon pooled URL, must include ?sslmode=require
+      - key: REDIS_URL
+        sync: false            # Upstash, rediss:// (TLS)
+      - key: CELERY_BROKER_URL
+        sync: false            # same Upstash URL
+      - key: CELERY_RESULT_BACKEND
+        sync: false
+      - key: CRON_SECRET
+        sync: false            # must match the GitHub Actions repo secret
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: EMAIL_BACKEND
+        sync: false
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

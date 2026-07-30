@@ -1,0 +1,18 @@
+# Buildmates — local dev + CI dependencies
+-r base.txt
+
+# ── Testing (tech-stack §9) ────────────────────────────────────
+pytest~=8.3
+pytest-django~=4.9
+pytest-cov~=6.0
+factory_boy~=3.3
+Faker~=33.0                        # also generates the demo seed content
+coverage~=7.6
+
+# ── Quality (tech-stack §9) ────────────────────────────────────
+ruff~=0.8                          # lint + format
+pre-commit~=4.0
+
+# ── Dev convenience ────────────────────────────────────────────
+django-debug-toolbar~=4.4
+ipython~=8.30

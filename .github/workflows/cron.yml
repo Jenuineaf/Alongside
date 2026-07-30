@@ -1,0 +1,53 @@
+name: Scheduled jobs
+
+# Stands in for Celery Beat in production.
+#
+# Render's free tier has no always-on background worker, and a beat process
+# inside the free web service would be asleep most of the time (the service
+# spins down after 15 minutes idle) — so it would silently miss its schedule.
+# GitHub Actions cron fires regardless, and the request itself wakes the app.
+#
+# PENDING JENI'S SIGN-OFF — see docs/deployment.md §4 for the three options.
+# The workflow is inert until RENDER_URL and CRON_SECRET exist as repo secrets.
+
+on:
+  schedule:
+    # 02:30 UTC = 08:00 IST daily. GitHub may delay cron by 5-15 min under
+    # load; irrelevant for a daily nudge.
+    - cron: "30 2 * * *"
+  workflow_dispatch:          # so it can be triggered by hand for testing
+
+jobs:
+  stale-post-nudge:
+    name: Stale post nudge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping scheduled-task endpoint
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RENDER_URL:-}" ] || [ -z "${CRON_SECRET:-}" ]; then
+            echo "RENDER_URL or CRON_SECRET not set — skipping."
+            exit 0
+          fi
+
+          # The free service may be cold; --max-time covers the ~30s spin-up
+          # plus the job itself, and we retry once on a connection failure.
+          status=$(curl --silent --show-error --location \
+            --retry 2 --retry-connrefused --retry-delay 10 \
+            --max-time 120 \
+            --output response.txt --write-out "%{http_code}" \
+            --header "X-Cron-Key: ${CRON_SECRET}" \
+            --request POST \
+            "${RENDER_URL}/internal/cron/stale-post-nudge/")
+
+          echo "HTTP ${status}"
+          cat response.txt
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Scheduled job failed with HTTP ${status}"
+            exit 1
+          fi

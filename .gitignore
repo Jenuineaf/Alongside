@@ -1,0 +1,50 @@
+# ── Secrets — nothing below this line may ever be committed ──
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+build/
+dist/
+.venv/
+venv/
+env/
+
+# ── Django ──
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+local_settings.py
+
+# ── Celery ──
+celerybeat-schedule*
+celerybeat.pid
+
+# ── Testing / tooling ──
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# ── Node (Tailwind build) ──
+node_modules/
+/static/css/tailwind.output.css
+
+# ── Editors / OS ──
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
