@@ -1,0 +1,93 @@
+{% comment %}
+  Base template — OWNED BY THE ARCHITECT.
+
+  Structure, asset loading and blocks only. Everything visual belongs to the
+  Designer: the palette lives in partials/_tailwind_config.html, and reusable
+  markup goes in templates/components/. Feature seats extend this file and fill
+  the blocks; they do not edit it. Change requests go through Jeni.
+
+  Blocks available:
+    title        page title (the " — Alongside" suffix is added here)
+    meta         per-page description / og tags
+    extra_head   page-specific <head> content
+    nav          the top bar; override only for full-bleed screens
+    content      the page
+    extra_body   page-specific scripts, loaded after Alpine
+{% endcomment %}<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  {# Mobile-first is a hard requirement — CONTRIBUTING.md rule 6. Without this the #}
+  {# whole design collapses on the phones our users actually have.           #}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}{% endblock %}{% if not request.path == "/" %} — Alongside{% endif %}</title>
+  {% block meta %}
+    <meta name="description" content="Alongside — nobody builds alone. Post an idea, find people to build it with.">
+  {% endblock %}
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  {% include "partials/_tailwind_config.html" %}
+
+  {# HTMX drives every partial update: feed pagination, comments, spark, the  #}
+  {# notification badge, live search. tech-stack.md §5.                       #}
+  <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+  {# Alpine for the bits HTMX doesn't cover — dropdowns, modals, the mobile   #}
+  {# drawer. Must load after HTMX.                                            #}
+  <script src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="h-full bg-ink-100 font-sans text-ink-900 antialiased"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  {# Every HTMX request carries the CSRF token from the body attribute above, #}
+  {# so no seat has to remember it per-form. Django rejects unsafe methods    #}
+  {# without it, and the failure looks like a mysterious 403.                 #}
+
+  <a href="#main"
+     class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:rounded
+            focus:bg-white focus:px-4 focus:py-2 focus:ring-2 focus:ring-brand-600">
+    Skip to content
+  </a>
+
+  {% block nav %}
+    {# Replaced by the Designer's real navigation. Kept minimal and functional #}
+    {# so the skeleton is navigable before Phase 1 lands.                      #}
+    <header class="sticky top-0 z-40 border-b border-ink-200 bg-white/95 backdrop-blur">
+      <nav class="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">
+        <a href="/" class="flex items-center gap-2 font-bold tracking-tight">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 fill-brand-500" aria-hidden="true">
+            <path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/>
+          </svg>
+          <span>Alongside</span>
+        </a>
+        <span class="ml-auto text-sm text-ink-500">
+          {% if user.is_authenticated %}{{ user.name }}{% endif %}
+        </span>
+      </nav>
+    </header>
+  {% endblock %}
+
+  {% if messages %}
+    <div class="mx-auto max-w-3xl px-4 pt-4">
+      {% for message in messages %}
+        <div class="mb-2 rounded-lg border px-4 py-3 text-sm
+                    {% if message.tags == 'error' %}border-bad-600 bg-bad-50 text-bad-700
+                    {% elif message.tags == 'success' %}border-ok-600 bg-ok-50 text-ok-700
+                    {% else %}border-ink-200 bg-white text-ink-700{% endif %}"
+             role="status">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main id="main" class="mx-auto max-w-3xl px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block extra_body %}{% endblock %}
+</body>
+</html>
