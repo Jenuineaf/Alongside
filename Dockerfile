@@ -40,6 +40,12 @@ RUN pip install -r requirements/dev.txt
 # dev image is run without the mount.
 COPY . .
 
+# The repo is authored on Windows, where git cannot store a Unix exec bit unless
+# it is set explicitly in the index. The index is now 100755, but this survives
+# anyone re-adding a script from a Windows checkout — without it the container
+# dies on boot with "permission denied" and no useful message.
+RUN chmod +x /app/scripts/*.sh
+
 EXPOSE 8000
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
@@ -52,14 +58,23 @@ RUN pip install -r requirements/prod.txt
 
 COPY . .
 
+RUN chmod +x /app/scripts/*.sh
+
 # Bake static files into the image so boot is fast and WhiteNoise has something
 # to serve. collectstatic never touches the database, so throwaway values for
 # the required env vars are safe here — none of them survive into the runtime
 # environment (Render injects the real ones).
-RUN SECRET_KEY="collectstatic-build-placeholder-not-used-at-runtime-000000000" \
+#
+# The key below is deliberately long and contains neither "dev" nor
+# "placeholder": prod.py is specified to REFUSE TO BOOT on a key matching either
+# (docs/deployment.md §8), and this build step loads prod.py. A friendlier-
+# looking key would fail the image build. If that guard's banned-word list ever
+# changes, this line changes with it.
+RUN SECRET_KEY="build-time-only-9f3c1a7e42b8d05619ca7fe38b204d7ce615a90f4482" \
     DATABASE_URL="postgres://build:build@127.0.0.1:5432/build" \
     REDIS_URL="redis://127.0.0.1:6379/0" \
     ALLOWED_HOSTS="localhost" \
+    CSRF_TRUSTED_ORIGINS="https://localhost" \
     DEBUG="False" \
     DJANGO_SETTINGS_MODULE="config.settings.prod" \
     python manage.py collectstatic --noinput
