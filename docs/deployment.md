@@ -9,8 +9,10 @@ This is the operational source of truth. Every infrastructure decision, and the 
 behind it, lives here — no teammate can see the DevOps chat, so if it isn't written here it
 doesn't exist.
 
-**Status: infrastructure files are written; nothing is deployed yet.** See §11 for exactly
-what is blocked and on whom.
+**Status (31 Jul): infrastructure files are written and reviewed; nothing has ever been run,
+and nothing is deployed.** Two boot-breaking bugs were found and fixed by review on 31 Jul —
+see the decision log (§10). The whole stack is blocked on the Architect's project skeleton;
+§11 has the honest list.
 
 ---
 
@@ -100,6 +102,16 @@ docker compose build --no-cache web                  # after changing requiremen
 - **Line endings.** `scripts/*.sh` must stay LF. Git on Windows may rewrite them to CRLF,
   which makes the container fail with `exec format error` or `no such file or directory`.
   If that happens: `git config core.autocrlf input`, then re-checkout the scripts.
+  *Checked 31 Jul: both scripts are LF and `core.autocrlf` is already `input`. Fine.*
+
+- **The exec bit on `scripts/*.sh`.** Windows has no Unix permission bit, so git committed both
+  entrypoints as mode `100644`. The container invokes them directly
+  (`CMD ["/app/scripts/start-web.sh"]`, and compose's `command:`), so a non-executable script
+  means **every service dies on boot with "permission denied"** — the first `docker compose up`
+  and the first Render deploy would both have failed. Fixed 31 Jul two ways: the git index is
+  now `100755` (`git update-index --chmod=+x`), and both Dockerfile stages `chmod +x` after
+  `COPY` so a future Windows-side re-add can't silently reintroduce it. If you ever add a new
+  `.sh`, run `git update-index --chmod=+x` on it and confirm with `git ls-files -s scripts/`.
 - **`pg_trgm`.** Trigram search (tech-stack §2) needs the extension. It should be created by
   a Django migration (`TrigramExtension`), not by hand — that way it exists identically in
   local, CI, and Neon. **Architect's call**; noted here so it isn't missed.
@@ -350,8 +362,27 @@ These land in `config/`, which the Architect owns. Requesting rather than editin
 
 **`config/settings/prod.py`**
 
-- **Refuse to boot on a weak `SECRET_KEY`** (< 32 chars or containing `dev`/`placeholder`).
-  SpendWise does this; it's cheap and it has caught real mistakes.
+- **Refuse to boot on a weak `SECRET_KEY`** — fewer than 32 characters, or containing any of
+  `dev`, `placeholder`, `changeme`, `insecure`. SpendWise does this; it's cheap and it has
+  caught real mistakes.
+
+  **The Dockerfile depends on this exact list.** The `prod` stage runs `collectstatic` with
+  `config.settings.prod` loaded, so it must pass a throwaway key that survives the guard. That
+  key is hardcoded in the Dockerfile and deliberately contains none of the banned words. If you
+  add a word to the banned list, check the Dockerfile in the same commit — otherwise the image
+  build fails, and it fails at `docker build` time with a Django traceback that looks nothing
+  like a secrets problem.
+
+- **Static files storage must be WhiteNoise, never Cloudinary.** `collectstatic` runs at image
+  build time with no network and no real credentials. Cloudinary is for *media* (user uploads)
+  only. Pointing `STORAGES["staticfiles"]` at Cloudinary would make every image build reach out
+  to an API it cannot authenticate against.
+
+- **`CSRF_TRUSTED_ORIGINS` must have a default or tolerate being unset**, or read it in a way
+  that doesn't explode when absent. The image build passes a dummy value, but any *other*
+  required-with-no-default variable added to `prod.py` becomes a new build-time failure. Rule of
+  thumb: if `prod.py` hard-requires a variable, it must also appear in the Dockerfile's
+  `collectstatic` env block.
 - `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` — required behind Render's
   proxy, or every redirect loops.
 - `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS.
@@ -404,6 +435,9 @@ that needs none of this.
 | 30 Jul | One Dockerfile, two targets | Dev and prod share dependency layers; no second file to drift |
 | 30 Jul | Compatible-release pins (`~=`) | Nothing is verified yet. Freeze to exact pins once CI is green — see §11 |
 | 30 Jul | **Proposed:** GH Actions cron + eager tasks in prod | §4. **Awaiting Jeni** |
+| 31 Jul | Entrypoint scripts forced to mode 755 in the git index **and** `chmod +x` in both Dockerfile stages | Windows can't store the exec bit; without it every container dies on boot with "permission denied". Two independent fixes because the git-index one is easy to lose on a Windows re-add |
+| 31 Jul | Build-time `SECRET_KEY` no longer contains the word "placeholder" | The prod image runs `collectstatic` under `prod.py`, whose spec'd guard rejects keys containing `placeholder` — the Dockerfile would have failed its own security check. Banned-word list is now pinned in §8 so the two can't drift |
+| 31 Jul | `CSRF_TRUSTED_ORIGINS` added to the `collectstatic` build env | Any variable `prod.py` requires without a default becomes an image-build failure. §8 now states the rule |
 
 ---
 
@@ -418,11 +452,29 @@ that needs none of this.
 **Blocked on Jeni:**
 
 - **The §4 Celery decision.**
-- **Docker Desktop is not installed** on this machine. Nothing in `docker-compose.yml` or the
-  `Dockerfile` has been executed — they are written and reviewed, not verified.
-- **No git repository and no GitHub remote.** `git init` has been run locally; the repo needs
-  creating on GitHub and pushing. The GitHub CLI (`gh`) is not installed either.
+- **Local toolchain — audited 31 Jul, and it's thinner than previously recorded:**
+
+  | Tool | State | Needed for |
+  |---|---|---|
+  | git | ✅ installed | — |
+  | Python | ⚠️ **3.14.6** | Stack targets 3.12. Irrelevant inside Docker; matters only for a no-Docker fallback, where Django 5.2 on 3.14 is untested |
+  | Node | ✅ installed | Tailwind build |
+  | **WSL2** | ❌ **not installed** | Prerequisite for Docker Desktop |
+  | **Docker Desktop** | ❌ not installed | Everything local |
+  | **GitHub CLI (`gh`)** | ❌ not installed | Convenience only — the web UI works |
+
+  The earlier note said "install Docker Desktop." That understated it: WSL2 has to be installed
+  and the machine rebooted *first* (`wsl --install`, reboot, then Docker Desktop). Budget an
+  hour including the reboot, not ten minutes.
+
+- **No GitHub remote.** `git init` has run and there is one local commit; the repo still needs
+  creating on GitHub and pushing. Doable through the web UI without `gh`.
 - **Accounts to create:** Render, Neon, Upstash, Cloudinary, Sentry.
+
+**Still true: nothing here has ever been executed.** Every infra file is reviewed-but-unrun.
+The two bugs found on 31 Jul (§2 exec bit, §8 `SECRET_KEY`) were both found by *reading*, and
+both would have broken the very first run — which is a fair warning about how much more a real
+`docker compose up` will surface.
 
 **Known soft spots to fix once things run:**
 
