@@ -1,0 +1,39 @@
+{% comment %}
+  Tailwind theme — OWNED BY THE DESIGNER.
+
+  Seeded by the Architect from design/mockups/v1-design-system-feed-post.html so
+  the skeleton renders in the approved palette from day one. The Designer edits
+  this file directly; the Architect does not.
+
+  Loaded by templates/base.html. It lives in its own partial precisely so that
+  changing the palette never means touching a file the Architect owns.
+
+  NOTE (DevOps, via Jeni): this uses the Tailwind Play CDN, which compiles in the
+  browser. Correct for Phase 0–1 — no build step, nothing to configure. Before
+  the portfolio deploy it should become a compiled stylesheet, because the CDN
+  prints a console warning in production and costs a render-blocking round trip
+  on the mid-range Android phones that are our primary target.
+{% endcomment %}
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          // Brand — "ember". Spark is the hero interaction, so the brand is warm.
+          brand: {50:'#FFF7ED',100:'#FFEDD5',200:'#FED7AA',300:'#FDBA74',400:'#FB923C',
+                  500:'#F97316',600:'#EA580C',700:'#C2410C',800:'#9A3412',900:'#7C2D12'},
+          // Neutrals — warm grey (stone), so greys don't fight the brand.
+          ink:   {50:'#FAFAF9',100:'#F5F5F4',200:'#E7E5E4',300:'#D6D3D1',400:'#A8A29E',
+                  500:'#78716C',600:'#57534E',700:'#44403C',800:'#292524',900:'#1C1917'},
+          ok:    {50:'#ECFDF5',600:'#059669',700:'#047857'},
+          warn:  {50:'#FFFBEB',600:'#D97706'},
+          bad:   {50:'#FFF1F2',600:'#E11D48',700:'#BE123C'},
+        },
+        fontFamily: {
+          sans: ['ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto',
+                 'Helvetica Neue','Arial','sans-serif'],
+        },
+      }
+    }
+  }
+</script>

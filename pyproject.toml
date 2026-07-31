@@ -1,0 +1,84 @@
+# Alongside — tooling configuration.
+#
+# One file rather than setup.cfg + pytest.ini + .ruff.toml, per testing.md §9.
+#
+# Ownership: [tool.ruff] is DevOps's (it runs in CI and pre-commit).
+# [tool.pytest.ini_options] and [tool.coverage] are QA's. The Architect created
+# the file so both had somewhere to land; neither section is the Architect's to
+# change.
+
+[project]
+name = "alongside"
+version = "0.1.0"
+description = "Alongside — nobody builds alone. A platform for finding people to build your idea with."
+requires-python = ">=3.12"
+
+# ── Lint + format (DevOps) ──────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# `*.md` is deliberate. requirements/dev.txt pins `ruff~=0.8`, which resolves to
+# >=0.8,<1.0 — today that installs 0.16, and since 0.9 the formatter reformats
+# Python code blocks inside Markdown. Our docs are prose with *illustrative*
+# snippets (docs/testing.md's factory examples, docs/data-model.md's queries);
+# they are aligned for reading, not for execution. Without this, CI's
+# `ruff format --check .` fails on documentation and the only way to go green is
+# to let a formatter rewrite the team's docs.
+# DevOps (via Jeni): consider also tightening the pin to `ruff==0.16.*` so a
+# future 0.x doesn't change the rules under CI again.
+extend-exclude = ["migrations", ".venv", "venv", "staticfiles", "*.md"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort — import ordering
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "DJ",   # flake8-django
+    "C4",   # comprehensions
+    "T20",  # no print() left behind
+]
+ignore = [
+    "E501",  # line length is handled by the formatter
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Settings modules legitimately star-import and re-export.
+"config/settings/*.py" = ["F403", "F405", "E402"]
+# Migrations are generated; they are not ours to restyle.
+"*/migrations/*.py" = ["E501", "I001"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "config", "accounts", "posts", "discovery",
+    "messaging", "notifications", "moderation",
+]
+
+# ── Tests (QA) ──────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.dev"
+addopts = "--strict-markers --reuse-db"
+testpaths = ["tests"]
+markers = [
+    "slow: excluded from the fast local run",
+    "browser: manual device checks, not run in CI",
+]
+
+# ── Coverage (QA) ───────────────────────────────────────────────────────────
+# No --cov-fail-under gate until Phase 2 — gating an empty project just blocks
+# the build (testing.md §9).
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "config/wsgi.py",
+    "config/asgi.py",
+    "manage.py",
+    "*/venv/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
