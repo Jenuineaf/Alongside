@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "alongside-mockups",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5173", "--directory", "C:/Users/JENNIE/OneDrive/Documents/Alongside"],
+      "port": 5173
+    }
+  ]
+}

@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alongside — Design system + Feed & Post detail (v1 proposal)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        // Brand — "ember". Spark is the product's hero interaction, so the brand is warm.
+        brand: {50:'#FFF7ED',100:'#FFEDD5',200:'#FED7AA',300:'#FDBA74',400:'#FB923C',
+                500:'#F97316',600:'#EA580C',700:'#C2410C',800:'#9A3412',900:'#7C2D12'},
+        // Neutrals — warm grey (stone), so greys don't fight the brand.
+        ink:   {50:'#FAFAF9',100:'#F5F5F4',200:'#E7E5E4',300:'#D6D3D1',400:'#A8A29E',
+                500:'#78716C',600:'#57534E',700:'#44403C',800:'#292524',900:'#1C1917'},
+        ok:    {50:'#ECFDF5',600:'#059669',700:'#047857'},
+        warn:  {50:'#FFFBEB',600:'#D97706'},
+        bad:   {50:'#FFF1F2',600:'#E11D48',700:'#BE123C'},
+      },
+      fontFamily: {
+        sans: ['ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Helvetica Neue','Arial','sans-serif'],
+      },
+    }
+  }
+}
+</script>
+<style>
+  body { -webkit-font-smoothing: antialiased; }
+  .frame { width: 375px; }
+  .swatch { height: 44px; }
+  /* line clamp helpers (Tailwind plugin in the real build) */
+  .clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .skel { background: linear-gradient(90deg,#F5F5F4 25%,#E7E5E4 37%,#F5F5F4 63%); background-size:400% 100%; animation: sh 1.4s ease infinite; }
+  @keyframes sh { 0%{background-position:100% 0} 100%{background-position:0 0} }
+  @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+  /* so this proposal is itself readable on a real phone */
+  @media (max-width: 460px) {
+    .frame { width: 100%; }
+    .phone { border-width: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  }
+</style>
+</head>
+<body class="bg-ink-100 font-sans text-ink-900">
+
+<!-- ================= PAGE HEADER ================= -->
+<header class="bg-ink-900 text-white px-6 py-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center gap-2 mb-3">
+      <svg viewBox="0 0 24 24" class="w-6 h-6 fill-brand-500"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>
+      <span class="text-xl font-bold tracking-tight">Alongside</span>
+      <span class="text-ink-400 text-sm">— nobody builds alone</span>
+    </div>
+    <h1 class="text-2xl font-bold">Design system + Feed & Post detail</h1>
+    <p class="text-ink-300 mt-1 text-sm">v1 proposal for approval · mobile-first (375px) · Django templates + HTMX + Alpine + Tailwind</p>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 py-10 space-y-14">
+
+<!-- ================= 1. COLOUR ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">1 · Colour</h2>
+  <p class="text-sm text-ink-600 mb-5 max-w-2xl">Every competitor in this space is blue or purple. Alongside is <strong>warm</strong> — it has to feel as natural to a crochet-business owner as to a developer. The brand ramp is an ember, which is also literally what <em>Spark</em> is. Rule: <strong>one loud colour per card</strong> — the spark. Everything else is quiet, or a dense feed becomes a fruit salad.</p>
+
+  <div class="grid sm:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl border border-ink-200 p-4">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Brand — ember</p>
+      <div class="grid grid-cols-5 gap-1 mb-2">
+        <div><div class="swatch rounded bg-brand-50 border border-ink-200"></div><p class="text-[10px] mt-1 text-ink-500">50</p></div>
+        <div><div class="swatch rounded bg-brand-100"></div><p class="text-[10px] mt-1 text-ink-500">100</p></div>
+        <div><div class="swatch rounded bg-brand-200"></div><p class="text-[10px] mt-1 text-ink-500">200</p></div>
+        <div><div class="swatch rounded bg-brand-500"></div><p class="text-[10px] mt-1 text-ink-500">500</p></div>
+        <div><div class="swatch rounded bg-brand-700"></div><p class="text-[10px] mt-1 text-ink-500">700</p></div>
+      </div>
+      <ul class="text-xs text-ink-600 space-y-1 mt-3">
+        <li><strong>700 #C2410C</strong> — primary buttons, links (4.9:1 on white ✓ AA)</li>
+        <li><strong>500 #F97316</strong> — the Spark icon when sparked. Fill only, never text</li>
+        <li><strong>50/100</strong> — role-chip and highlight backgrounds</li>
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-ink-200 p-4">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Ink — warm grey</p>
+      <div class="grid grid-cols-5 gap-1 mb-2">
+        <div><div class="swatch rounded bg-ink-50 border border-ink-200"></div><p class="text-[10px] mt-1 text-ink-500">50</p></div>
+        <div><div class="swatch rounded bg-ink-200"></div><p class="text-[10px] mt-1 text-ink-500">200</p></div>
+        <div><div class="swatch rounded bg-ink-500"></div><p class="text-[10px] mt-1 text-ink-500">500</p></div>
+        <div><div class="swatch rounded bg-ink-700"></div><p class="text-[10px] mt-1 text-ink-500">700</p></div>
+        <div><div class="swatch rounded bg-ink-900"></div><p class="text-[10px] mt-1 text-ink-500">900</p></div>
+      </div>
+      <ul class="text-xs text-ink-600 space-y-1 mt-3">
+        <li><strong>900</strong> body text · <strong>600</strong> secondary (7.0:1 ✓) · <strong>500</strong> meta (4.9:1 ✓)</li>
+        <li><strong>200</strong> borders · <strong>50</strong> page background, white cards on top</li>
+        <li>No ink-400 for text — it fails contrast. Decoration only.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-ink-200 p-4 mt-6">
+    <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Semantic + product status</p>
+    <div class="flex flex-wrap gap-2">
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-ok-50 text-ok-700 text-xs font-medium px-2.5 py-1"><span class="w-1.5 h-1.5 rounded-full bg-ok-600"></span>Still looking</span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-100 text-ink-600 text-xs font-medium px-2.5 py-1"><span class="w-1.5 h-1.5 rounded-full bg-ink-400"></span>Team formed</span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-100 text-ink-500 text-xs font-medium px-2.5 py-1"><span class="w-1.5 h-1.5 rounded-full bg-ink-300"></span>Closed</span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-warn-50 text-warn-600 text-xs font-medium px-2.5 py-1">Stale — still looking?</span>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-bad-50 text-bad-600 text-xs font-medium px-2.5 py-1">Reported</span>
+    </div>
+    <p class="text-xs text-ink-500 mt-3">Status is a <strong>dot + word</strong>, never colour alone (colour-blind safe).</p>
+  </div>
+</section>
+
+<!-- ================= 2. TYPE ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">2 · Type</h2>
+  <p class="text-sm text-ink-600 mb-5 max-w-2xl">
+    <strong>No web font.</strong> The system stack renders Roboto on Android and Segoe on Windows — zero download, zero layout shift, instant first paint on a mid-range phone over 4G. Brand personality lives in the wordmark (SVG) and the colour, not in a 90KB font file. This is a deliberate performance call for our users, and a good one to be able to defend.
+  </p>
+  <div class="bg-white rounded-2xl border border-ink-200 p-5 space-y-4">
+    <div class="flex flex-wrap items-baseline gap-4 border-b border-ink-100 pb-3"><span class="text-xs font-mono text-ink-500 w-40">display · 28/34 bold</span><span class="text-[28px] leading-[34px] font-bold">Nobody builds alone</span></div>
+    <div class="flex flex-wrap items-baseline gap-4 border-b border-ink-100 pb-3"><span class="text-xs font-mono text-ink-500 w-40">h1 · 22/28 semibold</span><span class="text-[22px] leading-7 font-semibold">Campus food-waste app</span></div>
+    <div class="flex flex-wrap items-baseline gap-4 border-b border-ink-100 pb-3"><span class="text-xs font-mono text-ink-500 w-40">h2 · 18/24 semibold</span><span class="text-lg leading-6 font-semibold">Card title in the feed</span></div>
+    <div class="flex flex-wrap items-baseline gap-4 border-b border-ink-100 pb-3"><span class="text-xs font-mono text-ink-500 w-40">body · 16/26</span><span class="text-base leading-relaxed text-ink-800">Post body and comments. Never below 16px — it also stops iOS zooming form fields.</span></div>
+    <div class="flex flex-wrap items-baseline gap-4 border-b border-ink-100 pb-3"><span class="text-xs font-mono text-ink-500 w-40">sm · 14/20</span><span class="text-sm text-ink-600">Names, secondary text, buttons</span></div>
+    <div class="flex flex-wrap items-baseline gap-4"><span class="text-xs font-mono text-ink-500 w-40">xs · 12/16</span><span class="text-xs text-ink-500">Chips, counts, timestamps — never load-bearing information</span></div>
+  </div>
+</section>
+
+<!-- ================= 3. SPACING / SHAPE ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">3 · Spacing, shape, elevation</h2>
+  <div class="grid sm:grid-cols-3 gap-4 mt-4">
+    <div class="bg-white rounded-2xl border border-ink-200 p-4">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">Spacing — 4px base</p>
+      <p class="text-sm text-ink-700">Only <code class="text-xs bg-ink-100 px-1 rounded">1 2 3 4 6 8 12</code> (4→48px). Card padding 16 mobile / 20 desktop. Screen gutter 16. Gap between cards 8.</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-ink-200 p-4">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">Radius</p>
+      <p class="text-sm text-ink-700">chips <code class="text-xs bg-ink-100 px-1 rounded">full</code> · inputs & buttons <code class="text-xs bg-ink-100 px-1 rounded">lg 8</code> · cards & images <code class="text-xs bg-ink-100 px-1 rounded">2xl 16</code> · avatars full.</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-ink-200 p-4">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">Elevation</p>
+      <p class="text-sm text-ink-700"><strong>Borders, not shadows.</strong> One shadow token, for things that float over the page only (sheets, dropdowns, toasts). Flat renders faster and looks less dated.</p>
+    </div>
+  </div>
+  <p class="text-sm text-ink-600 mt-4">Touch targets: <strong>44×44 minimum</strong>, always. Icon buttons are 40px visually with padding to 44.</p>
+</section>
+
+<!-- ================= 4. COMPONENTS ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">4 · Core components</h2>
+  <p class="text-sm text-ink-600 mb-5">These become <code class="text-xs bg-ink-200 px-1 rounded">templates/components/</code> partials so every feature seat builds from the same parts.</p>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- buttons -->
+    <div class="bg-white rounded-2xl border border-ink-200 p-5">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-4">Buttons</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <button class="h-11 px-4 rounded-lg bg-brand-700 text-white text-sm font-semibold hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Post your idea</button>
+        <button class="h-11 px-4 rounded-lg bg-white border border-ink-300 text-ink-800 text-sm font-semibold hover:bg-ink-50">Follow</button>
+        <button class="h-11 px-4 rounded-lg text-ink-700 text-sm font-semibold hover:bg-ink-100">Cancel</button>
+        <button class="h-11 px-4 rounded-lg bg-white border border-bad-600 text-bad-600 text-sm font-semibold">Block</button>
+        <button disabled class="h-11 px-4 rounded-lg bg-ink-200 text-ink-400 text-sm font-semibold cursor-not-allowed">Disabled</button>
+        <button class="h-11 px-4 rounded-lg bg-brand-700 text-white text-sm font-semibold inline-flex items-center gap-2 opacity-90">
+          <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" opacity=".3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          Posting…
+        </button>
+      </div>
+      <p class="text-xs text-ink-500 mt-4">Heights 36 / 44 / 48. On mobile, form submits go <strong>full width</strong>. The HTMX busy state swaps the label but keeps the width, so nothing jumps.</p>
+    </div>
+
+    <!-- inputs -->
+    <div class="bg-white rounded-2xl border border-ink-200 p-5">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-4">Inputs</p>
+      <label class="block text-sm font-medium text-ink-700 mb-1.5" for="d1">Idea title</label>
+      <input id="d1" class="w-full h-11 rounded-lg border border-ink-300 px-3 text-base placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30" placeholder="What are you building?">
+      <label class="block text-sm font-medium text-ink-700 mb-1.5 mt-4" for="d2">Roles you need</label>
+      <input id="d2" aria-invalid="true" aria-describedby="d2e" class="w-full h-11 rounded-lg border border-bad-600 px-3 text-base focus:outline-none focus:ring-2 focus:ring-bad-600/30" value="">
+      <p id="d2e" class="text-xs text-bad-600 mt-1.5">Add at least one role so people know how to help.</p>
+      <p class="text-xs text-ink-500 mt-4">16px text always. Errors are inline, red border + message, wired with <code class="bg-ink-100 px-1 rounded">aria-describedby</code>.</p>
+    </div>
+
+    <!-- chips -->
+    <div class="bg-white rounded-2xl border border-ink-200 p-5">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-4">Chips — three kinds, deliberately different</p>
+      <p class="text-xs text-ink-500 mb-2">Roles needed (the matching signal — these pop)</p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <span class="rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">Android dev</span>
+        <span class="rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">UI designer</span>
+        <span class="rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">+2</span>
+      </div>
+      <p class="text-xs text-ink-500 mb-2">Topic tags (filter links — quiet)</p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1 hover:bg-ink-200">sustainability</a>
+        <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1 hover:bg-ink-200">mobile</a>
+        <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1 hover:bg-ink-200">campus</a>
+      </div>
+      <p class="text-xs text-ink-500 mb-2">Meta (stage · commitment · location — borderless)</p>
+      <div class="flex flex-wrap gap-3 text-xs text-ink-600">
+        <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Just an idea</span>
+        <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-ink-400"></span>Serious — building a company</span>
+        <span>Bengaluru · remote ok</span>
+      </div>
+    </div>
+
+    <!-- spark + avatars -->
+    <div class="bg-white rounded-2xl border border-ink-200 p-5">
+      <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-4">Spark (the signature control) + avatars</p>
+      <div class="flex items-center gap-4 mb-5">
+        <button class="inline-flex items-center gap-1.5 h-11 px-3 rounded-full text-ink-600 hover:bg-brand-50 hover:text-brand-700" aria-pressed="false">
+          <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+          <span class="text-sm font-semibold tabular-nums">41</span>
+        </button>
+        <span class="text-xs text-ink-500">default</span>
+        <button class="inline-flex items-center gap-1.5 h-11 px-3 rounded-full bg-brand-50 text-brand-700" aria-pressed="true">
+          <svg viewBox="0 0 24 24" class="w-5 h-5 fill-brand-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+          <span class="text-sm font-semibold tabular-nums">42</span>
+        </button>
+        <span class="text-xs text-ink-500">sparked</span>
+      </div>
+      <div class="flex items-end gap-3">
+        <div class="w-8 h-8 rounded-full bg-brand-100 text-brand-800 ring-1 ring-ink-200 grid place-items-center text-xs font-bold">AR</div>
+        <div class="w-10 h-10 rounded-full bg-ok-50 text-ok-700 ring-1 ring-ink-200 grid place-items-center text-sm font-bold">MN</div>
+        <div class="w-14 h-14 rounded-full bg-ink-200 text-ink-700 ring-1 ring-ink-200 grid place-items-center font-bold">RK</div>
+        <p class="text-xs text-ink-500 ml-2">32 comment · 40 feed · 56 profile.<br>Initials fallback, tint derived from user id.</p>
+      </div>
+      <p class="text-xs text-ink-500 mt-4"><code class="bg-ink-100 px-1 rounded">hx-post</code> swaps the button; <code class="bg-ink-100 px-1 rounded">aria-pressed</code> + a polite live region announce the new count.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 5. SCREENS ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">5 · The two screens — phone first (375px)</h2>
+  <p class="text-sm text-ink-600 mb-6">Full screens shown end to end. On a real phone the top bar and the bottom bar are sticky.</p>
+
+  <div class="flex flex-wrap gap-10 items-start">
+
+    <!-- ========== FEED ========== -->
+    <div>
+      <p class="text-sm font-bold mb-2">Screen 5 — Feed <span class="font-normal text-ink-500">(and Home, same shell)</span></p>
+      <div class="frame phone rounded-[2rem] border-8 border-ink-900 overflow-hidden bg-ink-50 shadow-xl">
+
+        <!-- top app bar -->
+        <div class="bg-white border-b border-ink-200 px-4 h-14 flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" class="w-5 h-5 fill-brand-500"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>
+            <span class="font-bold tracking-tight">Alongside</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button class="w-11 h-11 grid place-items-center rounded-full hover:bg-ink-100" aria-label="Search">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </button>
+            <button class="w-11 h-11 grid place-items-center" aria-label="Your profile">
+              <span class="w-8 h-8 rounded-full bg-ink-200 ring-1 ring-ink-300 grid place-items-center text-xs font-bold text-ink-700">J</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- tabs -->
+        <div class="bg-white border-b border-ink-200 flex" role="tablist">
+          <button role="tab" aria-selected="true" class="flex-1 h-12 text-sm font-semibold text-ink-900 border-b-2 border-brand-600">Home</button>
+          <button role="tab" aria-selected="false" class="flex-1 h-12 text-sm font-medium text-ink-500 border-b-2 border-transparent">Feed</button>
+        </div>
+
+        <!-- filter chips, horizontally scrollable -->
+        <div class="bg-white border-b border-ink-200 px-4 py-2.5 flex gap-2 overflow-x-auto">
+          <button class="shrink-0 h-9 px-3 rounded-full bg-ink-900 text-white text-xs font-semibold inline-flex items-center gap-1">Newest
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button class="shrink-0 h-9 px-3 rounded-full border border-ink-300 text-ink-700 text-xs font-medium inline-flex items-center gap-1">Role
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button class="shrink-0 h-9 px-3 rounded-full border border-ink-300 text-ink-700 text-xs font-medium inline-flex items-center gap-1">Commitment
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+          <button class="shrink-0 h-9 px-3 rounded-full border border-ink-300 text-ink-700 text-xs font-medium">Location</button>
+        </div>
+
+        <!-- ===== card 1 ===== -->
+        <article class="bg-white border-b border-ink-200 p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-brand-100 ring-1 ring-ink-200 grid place-items-center text-sm font-bold text-brand-800">AR</div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 text-sm">
+                <span class="font-semibold truncate">Ananya Rao</span>
+                <span class="text-ink-500">· 2h</span>
+              </div>
+              <p class="text-xs text-ink-500 truncate">Final-year CS · Bengaluru</p>
+            </div>
+            <button class="w-9 h-9 -mr-2 grid place-items-center rounded-full text-ink-500 hover:bg-ink-100" aria-label="More">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+            </button>
+          </div>
+
+          <h3 class="text-lg leading-6 font-semibold mt-3 clamp-2">An app that moves leftover canteen food to hostels before it's binned</h3>
+          <p class="text-[15px] leading-6 text-ink-700 mt-1.5 clamp-3">Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I've mapped the flow and talked to two canteen managers — they're in. I can do the backend and the NGO side, but I've never shipped Android…</p>
+
+          <div class="mt-3">
+            <p class="text-xs font-semibold text-ink-500 mb-1.5">Looking for</p>
+            <div class="flex gap-2 overflow-x-auto pb-0.5">
+              <span class="shrink-0 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">Android dev</span>
+              <span class="shrink-0 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">Ops / NGO partnerships</span>
+              <span class="shrink-0 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">+1</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-ink-600">
+            <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Just an idea</span>
+            <span>Serious</span>
+            <span>Bengaluru · remote ok</span>
+            <span class="inline-flex items-center gap-1 text-ok-700 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-ok-600"></span>Still looking</span>
+          </div>
+
+          <div class="flex items-center justify-between mt-2 pt-1 border-t border-ink-100">
+            <div class="flex items-center -ml-2">
+              <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full bg-brand-50 text-brand-700" aria-pressed="true">
+                <svg viewBox="0 0 24 24" class="w-5 h-5 fill-brand-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+                <span class="text-sm font-semibold tabular-nums">42</span>
+              </button>
+              <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full text-ink-600">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                <span class="text-sm font-semibold tabular-nums">8</span>
+              </button>
+              <button class="w-11 h-11 grid place-items-center rounded-full text-ink-600" aria-label="Save">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>
+              </button>
+            </div>
+            <button class="h-9 px-3 rounded-lg border border-ink-300 text-ink-800 text-xs font-semibold">Message</button>
+          </div>
+        </article>
+
+        <!-- ===== card 2, with image ===== -->
+        <article class="bg-white border-b border-ink-200 p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-ok-50 ring-1 ring-ink-200 grid place-items-center text-sm font-bold text-ok-700">MN</div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 text-sm">
+                <span class="font-semibold truncate">Meera Nair</span>
+                <span class="text-ink-500">· 5h</span>
+              </div>
+              <p class="text-xs text-ink-500 truncate">Runs a crochet business · Kochi</p>
+            </div>
+            <button class="w-9 h-9 -mr-2 grid place-items-center rounded-full text-ink-500" aria-label="More">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+            </button>
+          </div>
+
+          <h3 class="text-lg leading-6 font-semibold mt-3 clamp-2">I make everything by hand and sell it on WhatsApp. I need an actual shop.</h3>
+          <p class="text-[15px] leading-6 text-ink-700 mt-1.5 clamp-3">Three years of orders in a notebook. I don't need a big startup — just a simple online store, decent photos, and someone patient enough to explain it to me. Happy to share revenue…</p>
+
+          <div class="mt-3 rounded-xl overflow-hidden border border-ink-200 bg-ink-100 aspect-[16/9] grid place-items-center">
+            <span class="text-xs text-ink-400">product photo · 16:9 · lazy · width+height set</span>
+          </div>
+
+          <div class="mt-3">
+            <p class="text-xs font-semibold text-ink-500 mb-1.5">Looking for</p>
+            <div class="flex gap-2 overflow-x-auto pb-0.5">
+              <span class="shrink-0 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">Web developer</span>
+              <span class="shrink-0 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-semibold px-2.5 py-1">Photographer</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-3 text-xs text-ink-600">
+            <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Already building</span>
+            <span>Casual / weekend</span>
+            <span>Kochi · remote ok</span>
+          </div>
+
+          <div class="flex items-center justify-between mt-2 pt-1 border-t border-ink-100">
+            <div class="flex items-center -ml-2">
+              <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full text-ink-600" aria-pressed="false">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+                <span class="text-sm font-semibold tabular-nums">27</span>
+              </button>
+              <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full text-ink-600">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                <span class="text-sm font-semibold tabular-nums">12</span>
+              </button>
+              <button class="w-11 h-11 grid place-items-center rounded-full text-brand-700" aria-label="Saved">
+                <svg viewBox="0 0 24 24" class="w-5 h-5 fill-brand-500 stroke-brand-700" stroke-width="1.5" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>
+              </button>
+            </div>
+            <button class="h-9 px-3 rounded-lg border border-ink-300 text-ink-800 text-xs font-semibold">Message</button>
+          </div>
+        </article>
+
+        <!-- cascading fallback divider -->
+        <div class="px-4 py-3 bg-ink-50 border-b border-ink-200">
+          <p class="text-sm font-semibold text-ink-800">You're all caught up</p>
+          <p class="text-xs text-ink-600 mt-0.5">Popular in <strong>Design</strong> this week — because the feed should never be empty.</p>
+        </div>
+
+        <!-- team formed card, muted -->
+        <article class="bg-white border-b border-ink-200 p-4 opacity-90">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-ink-200 ring-1 ring-ink-200 grid place-items-center text-sm font-bold text-ink-700">RK</div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 text-sm"><span class="font-semibold truncate">Rohit Kulkarni</span><span class="text-ink-500">· 3d</span></div>
+              <p class="text-xs text-ink-500 truncate">Product design · Pune</p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-ink-100 text-ink-600 text-[11px] font-medium px-2 py-1"><span class="w-1.5 h-1.5 rounded-full bg-ink-400"></span>Team formed</span>
+          </div>
+          <h3 class="text-lg leading-6 font-semibold mt-3 clamp-2">A Kannada-first OCR for old land records</h3>
+          <p class="text-[15px] leading-6 text-ink-700 mt-1.5 clamp-2">We found our third person last week — leaving this up because the dataset notes might help someone…</p>
+          <div class="flex items-center mt-2 pt-1 border-t border-ink-100 -ml-2">
+            <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full text-ink-600">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+              <span class="text-sm font-semibold tabular-nums">88</span></button>
+            <button class="inline-flex items-center gap-1.5 h-11 px-2.5 rounded-full text-ink-600">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+              <span class="text-sm font-semibold tabular-nums">31</span></button>
+          </div>
+        </article>
+
+        <!-- skeleton = infinite scroll loading -->
+        <div class="bg-white border-b border-ink-200 p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full skel"></div>
+            <div class="flex-1 space-y-2"><div class="h-3 w-28 rounded skel"></div><div class="h-2.5 w-20 rounded skel"></div></div>
+          </div>
+          <div class="h-4 w-11/12 rounded skel mt-4"></div>
+          <div class="h-3 w-full rounded skel mt-2.5"></div>
+          <div class="h-3 w-4/5 rounded skel mt-2"></div>
+          <div class="flex gap-2 mt-3"><div class="h-6 w-24 rounded-full skel"></div><div class="h-6 w-20 rounded-full skel"></div></div>
+          <p class="text-[10px] text-ink-400 mt-3 text-center">hx-trigger="revealed" · next page loads here</p>
+        </div>
+
+        <!-- bottom tab bar -->
+        <div class="bg-white border-t border-ink-200 flex items-center justify-around h-16 pb-1">
+          <button class="flex flex-col items-center gap-0.5 w-14 text-brand-700" aria-current="page">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/></svg>
+            <span class="text-[10px] font-semibold">Home</span></button>
+          <button class="flex flex-col items-center gap-0.5 w-14 text-ink-500">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <span class="text-[10px]">Explore</span></button>
+          <button class="w-12 h-12 rounded-2xl bg-brand-700 text-white grid place-items-center shadow-sm" aria-label="Post an idea">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button class="flex flex-col items-center gap-0.5 w-14 text-ink-500 relative">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+            <span class="absolute top-0 right-3 min-w-[16px] h-4 px-1 rounded-full bg-brand-600 text-white text-[10px] font-bold grid place-items-center">3</span>
+            <span class="text-[10px]">Messages</span></button>
+          <button class="flex flex-col items-center gap-0.5 w-14 text-ink-500">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="text-[10px]">Alerts</span></button>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500 mt-3 max-w-[375px]">Home/Feed are one shell with a tab — HTMX swaps only the list. Post (+) sits centre because posting is the thing we most want to happen. Saved, Profile and Settings live behind the avatar, not in the bar.</p>
+    </div>
+
+    <!-- ========== POST DETAIL ========== -->
+    <div>
+      <p class="text-sm font-bold mb-2">Screen 6 — Post detail</p>
+      <div class="frame phone rounded-[2rem] border-8 border-ink-900 overflow-hidden bg-white shadow-xl">
+
+        <div class="bg-white border-b border-ink-200 px-2 h-14 flex items-center justify-between">
+          <button class="w-11 h-11 grid place-items-center rounded-full hover:bg-ink-100" aria-label="Back">
+            <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <span class="text-sm font-semibold">Idea</span>
+          <button class="w-11 h-11 grid place-items-center rounded-full text-ink-600" aria-label="More">
+            <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+          </button>
+        </div>
+
+        <div class="p-4">
+          <!-- author -->
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-brand-100 ring-1 ring-ink-200 grid place-items-center text-sm font-bold text-brand-800">AR</div>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-semibold truncate">Ananya Rao</p>
+              <p class="text-xs text-ink-500 truncate">Final-year CS · Bengaluru · 2h ago</p>
+            </div>
+            <button class="h-9 px-3.5 rounded-lg bg-white border border-ink-300 text-ink-800 text-sm font-semibold">Follow</button>
+          </div>
+
+          <h1 class="text-[22px] leading-7 font-semibold mt-4">An app that moves leftover canteen food to hostels before it's binned</h1>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-3 text-xs text-ink-600">
+            <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>Just an idea</span>
+            <span>Serious — building a company</span>
+            <span>Bengaluru · remote ok</span>
+            <span class="inline-flex items-center gap-1 text-ok-700 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-ok-600"></span>Still looking</span>
+          </div>
+
+          <div class="text-base leading-relaxed text-ink-800 mt-4 space-y-3">
+            <p>Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I spent a month actually watching how it works instead of guessing.</p>
+            <p>I've mapped the flow and talked to two canteen managers — both are in, as long as nobody asks them to use a spreadsheet. The hard part isn't the app, it's the 40-minute window between "this is surplus" and "this is unsafe."</p>
+            <p>I can do the backend and the NGO side. I've never shipped Android and I'm not going to pretend otherwise.</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-4">
+            <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">sustainability</a>
+            <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">mobile</a>
+            <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">campus</a>
+            <a href="#" class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">social impact</a>
+          </div>
+
+          <!-- the conversion block -->
+          <div class="mt-5 rounded-2xl border border-brand-200 bg-brand-50 p-4">
+            <p class="text-sm font-bold text-brand-900">Looking for</p>
+            <div class="flex flex-wrap gap-2 mt-2.5">
+              <span class="rounded-full bg-white border border-brand-200 text-brand-800 text-sm font-semibold px-3 py-1.5">Android dev</span>
+              <span class="rounded-full bg-white border border-brand-200 text-brand-800 text-sm font-semibold px-3 py-1.5">Ops / NGO partnerships</span>
+              <span class="rounded-full bg-white border border-brand-200 text-brand-800 text-sm font-semibold px-3 py-1.5">Designer</span>
+            </div>
+            <p class="text-xs text-brand-900/70 mt-3">Ananya decides who joins — there's no application to fill in. Just say hello.</p>
+          </div>
+
+          <!-- counts -->
+          <div class="flex items-center gap-4 mt-5 pb-3 border-b border-ink-200 text-sm text-ink-600">
+            <span><strong class="text-ink-900 tabular-nums">42</strong> sparks</span>
+            <span><strong class="text-ink-900 tabular-nums">8</strong> comments</span>
+            <button class="ml-auto inline-flex items-center gap-1.5 text-ink-600 text-sm">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>Save</button>
+          </div>
+
+          <!-- comments -->
+          <h2 class="text-base font-bold mt-5">Suggestions &amp; comments</h2>
+          <p class="text-xs text-ink-500 mt-0.5">You don't have to join to be useful.</p>
+
+          <div class="flex items-start gap-2.5 mt-3">
+            <div class="w-8 h-8 shrink-0 rounded-full bg-ink-200 ring-1 ring-ink-200 grid place-items-center text-xs font-bold text-ink-700">J</div>
+            <div class="flex-1">
+              <input class="w-full h-11 rounded-full border border-ink-300 px-4 text-base placeholder:text-ink-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30" placeholder="Add a suggestion…">
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-5">
+            <div class="flex items-start gap-2.5">
+              <div class="w-8 h-8 shrink-0 rounded-full bg-ok-50 ring-1 ring-ink-200 grid place-items-center text-xs font-bold text-ok-700">SV</div>
+              <div class="min-w-0">
+                <p class="text-sm"><span class="font-semibold">Sneha V</span> <span class="text-ink-500">· 1h</span></p>
+                <p class="text-[15px] leading-6 text-ink-800 mt-0.5">The 40-minute window is the whole product. Robin Hood Army solved it with WhatsApp groups per neighbourhood — worth copying before you build routing.</p>
+                <button class="inline-flex items-center gap-1 mt-1.5 h-8 -ml-1 px-1 rounded-full text-ink-500 text-xs font-semibold">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>6</button>
+              </div>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <div class="w-8 h-8 shrink-0 rounded-full bg-brand-100 ring-1 ring-ink-200 grid place-items-center text-xs font-bold text-brand-800">DK</div>
+              <div class="min-w-0">
+                <p class="text-sm"><span class="font-semibold">Dev Krishnan</span> <span class="text-ink-500">· 40m</span></p>
+                <p class="text-[15px] leading-6 text-ink-800 mt-0.5">Android dev here, 2 yrs Kotlin. Free weekends. DM'ing you.</p>
+                <button class="inline-flex items-center gap-1 mt-1.5 h-8 -ml-1 px-1 rounded-full text-brand-700 text-xs font-semibold">
+                  <svg viewBox="0 0 24 24" class="w-4 h-4 fill-brand-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>3</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="w-full h-11 mt-5 rounded-lg border border-ink-300 text-ink-700 text-sm font-semibold">Load 6 more comments</button>
+        </div>
+
+        <!-- sticky action bar (replaces the tab bar on this screen) -->
+        <div class="bg-white border-t border-ink-200 px-3 py-2.5 flex items-center gap-3">
+          <button class="inline-flex items-center gap-1.5 h-11 px-3 rounded-full bg-brand-50 text-brand-700 shrink-0" aria-pressed="true">
+            <svg viewBox="0 0 24 24" class="w-6 h-6 fill-brand-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+            <span class="text-sm font-bold tabular-nums">42</span>
+          </button>
+          <button class="flex-1 h-11 rounded-lg bg-brand-700 text-white text-sm font-semibold">Message Ananya</button>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500 mt-3 max-w-[375px]">The "Looking for" panel is the loudest thing after the title — it's the whole point of the post. The sticky bar keeps Spark and Message reachable with a thumb no matter how long the body runs.</p>
+    </div>
+
+    <!-- ========== STATES ========== -->
+    <div>
+      <p class="text-sm font-bold mb-2">The states that always get forgotten</p>
+      <div class="frame space-y-4">
+
+        <div class="rounded-2xl border border-ink-200 bg-white p-4">
+          <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Logged out — post detail</p>
+          <div class="rounded-xl border border-ink-200 p-3 bg-ink-50">
+            <p class="text-sm font-semibold">Join to reply to Ananya</p>
+            <p class="text-xs text-ink-600 mt-0.5">You can read everything without an account. Sparking, commenting and messaging need one.</p>
+            <div class="flex gap-2 mt-3">
+              <button class="h-10 px-3.5 rounded-lg bg-brand-700 text-white text-sm font-semibold">Sign up</button>
+              <button class="h-10 px-3.5 rounded-lg border border-ink-300 text-ink-800 text-sm font-semibold">Log in</button>
+              <button class="h-10 px-3 rounded-lg text-ink-600 text-sm font-medium">Try the demo</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-ink-200 bg-white p-4">
+          <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Empty — no search results</p>
+          <div class="text-center py-4">
+            <div class="w-12 h-12 rounded-full bg-ink-100 grid place-items-center mx-auto text-ink-400">
+              <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            </div>
+            <p class="text-sm font-semibold mt-3">No ideas match “kannada ocr” with 2 filters</p>
+            <p class="text-xs text-ink-600 mt-1">Filters usually cause this, not the words.</p>
+            <button class="h-10 px-4 mt-3 rounded-lg bg-brand-700 text-white text-sm font-semibold">Clear filters</button>
+            <div class="flex flex-wrap gap-2 justify-center mt-3">
+              <span class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">ocr</span>
+              <span class="rounded-full bg-ink-100 text-ink-700 text-xs px-2.5 py-1">regional languages</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-ink-200 bg-white p-4">
+          <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Empty — no messages yet</p>
+          <div class="text-center py-3">
+            <p class="text-sm font-semibold">No conversations yet</p>
+            <p class="text-xs text-ink-600 mt-1 max-w-[15rem] mx-auto">Find an idea you'd want to help with and say hello. Most people reply — nobody posts here hoping to be left alone.</p>
+            <button class="h-10 px-4 mt-3 rounded-lg bg-brand-700 text-white text-sm font-semibold">Browse ideas</button>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-ink-200 bg-white p-4">
+          <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Error — an HTMX swap failed</p>
+          <div class="rounded-xl border border-bad-600/30 bg-bad-50 p-3 flex items-center gap-3">
+            <p class="text-sm text-ink-800 flex-1">Couldn't load more ideas.</p>
+            <button class="h-9 px-3 rounded-lg bg-white border border-ink-300 text-sm font-semibold">Retry</button>
+          </div>
+          <p class="text-xs text-ink-500 mt-2">Inline and retryable — never a dead end, never a full-page error for a partial failure.</p>
+        </div>
+
+        <div class="rounded-2xl border border-ink-200 bg-white p-4">
+          <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Stale-post nudge (Celery, day 30)</p>
+          <div class="rounded-xl border border-warn-600/30 bg-warn-50 p-3">
+            <p class="text-sm font-semibold text-ink-900">Still looking for teammates?</p>
+            <p class="text-xs text-ink-700 mt-0.5">This idea hasn't been touched in 30 days. Confirm it's live or it drops out of the feed.</p>
+            <div class="flex gap-2 mt-3">
+              <button class="h-9 px-3 rounded-lg bg-ink-900 text-white text-xs font-semibold">Yes, still looking</button>
+              <button class="h-9 px-3 rounded-lg bg-white border border-ink-300 text-xs font-semibold">Team formed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 6. DESKTOP ================= -->
+<section>
+  <h2 class="text-lg font-bold mb-1">6 · How it scales up (≥1024px)</h2>
+  <p class="text-sm text-ink-600 mb-4 max-w-2xl">Same components, more room. The bottom bar becomes a left rail, filters move out of the sheet into a persistent right rail. The centre column stays at 640px — a post is text, and text past ~70 characters per line is harder to read, not more impressive.</p>
+  <div class="bg-white rounded-2xl border border-ink-200 p-4">
+    <div class="flex gap-3 h-64 text-xs">
+      <div class="w-48 border border-dashed border-ink-300 rounded-xl p-3 space-y-2 text-ink-600">
+        <p class="font-bold text-ink-900">Alongside</p>
+        <p>Home</p><p>Explore</p><p>Messages</p><p>Alerts</p><p>Saved</p><p>Profile</p>
+        <div class="h-9 rounded-lg bg-brand-700 text-white grid place-items-center font-semibold">Post your idea</div>
+      </div>
+      <div class="flex-1 max-w-[640px] border border-dashed border-ink-300 rounded-xl p-3 text-ink-600">
+        <p class="font-semibold text-ink-900 mb-2">Home / Feed — 640px</p>
+        <div class="space-y-2"><div class="h-16 rounded-lg bg-ink-100"></div><div class="h-16 rounded-lg bg-ink-100"></div><div class="h-16 rounded-lg bg-ink-100"></div></div>
+      </div>
+      <div class="w-56 border border-dashed border-ink-300 rounded-xl p-3 space-y-2 text-ink-600">
+        <p class="font-semibold text-ink-900">Search</p>
+        <div class="h-8 rounded-lg bg-ink-100"></div>
+        <p class="font-semibold text-ink-900 pt-1">Filters</p>
+        <div class="h-20 rounded-lg bg-ink-100"></div>
+        <p class="font-semibold text-ink-900 pt-1">People to follow</p>
+        <div class="h-12 rounded-lg bg-ink-100"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 7. DECISIONS ================= -->
+<section class="pb-6">
+  <h2 class="text-lg font-bold mb-3">7 · Four things I need you to decide</h2>
+  <ol class="space-y-3 text-sm text-ink-800 list-decimal pl-5 max-w-3xl">
+    <li><strong>Warm ember, or something cooler?</strong> Everything else follows from this. I chose warm because the crochet-business owner has to feel as at home here as the developer — and because Spark <em>is</em> an ember.</li>
+    <li><strong>Home and Feed as two tabs in one shell</strong> (my proposal) <strong>or two separate destinations</strong> in the nav? Tabs are fewer taps and one HTMX swap; separate destinations are more explicit.</li>
+    <li><strong>"Message" on the feed card</strong> — I've drawn it in because it shortcuts your core loop, but it does add weight to every card. Cut it and messaging starts from the post detail and profile only.</li>
+    <li><strong>Dark mode.</strong> A lot of your users are on Android with dark mode on all day. Doing it later is a retrofit; doing it now roughly doubles the visual review. My recommendation: build light-only for v1 but write every colour as a semantic token, so dark mode is a token swap in Phase 2 rather than a rewrite.</li>
+  </ol>
+</section>
+
+</main>
+
+<footer class="bg-ink-900 text-ink-400 text-xs px-6 py-6 text-center">
+  Alongside · design proposal v1 · nothing is built until this is approved
+</footer>
+</body>
+</html>
