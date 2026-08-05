@@ -1,4 +1,4 @@
-# Buildmates — runtime dependencies
+# Alongside — runtime dependencies
 #
 # Every entry here traces to a row in docs/tech-stack.md. Nothing was invented.
 # Compatible-release pins (~=) so patch fixes land without surprise majors.
