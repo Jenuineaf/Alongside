@@ -1,4 +1,4 @@
-# Buildmates — production dependencies
+# Alongside — production dependencies
 #
 # Production runs base only. Nothing extra today; this file exists so the
 # Dockerfile's prod stage has a stable target and the ASGI switch (Phase 5,

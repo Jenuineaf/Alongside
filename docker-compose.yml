@@ -1,4 +1,4 @@
-# Buildmates — local development stack (five services)
+# Alongside — local development stack (five services)
 #
 #   web      Django dev server            http://localhost:8000
 #   postgres PostgreSQL 16                localhost:5432
@@ -14,13 +14,13 @@
 # The point of this file is that the *real* Celery topology exists somewhere,
 # and that somewhere is your laptop.
 
-name: buildmates
+name: alongside
 
 x-django: &django
   build:
     context: .
     target: dev
-  image: buildmates-dev:latest
+  image: alongside-dev:latest
   env_file: .env
   volumes:
     - .:/app
@@ -37,7 +37,12 @@ services:
   # ── Application ──────────────────────────────────────────────
   web:
     <<: *django
-    command: /app/scripts/start-dev.sh
+    # Invoked via `bash` on purpose. The bind mount below replaces /app wholesale,
+    # which also masks the `chmod +x` the Dockerfile applies — so in dev the exec
+    # bit comes from however Docker Desktop maps a Windows/OneDrive path, not from
+    # the image or the git index. Calling the interpreter directly removes that
+    # dependency entirely. (Prod has no bind mount, so start-web.sh runs directly.)
+    command: bash /app/scripts/start-dev.sh
     ports:
       - "8000:8000"
     stdin_open: true          # so `import pdb; pdb.set_trace()` is usable
@@ -47,15 +52,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-buildmates}
-      POSTGRES_USER: ${POSTGRES_USER:-buildmates}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-buildmates}
+      POSTGRES_DB: ${POSTGRES_DB:-alongside}
+      POSTGRES_USER: ${POSTGRES_USER:-alongside}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-alongside}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"           # so a GUI client can connect from Windows
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-buildmates} -d ${POSTGRES_DB:-buildmates}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alongside} -d ${POSTGRES_DB:-alongside}"]
       interval: 5s
       timeout: 5s
       retries: 10

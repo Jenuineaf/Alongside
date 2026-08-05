@@ -1,6 +1,6 @@
-# Buildmates — Deployment, Infrastructure & Runbook
+# Alongside — Deployment, Infrastructure & Runbook
 
-> **Buildmates** — find people to build alongside.
+> **Alongside** — nobody builds alone.
 
 **Owner:** DevOps seat · **Written:** 30 Jul 2026 (Day 17)
 **Companion to:** `tech-stack.md` (§10, §11), `roadmap.md`
@@ -9,10 +9,18 @@ This is the operational source of truth. Every infrastructure decision, and the 
 behind it, lives here — no teammate can see the DevOps chat, so if it isn't written here it
 doesn't exist.
 
-**Status (31 Jul): infrastructure files are written and reviewed; nothing has ever been run,
-and nothing is deployed.** Two boot-breaking bugs were found and fixed by review on 31 Jul —
-see the decision log (§10). The whole stack is blocked on the Architect's project skeleton;
-§11 has the honest list.
+**Status (31 Jul, second pass): the Architect's skeleton has landed** — `manage.py`, `config/`
+(settings split, `celery.py`, `wsgi.py`, `asgi.py`, `urls.py`, `/healthz/`), and all six Django
+apps now exist. That unblocks the infra layer: for the first time these files could be checked
+against real code instead of against a spec.
+
+**Three boot-breaking bugs found so far, all by reading, none by running.** Two on the first
+pass (§10, 31 Jul) and one on this pass — the prod image build would have failed on a
+`CLOUDINARY_URL` guard the Dockerfile didn't satisfy. Fixed.
+
+**Still deployed: nothing.** The remaining blockers are no longer engineering — they are a
+GitHub remote and five external accounts, all of which only Jeni can create. §7.0 is her
+checklist. §11 is the honest status.
 
 ---
 
@@ -32,6 +40,7 @@ see the decision log (§10). The whole stack is blocked on the Architect's proje
 | `render.yaml` | Render Blueprint for the web service |
 | `.pre-commit-config.yaml` | Ruff, secret detection, large-file guard |
 | `.gitignore` | `.env` first, deliberately |
+| `pyproject.toml` `[tool.ruff]` | Lint + format config — DevOps's section of a shared file (pytest and coverage are QA's) |
 
 **None of it has been executed.** Docker Desktop is not installed on the build machine, so
 these files are reviewed-but-unverified. First `docker compose up` is the real test. Treat
@@ -90,7 +99,7 @@ docker compose exec web python manage.py createsuperuser
 docker compose exec web python manage.py shell
 docker compose exec web pytest                       # tests
 docker compose exec web ruff check .                 # lint
-docker compose exec postgres psql -U buildmates -d buildmates
+docker compose exec postgres psql -U alongside -d alongside
 docker compose build --no-cache web                  # after changing requirements
 ```
 
@@ -98,7 +107,7 @@ docker compose build --no-cache web                  # after changing requiremen
 
 - **OneDrive.** The repo lives under OneDrive, so the bind mount crosses a syncing folder.
   Expect slower file watching than a plain local path. If hot reload gets unreliable, moving
-  the repo to `C:\dev\buildmates` fixes it — flagged, not urgent.
+  the repo to `C:\dev\alongside` fixes it — flagged, not urgent.
 - **Line endings.** `scripts/*.sh` must stay LF. Git on Windows may rewrite them to CRLF,
   which makes the container fail with `exec format error` or `no such file or directory`.
   If that happens: `git config core.autocrlf input`, then re-checkout the scripts.
@@ -203,6 +212,13 @@ Say yes, or pick a different option. Nothing here is locked in yet — `cron.yml
 but inert until its secrets exist, and `render.yaml` sets the eager flag which is one line
 to change.
 
+**Confirmed 31 Jul against the real code:** `base.py` reads `CELERY_TASK_ALWAYS_EAGER` from the
+environment (default `False`) and sets `CELERY_TASK_EAGER_PROPAGATES = True`, so an eager task
+that raises surfaces the exception instead of swallowing it — exactly what you want if tasks
+are running inline in a request. `CRON_SECRET` is read into settings, and `config/urls.py`
+already carries the commented-out `include()` for the cron endpoint. Both options 1 and 2
+remain switchable; nothing has been foreclosed.
+
 ### If cold starts become the problem
 
 The GitHub Actions cron already wakes the app daily. If you want it warm during a specific
@@ -271,26 +287,211 @@ Two deliberate choices:
 
 ## 7. Deploy runbook
 
-### First deploy (one time)
+### 7.0 Accounts and credentials — Jeni's checklist
 
-1. Push the repo to GitHub (`Jenuineaf/buildmates`), branch `main`.
-2. **Neon** → new project, region Singapore → copy the **pooled** connection string. It must
-   end in `?sslmode=require`.
-3. **Upstash** → new Redis database, region Singapore → copy the `rediss://` URL (TLS —
-   two s's; a `redis://` URL will fail to connect).
-4. **Cloudinary** → copy the `CLOUDINARY_URL`.
-5. **Sentry** → new Django project → copy the DSN.
-6. **Render** → New → Blueprint → connect the repo. Render reads `render.yaml` and prompts
-   for every `sync: false` variable. Paste the values from steps 2–5.
-7. First deploy fails on `ALLOWED_HOSTS` — you don't know the hostname until Render assigns
-   it. Once it appears (`buildmates-xxxx.onrender.com`), set:
-   - `ALLOWED_HOSTS` = `buildmates-xxxx.onrender.com`
-   - `CSRF_TRUSTED_ORIGINS` = `https://buildmates-xxxx.onrender.com`
+**Only Jeni can do this part.** Every account below is free, and none needs a card except
+where noted. Do them in this order — later steps need values from earlier ones.
 
-   then redeploy. This is expected, not a failure — write the hostname down.
-8. GitHub → repo → Settings → Secrets → Actions → add `RENDER_URL`
-   (`https://buildmates-xxxx.onrender.com`) and `CRON_SECRET` (same value as Render's).
-9. Verify: `curl -sS https://buildmates-xxxx.onrender.com/healthz/` returns 200.
+Keep a scratch note open. You are collecting **nine values**. Paste each one into the note as
+you get it, because most of these pages show a secret exactly once.
+
+> **Never paste any of these into a chat, a commit, or a file in the repo.** They go into two
+> places only: Render's dashboard and GitHub's Secrets page. Both are write-only surfaces —
+> you can overwrite a value but never read it back, which is the point.
+
+---
+
+**Step 1 — GitHub (repo + remote).** ~5 min.
+
+The repo has local commits but no remote, so nothing can deploy and CI has never run.
+
+1. github.com → **New repository** → name `alongside` → **Private** is fine (Render reads
+   private repos on the free plan) → **do not** add a README, `.gitignore`, or licence; the
+   repo already has them.
+2. Copy the HTTPS remote URL it shows you.
+3. From the repo root:
+
+```bash
+git remote add origin https://github.com/<your-username>/alongside.git
+```
+
+Don't push yet — §7.1 covers the first push, because the first push is what makes CI run.
+
+*Values collected: none. Note the repo URL.*
+
+---
+
+**Step 2 — Neon (Postgres).** ~5 min. → `DATABASE_URL`
+
+1. neon.tech → sign up with GitHub.
+2. **New Project** → name `alongside` → Postgres **16** → region **Singapore
+   (ap-southeast-1)**. Region matters: every query crosses this link, and picking a US region
+   adds ~200ms to every page load.
+3. On the connection panel, switch the toggle to **Pooled connection** and copy the string.
+   It looks like:
+
+   `postgresql://<user>:<password>@ep-xxxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`
+
+4. **Check two things before you save it:** the hostname contains `-pooler`, and the string
+   ends with `?sslmode=require`. A non-pooled URL will exhaust Neon's connection limit; a
+   missing `sslmode` will fail to connect.
+
+> ① **`DATABASE_URL`** = that string.
+> **Required.** The app refuses to boot without it.
+
+---
+
+**Step 3 — Upstash (Redis).** ~5 min. → `REDIS_URL`, `CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND`
+
+1. upstash.com → sign up with GitHub → **Create Database** → Redis.
+2. Name `alongside` → **Regional** → region **Singapore (ap-southeast-1)** → TLS **enabled**.
+3. On the database page, find the connection string in `rediss://` form (Upstash shows it
+   under "Redis" / "Endpoint" — there is a copy button).
+
+   `rediss://default:<password>@<name>.upstash.io:6379`
+
+4. **It must start with `rediss://` — two s's.** Upstash is TLS-only; a `redis://` URL fails
+   to connect with a confusing timeout rather than a clear TLS error.
+
+> ② **`REDIS_URL`** = that string.
+> ③ **`CELERY_BROKER_URL`** = **the same string**.
+> ④ **`CELERY_RESULT_BACKEND`** = the same string with `/1` on the end.
+>
+> Upstash's free tier gives one logical database, so `/1` may be rejected. If Render logs
+> show a "SELECT is not allowed" or "DB index" error, set this to the same value as ② and
+> tell me — it's a one-line change, not a problem.
+
+---
+
+**Step 4 — Cloudinary (images).** ~5 min. → `CLOUDINARY_URL`
+
+1. cloudinary.com → sign up for the free plan.
+2. Dashboard → **API Keys** (or "Account Details") → find the **API environment variable**.
+   It is already in exactly the format we need:
+
+   `cloudinary://<api_key>:<api_secret>@<cloud_name>`
+
+3. Copy the whole thing including the `cloudinary://` prefix.
+
+> ⑤ **`CLOUDINARY_URL`** = that string.
+> **Required.** The app deliberately refuses to boot without it — Render's disk is wiped on
+> every deploy, so an app that silently saved uploads locally would lose every image with no
+> error. Better to fail loudly at startup.
+
+---
+
+**Step 5 — Sentry (errors).** ~5 min. → `SENTRY_DSN`
+
+1. sentry.io → sign up → **Developer** plan (free).
+2. **Create Project** → platform **Django** → name `alongside`.
+3. It shows you a setup snippet. You only need the **DSN** — the
+   `https://<key>@o<org>.ingest.sentry.io/<project>` URL.
+
+> ⑥ **`SENTRY_DSN`** = that URL.
+> Optional. Leave it blank and Sentry simply stays off; nothing breaks.
+
+---
+
+**Step 6 — generate the cron secret yourself.** ~1 min. → `CRON_SECRET`
+
+This one isn't from a service — you make it up. Run:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+> ⑦ **`CRON_SECRET`** = the output.
+> The **same value** goes in two places (Render **and** GitHub). If they don't match, the
+> nightly job gets a 403 and silently does nothing.
+
+---
+
+**Step 7 — Render (the web service).** ~10 min, plus a failed first deploy that is expected.
+
+Do this **after** pushing to GitHub (§7.1), because Render needs a repo to read.
+
+1. render.com → sign up with GitHub → authorise access to the `alongside` repo.
+2. **New → Blueprint** → select the repo. Render finds `render.yaml` and prompts for every
+   value marked `sync: false`.
+3. Paste ① through ⑦. Leave the email and Google fields blank for now (see below).
+4. Deploy. **It will fail**, and that is expected — `ALLOWED_HOSTS` can't be filled in yet
+   because Render assigns the hostname only after the service is created.
+5. Once the hostname appears (`alongside-xxxx.onrender.com`), **write it down**, then set:
+
+   > ⑧ **`ALLOWED_HOSTS`** = `alongside-xxxx.onrender.com` — hostname only, **no** `https://`
+   > ⑨ **`CSRF_TRUSTED_ORIGINS`** = `https://alongside-xxxx.onrender.com` — scheme **required**
+
+   The asymmetry is Django's, not ours, and getting it backwards is the single most common
+   first-deploy mistake. Save, then **Manual Deploy → Deploy latest commit**.
+
+**Leave blank on purpose:** `DEFAULT_FROM_EMAIL`, `EMAIL_BACKEND`, `EMAIL_HOST`,
+`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. Real
+email and Google sign-in belong to the Accounts seat's phase, not to getting a URL live. Every
+one of them degrades gracefully when unset — email prints to the log, the Google button hides.
+
+---
+
+**Step 8 — GitHub repository secrets.** ~3 min.
+
+Repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+
+| Secret name | Value |
+|---|---|
+| `RENDER_URL` | `https://alongside-xxxx.onrender.com` — **with** scheme, **no** trailing slash |
+| `CRON_SECRET` | ⑦, character-for-character identical to Render's |
+
+The trailing slash matters: `cron.yml` appends `/internal/cron/stale-post-nudge/`, so a
+trailing slash produces a double slash and a 404.
+
+---
+
+### The full value → variable map
+
+| # | Value | From | Env var | Where it goes | Required? |
+|---|---|---|---|---|---|
+| ① | Pooled connection string | Neon | `DATABASE_URL` | Render | **Yes — won't boot** |
+| ② | `rediss://` URL | Upstash | `REDIS_URL` | Render | Boots, then fails on first cache read |
+| ③ | same as ② | Upstash | `CELERY_BROKER_URL` | Render | Recommended |
+| ④ | ② with `/1` | Upstash | `CELERY_RESULT_BACKEND` | Render | Recommended |
+| ⑤ | API environment variable | Cloudinary | `CLOUDINARY_URL` | Render | **Yes — won't boot** |
+| ⑥ | DSN | Sentry | `SENTRY_DSN` | Render | No — silently disabled |
+| ⑦ | self-generated | you | `CRON_SECRET` | Render **and** GitHub | Only for scheduled jobs |
+| ⑧ | Render hostname | Render | `ALLOWED_HOSTS` | Render | **Yes — won't boot** |
+| ⑨ | `https://` + hostname | Render | `CSRF_TRUSTED_ORIGINS` | Render | Yes for any form/login |
+| — | `https://` + hostname | Render | `RENDER_URL` | GitHub secret | Only for scheduled jobs |
+
+`SECRET_KEY` is **not** on this list on purpose — `render.yaml` has `generateValue: true`, so
+Render mints a strong one, keeps it stable across deploys, and no human ever sees it.
+
+---
+
+### 7.1 First deploy (one time)
+
+1. §7.0 steps 1–6 — accounts created, values collected, remote added.
+2. Push, which is also the first CI run:
+
+```bash
+git push -u origin main
+```
+
+3. **Watch the Actions tab before touching Render.** Three jobs run: Ruff, pytest, and a
+   production Docker build. The Docker build is the one that matters here — it is the same
+   image Render will build, so if it goes green, Render's build will too. Fixing a red build
+   here costs 90 seconds; finding it on Render costs five minutes per attempt.
+4. §7.0 step 7 — Render Blueprint, paste the values, expect the `ALLOWED_HOSTS` failure, set
+   ⑧ and ⑨, redeploy.
+5. §7.0 step 8 — GitHub secrets.
+6. Verify:
+
+```bash
+curl -sS -o /dev/null -w "%{http_code}\n" https://alongside-xxxx.onrender.com/healthz/
+```
+
+   `200` means the container booted, migrations ran, and gunicorn is serving. The first
+   request after an idle period takes ~30s — that's the cold start, not a failure.
+7. Smoke-test the admin at `/admin/`. There's no superuser yet; see §7 "Running migrations in
+   production" for how to create one from your laptop.
+8. Record the hostname in this doc, and tell the team the URL exists.
 
 ### Every deploy after that
 
@@ -330,7 +531,7 @@ connect from your laptop with production credentials:
 DATABASE_URL="<neon pooled url>" \
 DJANGO_SETTINGS_MODULE=config.settings.prod \
 SECRET_KEY="<any strong value — not used for migrations>" \
-ALLOWED_HOSTS="buildmates-xxxx.onrender.com" \
+ALLOWED_HOSTS="alongside-xxxx.onrender.com" \
 python manage.py migrate
 ```
 
@@ -340,68 +541,79 @@ Same shape for `showmigrations`, `createsuperuser`, or a `shell`. **Never point 
 ### Production checks
 
 ```bash
-curl -sS -o /dev/null -w "%{http_code}\n" https://buildmates-xxxx.onrender.com/healthz/
+curl -sS -o /dev/null -w "%{http_code}\n" https://alongside-xxxx.onrender.com/healthz/
 python manage.py check --deploy      # with prod settings — flags missing security settings
 ```
 
 ---
 
-## 8. What DevOps needs from the Architect
+## 8. Interface with the Architect's `config/` — verified 31 Jul
 
-These land in `config/`, which the Architect owns. Requesting rather than editing.
+The skeleton has landed. This section was a list of requests; it is now a list of *checks*,
+because every one of these is a place where infra and settings can silently drift apart.
 
-**`config/settings/base.py`**
+### Delivered and confirmed
 
-- `django-environ` reading every key in `.env.example`.
-- `INSTALLED_APPS` — nothing ops-specific required.
-- WhiteNoise: `whitenoise.middleware.WhiteNoiseMiddleware` **immediately after**
-  `SecurityMiddleware` (order matters — it won't serve anything if placed lower), plus
-  `STATIC_ROOT = BASE_DIR / "staticfiles"` and the compressed-manifest storage backend.
-- Celery config read from `CELERY_BROKER_URL`, `CELERY_RESULT_BACKEND`,
-  `CELERY_TASK_ALWAYS_EAGER`.
+| Ops requirement | Status |
+|---|---|
+| `django-environ` reading every `.env.example` key | ✅ `base.py` |
+| WhiteNoise middleware immediately after `SecurityMiddleware` | ✅ correct position — it serves nothing if placed lower |
+| `STATIC_ROOT` + `CompressedManifestStaticFilesStorage` | ✅ |
+| Celery read from `CELERY_BROKER_URL` / `_RESULT_BACKEND` / `_TASK_ALWAYS_EAGER` | ✅ |
+| `config/celery.py`, standard shape, namespaced config | ✅ |
+| `SECURE_PROXY_SSL_HEADER` for Render's proxy | ✅ — without it every redirect loops |
+| `SECURE_SSL_REDIRECT`, secure cookies, HSTS, nosniff, `X_FRAME_OPTIONS` | ✅ |
+| Sentry initialised only when `SENTRY_DSN` is set, `send_default_pii=False` | ✅ |
+| `/healthz/` returning 200 without touching the database | ✅ `config/views.py` |
+| Static storage is WhiteNoise, never Cloudinary | ✅ |
+| `CONN_MAX_AGE` for Neon | ✅ 60s — a nice catch that wasn't asked for |
 
-**`config/settings/prod.py`**
+### The guard contract — the thing that breaks builds
 
-- **Refuse to boot on a weak `SECRET_KEY`** — fewer than 32 characters, or containing any of
-  `dev`, `placeholder`, `changeme`, `insecure`. SpendWise does this; it's cheap and it has
-  caught real mistakes.
+`prod.py` refuses to boot on bad config, which is right. But **the `prod` Docker stage runs
+`collectstatic` under `prod.py`**, so every guard also runs at image build time, with no
+network and no real credentials. Any variable `prod.py` requires without a default must
+therefore also appear in the Dockerfile's `collectstatic` env block.
 
-  **The Dockerfile depends on this exact list.** The `prod` stage runs `collectstatic` with
-  `config.settings.prod` loaded, so it must pass a throwaway key that survives the guard. That
-  key is hardcoded in the Dockerfile and deliberately contains none of the banned words. If you
-  add a word to the banned list, check the Dockerfile in the same commit — otherwise the image
-  build fails, and it fails at `docker build` time with a Django traceback that looks nothing
-  like a secrets problem.
+As of 31 Jul the guards are:
 
-- **Static files storage must be WhiteNoise, never Cloudinary.** `collectstatic` runs at image
-  build time with no network and no real credentials. Cloudinary is for *media* (user uploads)
-  only. Pointing `STORAGES["staticfiles"]` at Cloudinary would make every image build reach out
-  to an API it cannot authenticate against.
+| Guard in `prod.py` | Satisfied at build time by |
+|---|---|
+| `SECRET_KEY` ≥ 50 chars, no `replace-me`, no `dev-` prefix | 60-char throwaway key in the Dockerfile |
+| `ALLOWED_HOSTS` non-empty | `ALLOWED_HOSTS="localhost"` |
+| `CLOUDINARY_URL` non-empty | dummy `cloudinary://…@build` |
+| `DATABASE_URL` (from `base.py`, no default) | dummy Postgres URL — never connected to |
 
-- **`CSRF_TRUSTED_ORIGINS` must have a default or tolerate being unset**, or read it in a way
-  that doesn't explode when absent. The image build passes a dummy value, but any *other*
-  required-with-no-default variable added to `prod.py` becomes a new build-time failure. Rule of
-  thumb: if `prod.py` hard-requires a variable, it must also appear in the Dockerfile's
-  `collectstatic` env block.
-- `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` — required behind Render's
-  proxy, or every redirect loops.
-- `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, HSTS.
-- Sentry initialised only when `SENTRY_DSN` is set, with `send_default_pii=False`.
+**This is where the third bug lived.** The original spec said the key guard banned the words
+`dev`/`placeholder`/`changeme`/`insecure`; the implemented guard is length + `replace-me` +
+`dev-` prefix, and it added an unspecified `CLOUDINARY_URL` guard. The Dockerfile satisfied
+the guard that was *specified* and not the one that was *written* — so `docker build` would
+have died on `ImproperlyConfigured: CLOUDINARY_URL must be set in production`, failing CI's
+Docker job and every Render deploy, with a traceback that reads like a secrets problem rather
+than a build problem. Fixed in the Dockerfile, and the guard list is now pinned in the table
+above.
 
-**`config/celery.py`** — DevOps owns the Celery wiring per the seat split, but the file sits
-in the Architect's package. Standard shape (`app = Celery("config")`,
-`config_from_object("django.conf:settings", namespace="CELERY")`, `autodiscover_tasks()`),
-imported from `config/__init__.py`. Whoever creates the skeleton can drop it in; DevOps will
-review and own it thereafter.
+> **Architect — standing request:** if you add or change a fail-fast guard in `prod.py`, say
+> so via Jeni in the same commit. It is a Dockerfile change every time. I'd rather have the
+> guards than not — they're the right design — but they're load-bearing for the image build.
 
-**A `/healthz/` view.** `render.yaml` and the deploy checks both point at it. Must return
-200 without touching the database — a health check that queries Postgres turns a database
-blip into a restart loop. Plain `HttpResponse("ok")` is right.
+### Still outstanding
 
-**A `/internal/cron/stale-post-nudge/` endpoint** *(only if Jeni approves §4 Option 2)* —
-POST only, compares the `X-Cron-Key` header against `CRON_SECRET` with
-`secrets.compare_digest`, 403 otherwise, then calls the same task function Celery Beat would
-have called. Trust & Safety seat owns the nudge logic; this is just the doorway.
+- **A `/internal/cron/stale-post-nudge/` endpoint** *(needed only if Jeni approves §4
+  Option 2)*. `config/urls.py` already has the `include()` line written and commented out,
+  pointing at `moderation.cron_urls` — good. The view itself: POST only, compare the
+  `X-Cron-Key` header against `CRON_SECRET` with `secrets.compare_digest` (not `==` — timing
+  attack), 403 otherwise, then call the same task function Celery Beat would have. Trust &
+  Safety owns the nudge logic; this is just the doorway.
+- **`pg_trgm`.** Still nothing creates it. `django.contrib.postgres` is installed and
+  tech-stack §2 requires trigram matching, but no migration runs `TrigramExtension`. Until one
+  does, fuzzy search will work nowhere — not locally, not in CI, not on Neon. It must be a
+  migration, not a hand-run `CREATE EXTENSION`, so all three environments match. Neon supports
+  it. Architect's call, second time of asking.
+- **`tests/` does not exist**, but `pyproject.toml` sets `testpaths = ["tests"]`. pytest exits
+  with an error, not "no tests collected" — so **CI goes red on the very first push** for a
+  reason that has nothing to do with anyone's code. QA seat: an empty `tests/` with one smoke
+  test fixes it. Flagging because it will look like a CI problem and it isn't.
 
 ---
 
@@ -438,18 +650,28 @@ that needs none of this.
 | 31 Jul | Entrypoint scripts forced to mode 755 in the git index **and** `chmod +x` in both Dockerfile stages | Windows can't store the exec bit; without it every container dies on boot with "permission denied". Two independent fixes because the git-index one is easy to lose on a Windows re-add |
 | 31 Jul | Build-time `SECRET_KEY` no longer contains the word "placeholder" | The prod image runs `collectstatic` under `prod.py`, whose spec'd guard rejects keys containing `placeholder` — the Dockerfile would have failed its own security check. Banned-word list is now pinned in §8 so the two can't drift |
 | 31 Jul | `CSRF_TRUSTED_ORIGINS` added to the `collectstatic` build env | Any variable `prod.py` requires without a default becomes an image-build failure. §8 now states the rule |
+| 31 Jul (2nd pass) | `CLOUDINARY_URL` added to the `collectstatic` build env | `prod.py` as *written* guards `CLOUDINARY_URL`; the spec never asked for it. The prod image build — and therefore CI's Docker job and every Render deploy — would have failed. The full guard list is now pinned in §8 |
+| 31 Jul (2nd pass) | Compose invokes `bash /app/scripts/start-dev.sh` rather than the script directly | The bind mount replaces `/app`, which masks the Dockerfile's `chmod +x`. In dev the exec bit came from however Docker Desktop maps a Windows/OneDrive path — an untested assumption on the very first run. Calling the interpreter removes the dependency |
+| 31 Jul (2nd pass) | `render.yaml` marks which variables are boot-blocking | Three of them refuse to boot when unset and `REDIS_URL` fails *later* instead. Jeni fills these in by hand once; the comments are the only place that distinction is visible at fill-in time |
+| 31 Jul (2nd pass) | Tailwind stays on the Play CDN through Phase 0–1 | No build step is the right call while there's no UI to build. It becomes a compiled stylesheet before the portfolio deploy — CDN Tailwind prints a console warning in production and costs a render-blocking round trip on the mid-range Android phones we target. Tracked in §11, not forgotten |
 
 ---
 
 ## 11. Blocked / not done — the honest list
 
-**Blocked on the Architect:**
+**Blocked on the Architect — mostly cleared.**
 
-- Everything in §8. There is no `manage.py`, no `config/`, no `requirements` consumer — so
-  the Dockerfile cannot build and compose cannot start. All infra files are written against
-  the layout in tech-stack.md §13 and will work the moment the skeleton lands.
+The skeleton landed and §8's checklist is almost entirely green. Two things remain, neither
+blocking the first deploy: the `pg_trgm` migration and the cron endpoint (§8, "Still
+outstanding").
 
-**Blocked on Jeni:**
+**Blocked on QA:**
+
+- `pyproject.toml` sets `testpaths = ["tests"]` and `tests/` doesn't exist, so **CI's pytest
+  job fails on the first push**. Not a code problem and not a CI problem — just a directory
+  that needs to exist with something in it.
+
+**Blocked on Jeni — this is now the critical path:**
 
 - **The §4 Celery decision.**
 - **Local toolchain — audited 31 Jul, and it's thinner than previously recorded:**
@@ -467,14 +689,21 @@ that needs none of this.
   and the machine rebooted *first* (`wsl --install`, reboot, then Docker Desktop). Budget an
   hour including the reboot, not ten minutes.
 
-- **No GitHub remote.** `git init` has run and there is one local commit; the repo still needs
-  creating on GitHub and pushing. Doable through the web UI without `gh`.
-- **Accounts to create:** Render, Neon, Upstash, Cloudinary, Sentry.
+- **No GitHub remote.** `git init` has run and there are local commits; the repo still needs
+  creating on GitHub and pushing. Doable through the web UI without `gh`. **§7.0 step 1.**
+- **Accounts to create:** GitHub repo, Neon, Upstash, Cloudinary, Sentry, Render.
+  **§7.0 is the ordered checklist, with every value mapped to its env var.** About 35 minutes
+  of clicking, all free, no card required.
+
+**The deploy is otherwise ready to fire.** Nothing in the pipeline is waiting on engineering:
+push → CI proves the image builds → Blueprint → paste nine values → live URL. The standing
+rule is deploy early, and the only thing between here and an empty app on a real URL is §7.0.
 
 **Still true: nothing here has ever been executed.** Every infra file is reviewed-but-unrun.
-The two bugs found on 31 Jul (§2 exec bit, §8 `SECRET_KEY`) were both found by *reading*, and
-both would have broken the very first run — which is a fair warning about how much more a real
-`docker compose up` will surface.
+Three bugs so far (§2 exec bit, §8 `SECRET_KEY`, §8 `CLOUDINARY_URL`), all found by *reading*,
+all of which would have broken the very first run. That is a fair warning about how much more
+a real `docker compose up` will surface — and the reason §7.1 says watch CI's Docker build
+before touching Render.
 
 **Known soft spots to fix once things run:**
 
@@ -484,3 +713,13 @@ both would have broken the very first run — which is a fair warning about how 
   out to have a slim wheel, dropping them cuts image size substantially.
 - No staging environment. Free tier, one service — `main` is production. Acceptable at this
   scale, but it means CI is the only safety net, which is why the Docker build runs there.
+- **Tailwind is on the Play CDN** (`templates/base.html`), which compiles in the browser. Right
+  call for Phase 0–1 — no build step, nothing to configure, the Designer edits a palette file
+  and reloads. It has to become a compiled stylesheet before the portfolio deploy: the CDN
+  prints a console warning in production and adds a render-blocking round trip on exactly the
+  mid-range Android phones CLAUDE.md rule 6 targets. When that happens the Node build joins the
+  Dockerfile as a stage; `.gitignore` already reserves `/static/css/tailwind.output.css`. Not
+  urgent, not forgotten.
+- **HTMX and Alpine are also CDN-loaded**, pinned to exact versions (`htmx.org@2.0.4`,
+  `alpinejs@3.14.8`) — pinned is the important part. Same migration path as Tailwind, same
+  non-urgency.

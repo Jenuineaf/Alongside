@@ -1,4 +1,4 @@
-# Buildmates — local dev + CI dependencies
+# Alongside — local dev + CI dependencies
 -r base.txt
 
 # ── Testing (tech-stack §9) ────────────────────────────────────

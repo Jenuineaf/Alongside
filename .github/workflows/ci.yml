@@ -44,12 +44,12 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: buildmates_test
-          POSTGRES_USER: buildmates
-          POSTGRES_PASSWORD: buildmates
+          POSTGRES_DB: alongside_test
+          POSTGRES_USER: alongside
+          POSTGRES_PASSWORD: alongside
         ports: ["5432:5432"]
         options: >-
-          --health-cmd="pg_isready -U buildmates"
+          --health-cmd="pg_isready -U alongside"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=10
@@ -68,7 +68,7 @@ jobs:
       SECRET_KEY: ci-only-key-not-a-secret-0000000000000000000000000000
       DEBUG: "False"
       ALLOWED_HOSTS: localhost,127.0.0.1
-      DATABASE_URL: postgres://buildmates:buildmates@localhost:5432/buildmates_test
+      DATABASE_URL: postgres://alongside:alongside@localhost:5432/alongside_test
       REDIS_URL: redis://localhost:6379/0
       CELERY_BROKER_URL: redis://localhost:6379/0
       CELERY_RESULT_BACKEND: redis://localhost:6379/1

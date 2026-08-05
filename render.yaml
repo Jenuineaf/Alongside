@@ -1,4 +1,4 @@
-# Buildmates — Render Blueprint
+# Alongside — Render Blueprint
 #
 # Creates the web service only. Postgres lives on Neon and Redis on Upstash
 # (see docs/deployment.md §3 for why), so they are not declared here — they
@@ -10,7 +10,7 @@
 
 services:
   - type: web
-    name: buildmates
+    name: alongside
     runtime: docker
     plan: free
     region: singapore          # closest to Bangalore users
@@ -48,22 +48,32 @@ services:
         generateValue: true
 
       # ── Prompted at Blueprint creation, never stored in git ──
+      #
+      # The three marked REQUIRED are hard-enforced: the app raises
+      # ImproperlyConfigured and refuses to boot without them
+      # (config/settings/{base,prod}.py). Leave one blank and the deploy dies at
+      # startup with a clear message.
       - key: ALLOWED_HOSTS
-        sync: false            # e.g. buildmates.onrender.com
-      - key: CSRF_TRUSTED_ORIGINS
-        sync: false            # e.g. https://buildmates.onrender.com
+        sync: false            # REQUIRED — e.g. alongside.onrender.com (no scheme)
       - key: DATABASE_URL
-        sync: false            # Neon pooled URL, must include ?sslmode=require
+        sync: false            # REQUIRED — Neon pooled URL, must include ?sslmode=require
+      - key: CLOUDINARY_URL
+        sync: false            # REQUIRED — cloudinary://<key>:<secret>@<cloud_name>
+
+      # REDIS_URL is *not* guarded: base.py falls back to redis://redis:6379/0,
+      # a hostname that exists only in docker-compose. Unset, the app boots fine
+      # and then fails on the first cache read. Set it.
       - key: REDIS_URL
-        sync: false            # Upstash, rediss:// (TLS)
+        sync: false            # Upstash, rediss:// (TLS — two s's)
+
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false            # e.g. https://alongside.onrender.com (scheme required)
       - key: CELERY_BROKER_URL
-        sync: false            # same Upstash URL
+        sync: false            # same Upstash URL as REDIS_URL
       - key: CELERY_RESULT_BACKEND
-        sync: false
+        sync: false            # same Upstash URL, /1
       - key: CRON_SECRET
         sync: false            # must match the GitHub Actions repo secret
-      - key: CLOUDINARY_URL
-        sync: false
       - key: SENTRY_DSN
         sync: false
       - key: DEFAULT_FROM_EMAIL

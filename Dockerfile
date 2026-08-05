@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Buildmates — one Dockerfile, two targets.
+# Alongside — one Dockerfile, two targets.
 #   dev  → used by docker-compose (all five services share this image)
 #   prod → used by Render (the final stage, so a plain `docker build` gets it)
 
@@ -65,16 +65,27 @@ RUN chmod +x /app/scripts/*.sh
 # the required env vars are safe here — none of them survive into the runtime
 # environment (Render injects the real ones).
 #
-# The key below is deliberately long and contains neither "dev" nor
-# "placeholder": prod.py is specified to REFUSE TO BOOT on a key matching either
-# (docs/deployment.md §8), and this build step loads prod.py. A friendlier-
-# looking key would fail the image build. If that guard's banned-word list ever
-# changes, this line changes with it.
+# EVERY fail-fast guard in config/settings/prod.py must be satisfied by this
+# block, because this step loads prod.py. As written on 31 Jul 2026 the guards
+# are:
+#   SECRET_KEY       — must be >= 50 chars, must not contain "replace-me",
+#                      must not start with "dev-"
+#   ALLOWED_HOSTS    — must be non-empty
+#   CLOUDINARY_URL   — must be non-empty (Render's disk is ephemeral)
+# The key below is 60 chars and matches none of the banned patterns. The
+# Cloudinary URL is syntactically valid but points nowhere; collectstatic only
+# uses the *staticfiles* storage (WhiteNoise), never the media storage, so
+# nothing here reaches the network.
+#
+# If prod.py gains another required-with-no-default variable, it must be added
+# here in the same commit — otherwise `docker build` fails with a Django
+# traceback that looks nothing like a config problem. See docs/deployment.md §8.
 RUN SECRET_KEY="build-time-only-9f3c1a7e42b8d05619ca7fe38b204d7ce615a90f4482" \
     DATABASE_URL="postgres://build:build@127.0.0.1:5432/build" \
     REDIS_URL="redis://127.0.0.1:6379/0" \
     ALLOWED_HOSTS="localhost" \
     CSRF_TRUSTED_ORIGINS="https://localhost" \
+    CLOUDINARY_URL="cloudinary://000000000000000:build-time-only-not-a-real-secret@build" \
     DEBUG="False" \
     DJANGO_SETTINGS_MODULE="config.settings.prod" \
     python manage.py collectstatic --noinput
