@@ -88,8 +88,18 @@ RESERVED_USERNAMES = frozenset(
 )
 
 
+# Prefixes nobody may register under. `deleted` alone was already blocked, but
+# `deleted_1` was not — so a real user could register a convincing fake tombstone
+# next to genuinely anonymised accounts (ACC-11). Anonymisation rewrites handles
+# to `deleted_<hex>`, so the whole prefix has to be ours.
+RESERVED_USERNAME_PREFIXES = ("deleted_",)
+
+
 def validate_username_not_reserved(value: str) -> None:
-    if value and value.lower() in RESERVED_USERNAMES:
+    if not value:
+        return
+    candidate = value.lower()
+    if candidate in RESERVED_USERNAMES or candidate.startswith(RESERVED_USERNAME_PREFIXES):
         raise ValidationError(
             _("That username is reserved. Please choose another."),
             code="reserved_username",
