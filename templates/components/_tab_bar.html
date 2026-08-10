@@ -1,0 +1,71 @@
+{% comment %}
+  Bottom tab bar — OWNED BY THE DESIGNER. The primary navigation on mobile.
+
+    {% block nav %}{% include "components/_tab_bar.html" with active="home" %}{% endblock %}
+
+  Params:
+    active          home · explore · messages · alerts
+    unread_messages / unread_alerts   integers, badge hidden when 0
+
+  Five slots, and Post sits in the middle because posting an idea is the thing
+  we most want to happen — it's the top of both loops in roadmap §1.3. Saved,
+  Profile and Settings live behind the avatar in the top bar, not here; a
+  six-item bar at 375px gives you 62px per target and labels that wrap.
+
+  Hidden for signed-out visitors — they get a Sign up / Log in bar instead.
+  Public browsing is non-negotiable (CONTRIBUTING.md rule 7), but a signed-out person
+  has nothing to put in Messages or Alerts.
+
+  The 11px label is a deliberate exception to the 12px type floor. At 375px,
+  12px labels wrap "Messages" onto two lines. The label is a redundant cue —
+  the icon and aria-current carry the meaning — so shrinking it costs nothing
+  that matters. Documented in design-system.md §2.
+{% endcomment %}
+<nav aria-label="Primary"
+     class="sticky bottom-0 z-40 flex h-16 items-center justify-around border-t border-ink-200 bg-white pb-1">
+
+  <a href="{% url 'posts:home' %}" {% if active == "home" %}aria-current="page"{% endif %}
+     class="flex w-14 flex-col items-center gap-0.5 rounded-lg py-1 text-[11px]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+            {% if active == 'home' %}font-semibold text-brand-700{% else %}text-ink-600{% endif %}">
+    {% include "components/_icon.html" with name="home" class="h-6 w-6" %}Home
+  </a>
+
+  <a href="{% url 'discovery:explore' %}" {% if active == "explore" %}aria-current="page"{% endif %}
+     class="flex w-14 flex-col items-center gap-0.5 rounded-lg py-1 text-[11px]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+            {% if active == 'explore' %}font-semibold text-brand-700{% else %}text-ink-600{% endif %}">
+    {% include "components/_icon.html" with name="explore" class="h-6 w-6" %}Explore
+  </a>
+
+  <a href="{% url 'posts:create' %}" aria-label="Post an idea"
+     class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-700 text-white shadow-sm hover:bg-brand-800
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+    {% include "components/_icon.html" with name="plus" class="h-6 w-6" %}
+  </a>
+
+  <a href="{% url 'messaging:list' %}" {% if active == "messages" %}aria-current="page"{% endif %}
+     class="relative flex w-14 flex-col items-center gap-0.5 rounded-lg py-1 text-[11px]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+            {% if active == 'messages' %}font-semibold text-brand-700{% else %}text-ink-600{% endif %}">
+    {% include "components/_icon.html" with name="messages" class="h-6 w-6" %}
+    {% if unread_messages %}
+      <span class="absolute right-2 top-0 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-bold text-white">{{ unread_messages }}</span>
+      <span class="sr-only">{{ unread_messages }} unread</span>
+    {% endif %}
+    Messages
+  </a>
+
+  <a href="{% url 'notifications:list' %}" {% if active == "alerts" %}aria-current="page"{% endif %}
+     class="relative flex w-14 flex-col items-center gap-0.5 rounded-lg py-1 text-[11px]
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+            {% if active == 'alerts' %}font-semibold text-brand-700{% else %}text-ink-600{% endif %}">
+    {% include "components/_icon.html" with name="bell" class="h-6 w-6" %}
+    {% if unread_alerts %}
+      <span class="absolute right-2 top-0 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-bold text-white">{{ unread_alerts }}</span>
+      <span class="sr-only">{{ unread_alerts }} unread</span>
+    {% endif %}
+    Alerts
+  </a>
+
+</nav>

@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alongside — low-fidelity wireframes, all 14 screens</title>
+<style>
+  /* Deliberately ugly. Greyscale only, no brand colour, no polish.
+     The job of this document is to find missing data, not to look good. */
+  :root{ color-scheme: light; --line:#999; --box:#e4e4e4; --box2:#f0f0f0; --ink:#111; --mut:#555; }
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);
+       font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  h1,h2,h3,p,ul,ol{margin:0}
+  a{color:inherit}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+  header.top{border-bottom:2px solid var(--ink);padding:22px 16px}
+  header.top .in{max-width:1180px;margin:0 auto}
+  header.top h1{font-size:20px;font-weight:700}
+  header.top p{font-size:13px;color:var(--mut);max-width:70ch;margin-top:6px}
+
+  .legend{border:1px solid var(--line);padding:12px;margin:22px 0;background:var(--box2)}
+  .legend b{font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .legend ul{list-style:none;padding:0;margin:8px 0 0;display:flex;flex-wrap:wrap;gap:6px 22px;font-size:12px}
+
+  section{margin-top:38px}
+  section > h2{font-size:16px;font-weight:700;border-bottom:1px solid var(--ink);padding-bottom:5px}
+  section > .why{font-size:12.5px;color:var(--mut);margin-top:6px;max-width:78ch}
+
+  .row{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;align-items:flex-start}
+
+  /* the phone */
+  .scr{width:300px;border:2px solid var(--ink);background:#fff}
+  .scr > .cap{border-bottom:2px solid var(--ink);padding:5px 8px;font-size:11px;font-weight:700;
+              text-transform:uppercase;letter-spacing:.05em;background:var(--ink);color:#fff}
+  .body{padding:8px;display:flex;flex-direction:column;gap:7px}
+
+  /* generic grey box */
+  .b{background:var(--box);border:1px solid var(--line);padding:7px;font-size:11.5px;color:var(--mut)}
+  .b.lite{background:var(--box2)}
+  .b.tall{min-height:52px}
+  .b.img{min-height:64px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#e8e8e8 0 6px,#dcdcdc 6px 12px)}
+  .b.btn{text-align:center;font-weight:700;color:var(--ink);background:#d2d2d2}
+  .b.inp{background:#fff;border-style:solid}
+  .b.pill{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11px}
+  .b.circ{border-radius:999px;width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;font-size:10px}
+  .b.circ.sm{width:26px;height:26px;flex-basis:26px}
+
+  .h{display:flex;gap:7px;align-items:center}
+  .h.top{align-items:flex-start}
+  .grow{flex:1;min-width:0}
+  .pills{display:flex;flex-wrap:wrap;gap:5px}
+  .bar{display:flex;gap:5px}
+  .bar > *{flex:1}
+
+  /* field annotation */
+  .f{font-size:10.5px;color:#000;background:#ffe;border:1px dashed #666;padding:1px 4px;display:inline-block}
+  .fl{font-size:10.5px;color:#333;margin-top:-3px}
+  .fl code{background:#ffe;border:1px dashed #666;padding:0 3px}
+
+  .note{border-left:4px solid var(--ink);background:var(--box2);padding:9px 11px;font-size:12px;margin-top:10px;max-width:78ch}
+  .gap{border:2px solid #000;background:#fff;padding:9px 11px;font-size:12px;margin-top:10px;max-width:78ch}
+  .gap b{background:#000;color:#fff;padding:1px 5px;font-size:11px;letter-spacing:.04em}
+
+  .sect-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);
+              border-bottom:1px solid var(--line);padding-bottom:3px;margin-top:3px}
+
+  @media (max-width:700px){ .scr{width:100%} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="in">
+    <h1>Alongside — low-fidelity wireframes · all 14 screens</h1>
+    <p>Greyscale boxes on purpose. The only question this document answers is: <b>what data does each screen need to display or capture?</b> Every box is annotated with the model field behind it. Fields that don't exist yet are marked <span class="f">MISSING</span>. Written for the Architect's data-model review — the findings list is in <code>docs/review/designer.md</code>.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="legend">
+    <b>How to read this</b>
+    <ul>
+      <li><span class="f">Model.field</span> — exists in data-model.md</li>
+      <li><span class="f">MISSING</span> — not in the schema</li>
+      <li><span class="f">query</span> — derived, not stored</li>
+      <li>Grey box = content · white box = input · dark box = button</li>
+    </ul>
+  </div>
+
+  <!-- ============ 1 ============ -->
+  <section>
+    <h2>1 · Landing / public feed <span style="font-weight:400;font-size:12px">— no auth</span></h2>
+    <p class="why">First impression, and it must not be a login wall. Everything here is readable signed-out.</p>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">1 · Landing</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:1">wordmark + tagline <span class="f">static</span></div><div class="b btn" style="flex:0 0 70px">Log in</div></div>
+          <div class="b tall">hero headline + subcopy <span class="f">static</span></div>
+          <div class="bar"><div class="b btn">Post your idea</div></div>
+          <div class="bar"><div class="b btn">Browse ideas</div></div>
+          <div class="sect-label">Live right now</div>
+          <div class="b lite">
+            <div class="h"><div class="b circ">av</div><div class="grow">
+              <div class="b" style="padding:3px">author name <span class="f">User.display_name</span></div>
+              <div class="b" style="padding:3px;margin-top:3px">headline <span class="f">Profile.headline</span></div>
+            </div></div>
+            <div class="b" style="margin-top:5px">title <span class="f">Post.title</span></div>
+            <div class="pills" style="margin-top:5px">
+              <span class="b pill">role <span class="f">PostRole→Role.name</span></span>
+              <span class="b pill">role</span>
+            </div>
+            <div class="b" style="margin-top:5px">42 sparks · 8 comments <span class="f">Post.spark_count / comment_count</span></div>
+          </div>
+          <div class="b lite tall">2nd sample post <span class="f">same shape</span></div>
+          <div class="b tall">sign-up prompt <span class="f">static</span></div>
+          <div class="b lite">demo creds <span class="f">settings const + User.is_public_demo</span></div>
+          <div class="b lite">"sample data, not real traction" <span class="f">static</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="note"><b>Query, not a field:</b> "live right now" is <code>Post.objects.visible_to(AnonymousUser)</code> ordered by <code>published_at</code>. Anonymous <code>visible_to()</code> is a documented no-op, so this path stays cheap.</div>
+        <div class="gap"><b>NOT A SCHEMA GAP</b> The demo password can't live in the database (it's published on a web page and passwords are hashed). It's a settings constant. <code>User.is_public_demo</code> marks <em>which</em> account, which is all the schema needs to do.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 ============ -->
+  <section>
+    <h2>2 · Sign up / log in</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">2a · Sign up</div>
+        <div class="body">
+          <div class="bar"><div class="b btn">Sign up</div><div class="b">Log in</div></div>
+          <div class="fl">name <code>User.display_name</code></div><div class="b inp">&nbsp;</div>
+          <div class="fl">email <code>User.email</code> (unique)</div><div class="b inp">&nbsp;</div>
+          <div class="fl">password <code>User.password</code></div><div class="b inp">&nbsp;</div>
+          <div class="fl" style="color:#000">username? <span class="f">User.username — WHERE FROM?</span></div>
+          <div class="b" style="background:#fff;border:2px solid #000">not asked for on this screen</div>
+          <div class="bar"><div class="b btn">Create account</div></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">2b · Log in (error)</div>
+        <div class="body">
+          <div class="bar"><div class="b">Sign up</div><div class="b btn">Log in</div></div>
+          <div class="b" style="border:2px solid #000;background:#fff">error banner <span class="f">form errors</span></div>
+          <div class="fl">email</div><div class="b inp">&nbsp;</div>
+          <div class="fl">password + "forgot it?" <span class="f">allauth reset → User.email</span></div><div class="b inp">&nbsp;</div>
+          <div class="bar"><div class="b btn">Log in</div></div>
+          <div class="b lite">demo creds prefill <span class="f">settings const</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 1 — username</b> <code>User.username</code> is unique, validated <code>[a-z0-9_]{3,30}</code>, reserved-blocklisted, and is the public URL (<code>/u/&lt;username&gt;</code>). The sign-up form doesn't ask for it. So either we <b>ask</b> (a fourth field + live availability check, which needs an endpoint) or we <b>derive</b> it from the email and let people change it later. §10 only describes derivation for <em>Google</em> sign-in; v1 is email/password.<br><br>Follow-on: <b>is username changeable?</b> If yes, old profile URLs rot and Settings needs a screen for it. Not answered anywhere.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 ============ -->
+  <section>
+    <h2>3 · Onboarding — three steps, all skippable</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">3a · Purpose</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:1">progress 1/3 <span class="f">query</span></div><div class="b" style="flex:0 0 46px">Skip</div></div>
+          <div class="b tall">"I have an idea" <span class="f">Profile.purpose = post</span></div>
+          <div class="b tall">"I want to join" <span class="f">= find</span></div>
+          <div class="b lite">both → <span class="f">= both</span></div>
+          <div class="bar"><div class="b btn">Continue</div></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">3b · Field + interests</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:1">progress 2/3</div><div class="b" style="flex:0 0 46px">Skip</div></div>
+          <div class="fl">occupation, free text <code>Profile.occupation</code></div><div class="b inp">&nbsp;</div>
+          <div class="fl">field picker <code>Profile.field_tag → Tag</code> <b>curated only</b> <code>Tag.is_curated</code></div>
+          <div class="pills"><span class="b pill">tag</span><span class="b pill">tag</span><span class="b pill">tag</span></div>
+          <div class="fl">interest topics <code>ProfileInterest ⇄ Tag</code> (any tag)</div>
+          <div class="pills"><span class="b pill">topic</span><span class="b pill">topic</span><span class="b pill">topic</span><span class="b pill">topic</span></div>
+          <div class="bar"><div class="b btn">Continue</div></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">3c · Suggested follows</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:1">progress 3/3</div><div class="b" style="flex:0 0 46px">Skip</div></div>
+          <div class="h"><div class="b circ">av</div><div class="grow b">name + headline + post count <span class="f">Profile.post_count</span></div><div class="b btn" style="flex:0 0 60px">Follow</div></div>
+          <div class="fl">→ <code>Follow(follower, following)</code></div>
+          <div class="h"><div class="b circ">av</div><div class="grow b">person 2</div><div class="b" style="flex:0 0 60px">Following</div></div>
+          <div class="fl">"or follow a topic" <code>ProfileInterest</code> — same thing as interests above</div>
+          <div class="pills"><span class="b pill">#tag</span><span class="b pill">#tag</span></div>
+          <div class="bar"><div class="b btn">Take me Home</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="gap"><b>GAP 2 — resume position</b> <code>Profile.onboarding_completed_at</code> is null-or-set: it records <em>finished</em>, never <em>how far</em>. Someone who abandons on step 2 and comes back can't be resumed, and we can't tell "skipped everything" from "never started". If that's an accepted simplification, fine — but it should be a recorded decision, not an accident. One nullable <code>onboarding_step</code> smallint would cover it.</div>
+    <div class="note"><b>Naming mismatch, no schema change:</b> data-model.md labels <code>ProfileInterest</code> as "onboarding step 3", but interests are captured on <b>step 2</b> in this flow and step 3 is suggested follows. Same fields, different step numbers — worth aligning the doc so the Accounts seat builds the right screen.</div>
+    <div class="note"><b>Confirmed, not a gap:</b> "follow a topic" in step 3 is the same row as an interest tag (<code>ProfileInterest</code>). There is no separate tag-follow model and none is needed — but the UI copy should say "interests" consistently, or seats will look for a model that isn't there.</div>
+  </section>
+
+  <!-- ============ 4 + 5 ============ -->
+  <section>
+    <h2>4 &amp; 5 · Home (personalised) and Feed (everything)</h2>
+    <p class="why">One shell, one tab control. Home runs the cascade; Feed is a flat list with sort + filters.</p>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">4 · Home — new user</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:1">wordmark</div><div class="b circ sm">av</div></div>
+          <div class="bar"><div class="b btn">Home</div><div class="b">Feed</div></div>
+          <div class="b lite">"you follow 1 person" <span class="f">Profile.following_count</span></div>
+          <div class="sect-label">Band A — from people you follow</div>
+          <div class="b lite tall">post card <span class="f">tier 1</span></div>
+          <div class="sect-label">Band B — because you picked &lt;field&gt;</div>
+          <div class="fl"><code>Profile.field_tag.name</code></div>
+          <div class="b lite tall">post card <span class="f">tier 2</span></div>
+          <div class="sect-label">Band C — newest overall</div>
+          <div class="b lite tall">post card <span class="f">tier 3</span></div>
+          <div class="b">nudge: follow more people</div>
+          <div class="bar"><div class="b">Home</div><div class="b">Expl</div><div class="b btn">+</div><div class="b">Msg</div><div class="b">Alrt</div></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">5 · Feed + card anatomy</div>
+        <div class="body">
+          <div class="bar"><div class="b">Home</div><div class="b btn">Feed</div></div>
+          <div class="bar">
+            <div class="b">Newest ▾ <span class="f">published_at</span></div>
+            <div class="b">Sparked <span class="f">spark_count</span></div>
+          </div>
+          <div class="bar">
+            <div class="b">Role <span class="f">PostRole</span></div>
+            <div class="b">Commit <span class="f">commitment</span></div>
+            <div class="b">Loc <span class="f">city_slug</span></div>
+          </div>
+          <div class="b lite">
+            <div class="h top"><div class="b circ">av</div><div class="grow">
+              <div class="b" style="padding:3px">name <span class="f">User.display_name</span></div>
+              <div class="b" style="padding:3px;margin-top:3px">headline <span class="f">Profile.headline</span></div>
+              <div class="b" style="padding:3px;margin-top:3px">2h <span class="f">Post.published_at</span></div>
+            </div><div class="b" style="flex:0 0 24px">⋯</div></div>
+            <div class="b" style="margin-top:5px">title <span class="f">Post.title</span></div>
+            <div class="b tall" style="margin-top:4px">body excerpt <span class="f">Post.body</span></div>
+            <div class="b img" style="margin-top:4px">image <span class="f">PostImage.image / .order</span></div>
+            <div class="pills" style="margin-top:5px">
+              <span class="b pill">stage <span class="f">Post.stage</span></span>
+              <span class="b pill">commit <span class="f">Post.commitment</span></span>
+              <span class="b pill">status <span class="f">Post.status</span></span>
+              <span class="b pill">stale? <span class="f">Post.is_stale</span></span>
+            </div>
+            <div class="fl" style="margin-top:5px">roles needed <code>PostRole → Role.name</code> + <code>Post.custom_roles</code></div>
+            <div class="pills"><span class="b pill">role</span><span class="b pill">role</span><span class="b pill">+2</span></div>
+            <div class="fl" style="margin-top:5px">topic tags <code>PostTag → Tag.name/slug</code></div>
+            <div class="pills"><span class="b pill">tag</span><span class="b pill">tag</span></div>
+            <div class="b" style="margin-top:5px">city · remote <span class="f">Post.city / is_remote_friendly</span></div>
+            <div class="bar" style="margin-top:5px">
+              <div class="b">★ 42 <span class="f">spark_count + <b>is_sparked</b></span></div>
+              <div class="b">💬 8 <span class="f">comment_count</span></div>
+              <div class="b">save <span class="f"><b>is_saved</b></span></div>
+            </div>
+          </div>
+          <div class="b lite">skeleton → next page <span class="f">cursor on published_at</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 3 — per-viewer annotations aren't specified anywhere</b> Every card renders <code>is_sparked</code> and <code>is_saved</code> for the signed-in viewer. Neither is a field (correctly — they're <code>PostSpark</code>/<code>SavedPost</code> rows), but nothing in data-model.md says the feed query must <b>annotate</b> them. If each card checks individually that's an N+1 on the hottest query in the app. Needs to be a stated contract like <code>.visible_to()</code> is — e.g. <code>Post.objects.for_viewer(user)</code> adding both via <code>Exists()</code>.</div>
+        <div class="gap"><b>GAP 4 — tier provenance</b> Home labels each band with where it came from ("from people you follow", "because you picked android"). The cascade is defined as three queries; nothing says the result carries a <b>marker of which tier produced each post</b>. Without it the bands can't be labelled and Home becomes an unexplained list — which is the whole cold-start problem. Cheap if Discovery returns tagged querysets; expensive to retrofit once the view is written.</div>
+        <div class="note"><b>Confirmed present:</b> stale sinks rather than hides (<code>is_stale</code> as leading sort column), so the card needs a visual treatment for a stale-but-visible post. That's mine to design; the field exists.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 ============ -->
+  <section>
+    <h2>6 · Post detail</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">6 · Post detail</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 30px">←</div><div class="grow b">Idea</div><div class="b" style="flex:0 0 30px">⋯</div></div>
+          <div class="h"><div class="b circ">av</div><div class="grow b">name · headline · time</div><div class="b btn" style="flex:0 0 58px">Follow</div></div>
+          <div class="b">title <span class="f">Post.title</span></div>
+          <div class="pills"><span class="b pill">stage</span><span class="b pill">commitment</span><span class="b pill">status</span></div>
+          <div class="b tall">full body <span class="f">Post.body</span></div>
+          <div class="b img">images, up to 5 <span class="f">PostImage.image / .caption / .order</span></div>
+          <div class="fl">topic tags <code>PostTag</code></div>
+          <div class="pills"><span class="b pill">tag</span><span class="b pill">tag</span></div>
+          <div class="b lite">
+            <div class="b">LOOKING FOR</div>
+            <div class="pills" style="margin-top:4px"><span class="b pill">role</span><span class="b pill">role</span></div>
+            <div class="b" style="margin-top:4px;border:2px solid #000;background:#fff">per-role note <span class="f">PostRole.note — NOT DISPLAYED YET</span></div>
+          </div>
+          <div class="bar"><div class="b">42 sparks</div><div class="b">8 comments</div><div class="b">Save</div></div>
+          <div class="sect-label">Comments — flat</div>
+          <div class="b inp">add a comment <span class="f">Comment.body</span></div>
+          <div class="h top"><div class="b circ sm">av</div><div class="grow">
+            <div class="b">author + time <span class="f">Comment.author / created_at</span></div>
+            <div class="b" style="margin-top:3px">body <span class="f">Comment.body</span></div>
+            <div class="b" style="margin-top:3px">★ 6 <span class="f">Comment.spark_count + CommentSpark</span></div>
+          </div></div>
+          <div class="b">load more <span class="f">Index(post, created_at)</span></div>
+          <div class="bar"><div class="b btn">★ 42</div><div class="b btn">Message author</div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 5 — <code>PostRole.note</code> has no home in the UI</b> The field exists (<code>CharField(120)</code>, e.g. "React dev, ~5 hrs/week") and it's genuinely useful — it's the difference between "Android dev" and "Android dev, ~5 hrs/week, evenings". But nothing in my designs displayed it, and nothing in the create form captured it. <b>Either I design it in (I want to) or the field is dead weight.</b> Flagging so the Architect doesn't ship a column nobody writes to.</div>
+        <div class="note"><b>Not a gap:</b> comment count on this screen is the length of the fetched list, not <code>comment_count</code> (§7.2). The two never appear on the same screen — consistent with what I've drawn.</div>
+        <div class="note"><b>Report / block flow is missing from my designs entirely.</b> The ⋯ menu needs a report sheet: <code>Report.reason</code> (6 choices) + <code>Report.details</code>. Schema is complete; the <b>screen</b> doesn't exist yet. That's my gap, not the Architect's.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7 ============ -->
+  <section>
+    <h2>7 · Create / edit post</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">7 · Create idea</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 30px">✕</div><div class="grow b">New idea</div><div class="b" style="flex:0 0 60px;border:2px solid #000;background:#fff">draft?</div></div>
+          <div class="fl">title <code>Post.title</code> (140)</div><div class="b inp">&nbsp;</div>
+          <div class="fl">body <code>Post.body</code></div><div class="b inp tall">&nbsp;</div>
+          <div class="fl">roles — curated picker <code>PostRole → Role</code></div>
+          <div class="pills"><span class="b pill">role ✕</span><span class="b pill">role ✕</span></div>
+          <div class="fl">+ "Other" free text <code>Post.custom_roles</code> (max 3)</div><div class="b inp">&nbsp;</div>
+          <div class="fl" style="color:#000">per-role note <span class="f">PostRole.note — NO INPUT</span></div>
+          <div class="b" style="border:2px solid #000;background:#fff">not captured anywhere</div>
+          <div class="fl">topic tags — free text <code>PostTag → Tag</code></div><div class="b inp">&nbsp;</div>
+          <div class="fl">stage <code>Post.stage</code></div>
+          <div class="bar"><div class="b">idea</div><div class="b btn">building</div><div class="b">launched</div></div>
+          <div class="fl">commitment <code>Post.commitment</code></div>
+          <div class="bar"><div class="b">casual</div><div class="b btn">serious</div></div>
+          <div class="fl">city <code>Post.city</code> → <code>city_slug</code></div><div class="b inp">&nbsp;</div>
+          <div class="b">☑ remote ok <span class="f">Post.is_remote_friendly</span></div>
+          <div class="fl">images, max 5 <code>PostImage</code></div>
+          <div class="b img">upload</div>
+          <div class="b" style="border:2px solid #000;background:#fff">caption? <span class="f">PostImage.caption — NO INPUT</span></div>
+          <div class="fl">edit mode only: status <code>Post.status</code></div>
+          <div class="bar"><div class="b">looking</div><div class="b">team formed</div><div class="b">closed</div></div>
+          <div class="bar"><div class="b btn">Publish</div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 6 — I drew a "Save draft" button and drafts do not exist</b> data-model.md §2.3.1 is explicit: <b>there are no drafts in v1</b>, a post is live when created. My v5 create screen has a "Save draft" control. That's my error, caught by this sweep — it's removed. Flagging it because if it had shipped, someone would have built a draft state to satisfy the button.</div>
+        <div class="gap"><b>GAP 7 — <code>PostImage.caption</code> is never captured</b> Same shape as GAP 5: the column exists, no form field writes to it. Either the create form gets a caption input per image, or the column goes. My preference: keep it and I'll design the input — a caption is the only accessible text an image ever gets, and alt text matters more than it looks.</div>
+        <div class="note"><b>Confirmed present and sufficient:</b> curated roles + "Other" free text (<code>custom_roles</code>, max 3, searchable not filterable) and free-text topic tags. The asymmetry is deliberate (ADR-0004) and the form must reflect it — role picker is a <em>closed list plus Other</em>, tags are an <em>open text input</em>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8 ============ -->
+  <section>
+    <h2>8 · Profile — someone else's, and your own</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">8a · Their profile</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 30px">←</div><div class="grow b">Profile</div><div class="b" style="flex:0 0 30px">⋯</div></div>
+          <div class="h top"><div class="b circ" style="width:48px;height:48px;flex-basis:48px">av</div><div class="grow">
+            <div class="b">display name <span class="f">User.display_name</span></div>
+            <div class="b" style="margin-top:3px">@username <span class="f">User.username</span></div>
+            <div class="b" style="margin-top:3px">headline <span class="f">Profile.headline</span></div>
+            <div class="b" style="margin-top:3px">city <span class="f">Profile.city</span></div>
+          </div></div>
+          <div class="bar"><div class="b">128 followers <span class="f">follower_count</span></div><div class="b">64 following</div></div>
+          <div class="b tall">bio <span class="f">Profile.bio</span></div>
+          <div class="b tall" style="border:2px solid #000;background:#fff">work done so far <span class="f">Profile.work_done — NOT DESIGNED</span></div>
+          <div class="fl">links <code>github_url / portfolio_url / website_url</code></div>
+          <div class="bar"><div class="b">gh</div><div class="b">portfolio</div><div class="b">site</div></div>
+          <div class="fl">roles they can fill <code>ProfileSkill → Role</code> + <code>Profile.custom_skills</code></div>
+          <div class="pills"><span class="b pill">skill</span><span class="b pill">skill</span></div>
+          <div class="bar"><div class="b btn">Follow</div><div class="b btn">Message</div></div>
+          <div class="bar"><div class="b btn">Ideas <span class="f">post_count</span></div><div class="b" style="border:2px solid #000;background:#fff">Sparked?</div></div>
+          <div class="b lite tall">their posts <span class="f">Index(author, -published_at)</span></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">8b · Follow + note</div>
+        <div class="body">
+          <div class="b">"You're following X" <span class="f">Follow row created</span></div>
+          <div class="fl">optional note <code>Follow.note</code> (200)</div>
+          <div class="b inp tall">&nbsp;</div>
+          <div class="bar"><div class="b btn">Send note</div><div class="b">Not now</div></div>
+          <div class="b lite">→ becomes a <span class="f">Notification(kind=new_follower)</span></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">8c · Your own</div>
+        <div class="body">
+          <div class="h top"><div class="b circ" style="width:48px;height:48px;flex-basis:48px">av</div><div class="grow b">you</div></div>
+          <div class="bar"><div class="b btn">Edit profile</div><div class="b" style="flex:0 0 40px">⚙</div></div>
+          <div class="bar"><div class="b btn">Ideas</div><div class="b">Sparked</div><div class="b">Saved</div></div>
+          <div class="fl">Saved tab <code>SavedPost</code> — own only</div>
+          <div class="b tall">empty state: no posts yet</div>
+        </div>
+      </div>
+    </div>
+    <div class="gap"><b>GAP 8 — is a person's spark history public?</b> I put a "Sparked" tab on <em>other people's</em> profiles. <code>PostSpark</code> has <code>Index(user, -created_at)</code>, so it's queryable — but nothing says whether one user may see another's sparks. That's a <b>privacy decision, not a schema one</b>, and it needs an answer before the Social seat builds the tab. Safe default: sparks are public (they're a public signal that ranks the feed), saves are private. Confirm.</div>
+    <div class="gap"><b>GAP 9 — <code>Profile.work_done</code> has no design</b> <code>TextField(1000)</code>, straight from spec §4.1, and my profile screen never rendered it. Same class of finding as GAP 5/7: real column, no surface. It's the field that answers "has this person actually finished anything", which is exactly what a joiner wants. I'll design it in.</div>
+  </section>
+
+  <!-- ============ 9 ============ -->
+  <section>
+    <h2>9 · Search results — ideas <em>and</em> people</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">9 · Search</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 30px">←</div><div class="grow b inp">query <span class="f">GET param</span></div></div>
+          <div class="bar"><div class="b btn">Ideas 12 <span class="f">query count</span></div><div class="b">People 5</div></div>
+          <div class="bar"><div class="b">Role</div><div class="b">Commit</div><div class="b">Loc</div></div>
+          <div class="b lite tall">post result <span class="f">Post.search_vector</span></div>
+          <div class="b" style="border:2px solid #000;background:#fff">highlighted match <span class="f">ts_headline — not specified</span></div>
+          <div class="sect-label">People</div>
+          <div class="h"><div class="b circ">av</div><div class="grow b">name · headline · skills <span class="f">Profile.search_vector</span></div><div class="b btn" style="flex:0 0 58px">Follow</div></div>
+          <div class="b tall">empty: no match + suggestions</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="note"><b>Covered:</b> both search vectors exist (<code>Post.search_vector</code> weighted title/keywords/body, <code>Profile.search_vector</code>), <code>custom_roles</code> and <code>custom_skills</code> are in the vectors, and Q11 confirms comments are <b>not</b> searched — so no comment results tab.</div>
+        <div class="gap"><b>GAP 10 — match highlighting is undefined</b> Minor, but: I've drawn the matched term highlighted inside the result excerpt. That needs Postgres <code>ts_headline()</code> (or client-side highlighting), and it isn't mentioned. If it's out of scope, say so and I'll drop the highlight — but a search result with no visible reason for matching is a poor result.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 + 11 ============ -->
+  <section>
+    <h2>10 &amp; 11 · Messages and the chat thread</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">10 · Conversation list</div>
+        <div class="body">
+          <div class="b">Messages</div>
+          <div class="h top"><div class="b circ">av</div><div class="grow">
+            <div class="b">other participant <span class="f">ConversationParticipant → User</span></div>
+            <div class="b" style="margin-top:3px">preview <span class="f">Conversation.last_message_preview</span></div>
+            <div class="b" style="margin-top:3px">time <span class="f">Conversation.last_message_at</span></div>
+            <div class="b" style="margin-top:3px;border:2px solid #000;background:#fff">"You:" prefix <span class="f">MISSING — no last sender</span></div>
+          </div><div class="b" style="flex:0 0 16px">●</div></div>
+          <div class="fl">unread dot <code>ConversationParticipant.last_read_at</code> vs <code>last_message_at</code></div>
+          <div class="b lite tall">2 more rows</div>
+          <div class="b" style="border:2px solid #000;background:#fff">archive / mute <span class="f">is_archived / is_muted — NO UI</span></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">11 · Chat thread</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 26px">←</div><div class="b circ sm">av</div><div class="grow b">name + headline</div><div class="b" style="flex:0 0 26px">⋯</div></div>
+          <div class="b" style="border:2px solid #000;background:#fff">"About: &lt;idea title&gt;" <span class="f">MISSING — no post link</span></div>
+          <div class="b">date divider <span class="f">Message.created_at</span></div>
+          <div class="b" style="margin-left:60px">my message <span class="f">Message.body / sender</span></div>
+          <div class="b" style="margin-right:60px">their message</div>
+          <div class="b" style="margin-left:60px">my message</div>
+          <div class="h"><div class="grow b inp">composer <span class="f">Message.body (4000)</span></div><div class="b btn" style="flex:0 0 40px">→</div></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 11 — conversation has no link to the idea it started from ⚠ biggest one</b> The whole product is "find an idea → message the person". Anyone can DM anyone with no request gate, so the receiver's first question is always <em>why is this person messaging me</em>. Every screen I've drawn answers it with a context strip: <b>"About: An app that moves leftover canteen food…"</b><br><br><code>Conversation</code> has <code>dyad_key</code>, <code>last_message_at</code>, <code>last_message_preview</code>, <code>created_at</code> — and <b>no reference to a Post</b>. Suggested: <code>origin_post = FK → Post, null=True, on_delete=SET_NULL</code>. Nullable because profile-initiated DMs have no origin post, and SET_NULL so deleting the idea doesn't destroy the conversation.<br><br>This is cheap now and awkward later: retrofitting means either a migration with no back-fill possible, or dropping the feature.</div>
+        <div class="gap"><b>GAP 12 — "You:" on the conversation preview</b> The list shows whether the last message was mine. <code>last_message_preview</code> is text only; there's no <code>last_message_sender</code>. Joining to <code>Message</code> to find out defeats the point of denormalising the preview ("the list renders with zero joins"). Suggested: <code>last_message_sender = FK → User, null, SET_NULL</code>, written in the same transaction as the other two denormalised fields.</div>
+        <div class="note"><b>Covered:</b> unread state from <code>last_read_at</code>; block hides the thread without deleting it; no read receipts or typing indicators in v1 (both Phase 2), so timestamps carry that weight.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12 + 13 ============ -->
+  <section>
+    <h2>12 &amp; 13 · Notifications and Saved</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">12 · Notifications</div>
+        <div class="body">
+          <div class="h"><div class="grow b">Alerts</div><div class="b" style="flex:0 0 70px">Mark read</div></div>
+          <div class="sect-label">New — <span class="f">is_read=false</span></div>
+          <div class="h top"><div class="b circ">av</div><div class="grow">
+            <div class="b">X replied <span class="f">kind=new_message, actor, conversation</span></div>
+            <div class="b" style="margin-top:3px">preview + time</div>
+          </div><div class="b" style="flex:0 0 16px">●</div></div>
+          <div class="h top"><div class="b circ">av</div><div class="grow">
+            <div class="b">X followed you <span class="f">kind=new_follower, actor</span></div>
+            <div class="b" style="margin-top:3px;border:2px solid #000;background:#fff">their note <span class="f">Follow.note — no FK from Notification</span></div>
+          </div></div>
+          <div class="h top"><div class="b circ">av</div><div class="grow b">X commented <span class="f">kind=new_comment, post, comment</span></div></div>
+          <div class="b" style="border:2px solid #000;background:#fff">stale nudge <span class="f">no kind for this</span></div>
+        </div>
+      </div>
+      <div class="scr">
+        <div class="cap">13 · Saved</div>
+        <div class="body">
+          <div class="h"><div class="b" style="flex:0 0 30px">←</div><div class="grow b">Saved</div></div>
+          <div class="h top"><div class="b circ">av</div><div class="grow">
+            <div class="b">author</div>
+            <div class="b" style="margin-top:3px">saved 3 days ago <span class="f">SavedPost.created_at</span></div>
+          </div><div class="b" style="flex:0 0 30px">🔖</div></div>
+          <div class="b">title <span class="f">Post.title</span></div>
+          <div class="pills"><span class="b pill">status</span><span class="b pill">27 sparks</span></div>
+          <div class="b lite tall">2nd saved post — note it can be <span class="f">status=team_formed</span></div>
+          <div class="b tall">empty state</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="gap"><b>GAP 13 — the stale-post nudge has no delivery channel ⚠</b> Spec §4.8 says a post untouched ~30 days "triggers 'Still looking for teammates?'". The schema has the <b>trigger</b> side (<code>Post.is_stale</code>, <code>nudged_at</code>, <code>last_activity_at</code>) but <code>Notification.kind</code> is exactly <code>new_message / new_follower / new_comment</code>. There is <b>no way to put the nudge in front of the user in-app</b>, and email is Phase 2. Either add a <code>stale_nudge</code> kind (plus the existing nullable <code>post</code> FK carries the target), or state that the nudge is surfaced only as a banner on the author's own post — in which case the author has to go looking for it, which defeats a nudge.</div>
+        <div class="gap"><b>GAP 14 — follow notifications can't reach the note</b> A <code>new_follower</code> row has <code>actor</code> but no link to the <code>Follow</code> row, so it can't render <code>Follow.note</code> — the single thing that makes a follow notification worth opening ("I'd want the Android role"). Workable without a schema change (look up <code>Follow(follower=actor, following=recipient)</code>), but that's an extra query per notification and it silently breaks if the follow is later withdrawn. A <code>follow</code> nullable FK would match the existing pattern of concrete nullable FKs per target type.</div>
+        <div class="note"><b>Covered:</b> both dedup rules (§5.2), no spark notifications (Q9), and saved posts survive the post going <code>team_formed</code> — the Saved screen needs to show that state rather than hide the row.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 14 ============ -->
+  <section>
+    <h2>14 · Settings</h2>
+    <div class="row">
+      <div class="scr">
+        <div class="cap">14 · Settings</div>
+        <div class="body">
+          <div class="sect-label">You</div>
+          <div class="b">Edit profile <span class="f">Profile.* — all fields</span></div>
+          <div class="b">Your field <span class="f">Profile.occupation / field_tag</span></div>
+          <div class="b">Interests <span class="f">ProfileInterest</span></div>
+          <div class="b">Skills <span class="f">ProfileSkill + custom_skills</span></div>
+          <div class="sect-label">Account</div>
+          <div class="b">Email &amp; password <span class="f">User.email</span></div>
+          <div class="b" style="border:2px solid #000;background:#fff">Change username? <span class="f">User.username — changeable?</span></div>
+          <div class="b">Blocked people <span class="f">Block → blocked User</span></div>
+          <div class="sect-label">About / session</div>
+          <div class="b">Log out</div>
+          <div class="sect-label">Danger</div>
+          <div class="b tall">Delete account <span class="f">User.deletion_requested_at</span></div>
+          <div class="b lite">"posts stay, credited to [deleted]" <span class="f">ADR-0001</span></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div class="note"><b>Copy check passed:</b> my settings screen says deleting keeps your ideas, credited to a placeholder. ADR-0001 confirms: anonymise, 30-day grace, posts/comments/messages kept under a <code>[deleted]</code> placeholder. The screen should also say <b>logging back in within 30 days cancels it</b> — I'd missed that and it's the reassuring half.</div>
+        <div class="gap"><b>GAP 15 — <code>[deleted]</code> users need a design, everywhere</b> §8.1 says "every seat that renders a user must handle <code>[deleted]</code> safely" — cards, comments, conversation headers, notifications. That's a real visual state on five screens and I haven't drawn it. Mine to fix, but it belongs on the Architect's radar because it's a cross-seat consequence of ADR-0001.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="note" style="max-width:none">
+      <b>15 findings.</b> Three need a schema change before lock — <b>GAP 11</b> (conversation → origin post), <b>GAP 13</b> (no notification kind for the stale nudge), <b>GAP 12</b> (last message sender). Two are decisions only Jeni can make — <b>GAP 1</b> (username capture and changeability) and <b>GAP 8</b> (are sparks public). Three are columns with no UI writing to them — <b>GAP 5, 7, 9</b> — which are mine to design or the Architect's to cut. The rest are contracts and copy. Full write-up with severity: <code>docs/review/designer.md</code>.
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

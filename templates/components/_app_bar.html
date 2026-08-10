@@ -1,0 +1,57 @@
+{% comment %}
+  Top app bar — OWNED BY THE DESIGNER.
+
+    {% include "components/_app_bar.html" %}
+    {% include "components/_app_bar.html" with back_url=post.get_absolute_url heading="Idea" %}
+
+  Params:
+    back_url  renders a back arrow and centres the heading (detail screens)
+    heading   centre title. Omit on the feed — the wordmark takes that slot.
+
+  Two modes on purpose: the feed-level bar is branded (wordmark + search +
+  you), and the detail-level bar is a back arrow + what you're looking at.
+  Mixing them leaves people unsure whether Back means "up" or "previous".
+{% endcomment %}
+<header class="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-ink-200 bg-white px-2">
+
+  {% if back_url %}
+    <a href="{{ back_url }}" aria-label="Back"
+       class="grid h-11 w-11 place-items-center rounded-full text-ink-800 hover:bg-ink-100
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_icon.html" with name="chevron-left" class="h-6 w-6" %}
+    </a>
+    <span class="text-sm font-semibold">{{ heading }}</span>
+    <span class="h-11 w-11"></span>{# spacer, keeps the heading optically centred #}
+  {% else %}
+    <a href="{% url 'posts:home' %}"
+       class="flex items-center gap-1.5 px-2 font-bold tracking-tight
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-700" aria-hidden="true">
+        <path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/>
+      </svg>
+      Alongside
+    </a>
+
+    <div class="flex items-center gap-1">
+      <a href="{% url 'discovery:search' %}" aria-label="Search"
+         class="grid h-11 w-11 place-items-center rounded-full text-ink-700 hover:bg-ink-100
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+        {% include "components/_icon.html" with name="search" %}
+      </a>
+
+      {% if user.is_authenticated %}
+        {# Saved, Profile and Settings live behind here — not in the tab bar #}
+        <a href="{{ user.get_absolute_url }}" aria-label="You and your settings"
+           class="grid h-11 w-11 place-items-center rounded-full
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+          {% include "components/_avatar.html" with user=user size="sm" %}
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}"
+           class="mr-1 inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand-700 hover:bg-brand-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Log in</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</header>

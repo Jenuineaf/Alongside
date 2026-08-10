@@ -1,0 +1,37 @@
+{% comment %}
+  Empty state — OWNED BY THE DESIGNER.
+
+    {% include "components/_empty_state.html" with icon="messages" title="No conversations yet" body="Find an idea you'd want to help with and say hello. Most people reply — nobody posts here hoping to be left alone." action_label="Browse ideas" action_url="/feed/" %}
+
+  Params: icon · title · body · action_label + action_url (optional)
+
+  Empty states are not filler. For a brand-new user they ARE the product — the
+  cold-start problem is won or lost here, and an empty screen that says "No
+  results" is how a portfolio demo dies in the first ten seconds.
+
+  Three rules, learned from every feed product that got this wrong:
+    1. Say WHY it's empty, not just that it is.
+    2. Give exactly one way out, as a real button.
+    3. Never blame the user. "No ideas match those filters" — not "You have no
+       results". Filters cause this far more often than the words do.
+
+  For the Feed and Home specifically, DON'T use this: the cascading fallback
+  (product-spec §4.3) means those are never empty. They get a labelled
+  divider explaining where the posts came from instead.
+{% endcomment %}
+<div class="flex flex-col items-center px-6 py-10 text-center">
+  {% if icon %}
+    <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+      {% include "components/_icon.html" with name=icon class="h-6 w-6" %}
+    </div>
+  {% endif %}
+  <p class="mt-3 text-base font-semibold text-ink-900">{{ title }}</p>
+  {% if body %}
+    <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">{{ body }}</p>
+  {% endif %}
+  {% if action_label and action_url %}
+    <div class="mt-4">
+      {% include "components/_button.html" with label=action_label href=action_url %}
+    </div>
+  {% endif %}
+</div>

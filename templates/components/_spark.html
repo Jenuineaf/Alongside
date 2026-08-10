@@ -1,0 +1,53 @@
+{% comment %}
+  Spark — OWNED BY THE DESIGNER. The signature control of the product.
+
+    {% include "components/_spark.html" with post=post %}
+
+  Params:
+    post      needs .pk, .spark_count and .is_sparked (annotated per-request).
+    size      md (default) · lg (post detail sticky bar)
+    url       override the endpoint. Default {% url 'social:spark' post.pk %}.
+
+  HOW IT WORKS
+    hx-post toggles the spark and the view returns THIS PARTIAL again, swapping
+    itself via hx-swap="outerHTML". The count and the pressed state come back
+    from the server, so two tabs can't disagree.
+
+  RULES — these are not stylistic preferences
+    1. Burnt orange (spark-*) appears here and nowhere else in the product.
+       Not on a button, not on a link, not on a banner. Its entire power is
+       that it shows up about once per screen. The moment it lands on a CTA,
+       Spark stops meaning anything.
+    2. aria-pressed carries the state. Never rely on colour alone — the icon
+       also changes from outline to solid, so it survives greyscale and
+       colour-blindness.
+    3. The count is announced politely on change (aria-live on the count only,
+       so screen readers hear "43 sparks", not the whole button).
+    4. 44px minimum height, always.
+
+  Vocabulary: it is a Spark. Never a like. Counts read "42 sparks".
+{% endcomment %}
+{% firstof url post.get_spark_url as spark_url %}
+<button type="button"
+        hx-post="{{ spark_url }}"
+        hx-swap="outerHTML"
+        aria-pressed="{% if post.is_sparked %}true{% else %}false{% endif %}"
+        aria-label="{% if post.is_sparked %}Remove your spark from “{{ post.title }}”{% else %}Spark “{{ post.title }}”{% endif %}"
+        class="group inline-flex items-center gap-1.5 rounded-full
+               {% if size == 'lg' %}h-11 px-3.5{% else %}h-11 px-3{% endif %}
+               transition-colors
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2
+               {% if post.is_sparked %}bg-spark-50 text-spark-700{% else %}text-ink-600 hover:bg-spark-50 hover:text-spark-700{% endif %}">
+  {% if post.is_sparked %}
+    <svg viewBox="0 0 24 24" class="{% if size == 'lg' %}h-6 w-6{% else %}h-5 w-5{% endif %} fill-spark-500" aria-hidden="true">
+      <path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/>
+    </svg>
+  {% else %}
+    <svg viewBox="0 0 24 24" class="{% if size == 'lg' %}h-6 w-6{% else %}h-5 w-5{% endif %}"
+         fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/>
+    </svg>
+  {% endif %}
+  <span class="text-sm font-semibold tabular-nums" aria-live="polite">{{ post.spark_count }}</span>
+  <span class="sr-only">sparks</span>
+</button>

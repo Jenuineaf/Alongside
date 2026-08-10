@@ -1,0 +1,70 @@
+{% comment %}
+  Icon — OWNED BY THE DESIGNER.
+
+  Usage:
+    {% include "components/_icon.html" with name="spark" %}
+    {% include "components/_icon.html" with name="spark" filled=True class="h-6 w-6" %}
+
+  Params:
+    name    required. See the list below.
+    class   sizing + colour utilities. Default "h-5 w-5". Colour comes from
+            the parent via currentColor — do not put a colour on the icon.
+    filled  only meaningful for "spark" and "save"; draws the solid variant.
+
+  Icons are inline rather than a sprite because base.html belongs to the
+  Architect and a sprite would need to live there. Inline costs a few bytes
+  per use and needs no setup from any other seat.
+
+  Available: spark · comment · save · search · home · explore · plus ·
+             messages · bell · chevron-down · chevron-left · more · check ·
+             alert-circle · alert-triangle · close · image · settings · people
+{% endcomment %}
+{% firstof class "h-5 w-5" as icon_class %}
+<svg viewBox="0 0 24 24" class="{{ icon_class }}" aria-hidden="true" focusable="false"
+     {% if name == "spark" and filled %}fill="currentColor" stroke="none"
+     {% elif name == "save" and filled %}fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"
+     {% else %}fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"{% endif %}>
+  {% if name == "spark" %}
+    <path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/>
+  {% elif name == "comment" %}
+    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>
+  {% elif name == "save" %}
+    <path d="M6 4h12v16l-6-4-6 4V4z"/>
+  {% elif name == "search" %}
+    <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+  {% elif name == "home" %}
+    <path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/>
+  {% elif name == "explore" %}
+    {# compass, not a magnifier — search already owns the magnifier #}
+    <circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/>
+  {% elif name == "plus" %}
+    <path d="M12 5v14M5 12h14" stroke-width="2.5"/>
+  {% elif name == "messages" %}
+    {# envelope, deliberately not a speech bubble — that shape means "comment" #}
+    <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>
+  {% elif name == "bell" %}
+    <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>
+  {% elif name == "chevron-down" %}
+    <path d="M6 9l6 6 6-6" stroke-width="2.2"/>
+  {% elif name == "chevron-left" %}
+    <path d="M15 19l-7-7 7-7" stroke-width="2.2"/>
+  {% elif name == "more" %}
+    <g fill="currentColor" stroke="none">
+      <circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>
+    </g>
+  {% elif name == "check" %}
+    <path d="M20 6L9 17l-5-5" stroke-width="2.4"/>
+  {% elif name == "alert-circle" %}
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01" stroke-width="2.2"/>
+  {% elif name == "alert-triangle" %}
+    <path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.01" stroke-width="2.2"/>
+  {% elif name == "close" %}
+    <path d="M6 6l12 12M18 6L6 18" stroke-width="2.2"/>
+  {% elif name == "image" %}
+    <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5-9 8"/>
+  {% elif name == "settings" %}
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>
+  {% elif name == "people" %}
+    <path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.9M16.5 3.6a4 4 0 0 1 0 7"/>
+  {% endif %}
+</svg>

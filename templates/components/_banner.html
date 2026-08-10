@@ -1,0 +1,40 @@
+{% comment %}
+  Error / warning banner — OWNED BY THE DESIGNER.
+
+    {% include "components/_banner.html" with kind="error" title="Couldn't publish your idea" body="Your connection dropped partway through. Nothing was lost — try again." %}
+    {% include "components/_banner.html" with kind="warning" title="Still looking for teammates?" body="Nobody's touched this idea in 30 days. Confirm it's live, or it drops out of the feed." %}
+
+  Params:
+    kind    error · warning
+    title   what happened, in the user's words
+    body    optional. What to do about it.
+    slot    optional. Buttons go here — see the stale-post nudge in the feed.
+
+  WARNING IS AMBER-YELLOW, NOT AMBER-ORANGE
+    Conventional warning amber (#B45309) sits 8° from Spark's burnt orange. A
+    warning banner in that colour reads as an enormous Spark. Ours is #8A6100 —
+    24° away with a large lightness gap, so the two never get confused.
+
+    Error red is 15° from ember, which is tighter than ideal. It's safe because
+    an error is always an icon-and-text banner inside a form, never a filled
+    pill in a card's action row, so the two never share a context. If a future
+    design puts a red pill next to a Spark, revisit this.
+
+  Errors use role="alert" (interrupts, because the user is blocked). Warnings
+  use role="status" (polite, because nothing is broken yet).
+
+  Copy rule: say what happened and what to do. No apologies, no "oops".
+{% endcomment %}
+{% if kind == "warning" %}
+<div role="status" class="flex items-start gap-3 rounded-xl border border-warn-200 bg-warn-50 p-4 text-warn-700">
+  {% include "components/_icon.html" with name="alert-triangle" class="h-5 w-5 shrink-0 text-warn-600" %}
+{% else %}
+<div role="alert" class="flex items-start gap-3 rounded-xl border border-bad-200 bg-bad-50 p-4 text-bad-700">
+  {% include "components/_icon.html" with name="alert-circle" class="h-5 w-5 shrink-0 text-bad-600" %}
+{% endif %}
+  <div class="min-w-0 flex-1">
+    <b class="block text-sm font-bold">{{ title }}</b>
+    {% if body %}<p class="mt-0.5 text-sm leading-relaxed">{{ body }}</p>{% endif %}
+    {% if slot %}<div class="mt-3 flex flex-wrap gap-2">{{ slot }}</div>{% endif %}
+  </div>
+</div>

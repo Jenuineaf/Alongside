@@ -1,0 +1,64 @@
+{% comment %}
+  Stage · commitment · status badges — OWNED BY THE DESIGNER.
+
+    {% include "components/_badges.html" with post=post %}
+    {% include "components/_badges.html" with post=post show_status=False %}
+
+  Params:
+    post          needs .stage, .commitment, .status (the model's choice values)
+    show_stage / show_commitment / show_status   default True
+
+  These three fields are the anti-ghosting design (product-spec §4.8), not
+  decoration. They are the reason someone doesn't waste three weeks on a
+  "serious startup" that was a weekend doodle. So they get real badges on the
+  card, not muted meta text.
+
+  WHY STAGE GETS A METER
+    Stage is ordinal — just an idea → already building → launched. A 3-segment
+    meter says "1 of 3" before you read the word, which is information the flat
+    dot in the first mockup was throwing away. Commitment is binary, so it gets
+    a dot: hollow for casual, filled brand for serious.
+
+  COLOUR IS NEVER THE ONLY SIGNAL
+    Every badge carries its word. Status also carries a dot, but the word is
+    what does the work — this survives greyscale, and with a green brand and
+    red/green colour blindness that matters more here than on a blue app.
+{% endcomment %}
+<div class="flex flex-wrap items-center gap-2">
+
+  {% if show_stage|default_if_none:True %}
+    <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700">
+      <span class="flex gap-0.5" aria-hidden="true">
+        <i class="h-1 w-1.5 rounded-sm {% if post.stage %}bg-brand-600{% else %}bg-ink-300{% endif %}"></i>
+        <i class="h-1 w-1.5 rounded-sm {% if post.stage == 'building' or post.stage == 'launched' %}bg-brand-600{% else %}bg-ink-300{% endif %}"></i>
+        <i class="h-1 w-1.5 rounded-sm {% if post.stage == 'launched' %}bg-brand-600{% else %}bg-ink-300{% endif %}"></i>
+      </span>
+      {{ post.get_stage_display }}
+    </span>
+  {% endif %}
+
+  {% if show_commitment|default_if_none:True %}
+    <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700">
+      <span aria-hidden="true"
+            class="h-1.5 w-1.5 rounded-full {% if post.commitment == 'serious' %}bg-brand-600{% else %}bg-ink-400{% endif %}"></span>
+      {{ post.get_commitment_display }}
+    </span>
+  {% endif %}
+
+  {% if show_status|default_if_none:True %}
+    {% if post.status == 'looking' %}
+      <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800">
+        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking
+      </span>
+    {% elif post.status == 'formed' %}
+      <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-700">
+        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-ink-500"></span>Team formed
+      </span>
+    {% elif post.status == 'closed' %}
+      <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-600">
+        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-ink-400"></span>Closed
+      </span>
+    {% endif %}
+  {% endif %}
+
+</div>

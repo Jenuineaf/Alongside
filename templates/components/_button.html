@@ -1,0 +1,48 @@
+{% comment %}
+  Button — OWNED BY THE DESIGNER.
+
+    {% include "components/_button.html" with label="Post your idea" %}
+    {% include "components/_button.html" with label="Follow" variant="secondary" %}
+    {% include "components/_button.html" with label="Browse ideas" href="/feed/" %}
+    {% include "components/_button.html" with label="Publish" full=True busy_label="Publishing…" %}
+
+  Params — all optional except label:
+    label       the text. Say what happens: "Publish", not "Submit".
+    variant     primary (default) · secondary · ghost · danger
+    size        md (default, 44px) · lg (48px)
+    full        truthy → full width. Do this for every form submit on mobile.
+    href        renders an <a> instead of a <button>.
+    type        button type, default "submit". Ignored when href is set.
+    icon        icon name from components/_icon.html, drawn before the label.
+    disabled    truthy → disabled.
+    busy_label  HTMX busy text. Swapped in by hx-indicator; the width is held by
+                the label so nothing jumps when it changes.
+
+  If you need hx-* or x-* attributes, write your own element and pull the
+  classes from components/_btn_class.html instead.
+{% endcomment %}
+{% if href %}
+<a href="{{ href }}" class="{% include 'components/_btn_class.html' %}">
+  {% if icon %}{% include "components/_icon.html" with name=icon class="h-4 w-4" %}{% endif %}
+  {{ label }}
+</a>
+{% else %}
+<button type="{% firstof type 'submit' %}"
+        class="{% include 'components/_btn_class.html' %}"
+        {% if disabled %}disabled{% endif %}>
+  {% if icon %}{% include "components/_icon.html" with name=icon class="h-4 w-4" %}{% endif %}
+  {# HTMX puts .htmx-request on the element making the request — this button.  #}
+  {# [.htmx-request_&] is Tailwind's arbitrary ancestor variant; there is no   #}
+  {# built-in htmx-request: variant, so don't reach for one.                   #}
+  <span {% if busy_label %}class="[.htmx-request_&]:hidden"{% endif %}>{{ label }}</span>
+  {% if busy_label %}
+    <span class="hidden items-center gap-2 [.htmx-request_&]:inline-flex">
+      <svg viewBox="0 0 24 24" class="h-4 w-4 animate-spin" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" opacity=".3"/>
+        <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      {{ busy_label }}
+    </span>
+  {% endif %}
+</button>
+{% endif %}

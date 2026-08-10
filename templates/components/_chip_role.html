@@ -1,0 +1,25 @@
+{% comment %}
+  Role-needed chip — OWNED BY THE DESIGNER.
+
+    {% include "components/_chip_role.html" with role=role %}
+    {% include "components/_chip_role.html" with label="+2 more" %}
+
+  Params: role (uses .name) or label · href (optional, makes it a filter link)
+
+  These are the matching signal — the single most important thing on a card for
+  a joiner scanning the feed. They are brand-tinted so they read louder than
+  topic tags, which are quiet grey. Do not make topic tags brand-coloured; the
+  contrast between the two is what lets someone find "Android dev" at a glance.
+
+  Brand-800 on brand-50 = 11.46:1.
+{% endcomment %}
+{% firstof label role.name as chip_label %}
+{% if href %}
+<a href="{{ href }}"
+   class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2
+          text-xs font-semibold text-brand-800 hover:bg-brand-100
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ chip_label }}</a>
+{% else %}
+<span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2
+             text-xs font-semibold text-brand-800">{{ chip_label }}</span>
+{% endif %}

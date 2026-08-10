@@ -1,0 +1,37 @@
+{% comment %}
+  Button CLASS STRING — OWNED BY THE DESIGNER.
+
+  Emits only the class list, so you can put it on your own <button> or <a> and
+  keep full control of hx-post, x-on:click, name, value, formaction and the rest.
+
+    <button class="{% include 'components/_btn_class.html' with variant='primary' %}"
+            hx-post="{% url 'posts:spark' post.pk %}">Post your idea</button>
+
+  For a plain button with no custom attributes, components/_button.html is less
+  typing.
+
+  Params — all optional:
+    variant  primary (default) · secondary · ghost · danger
+    size     md (default, 44px) · lg (48px)
+    full     truthy → full width. Use for every form submit on mobile.
+
+  There is no 36px size. 44px is the minimum touch target and it is not
+  negotiable on a product whose users are on phones — design-system.md §7.
+{% endcomment %}
+{% spaceless %}
+inline-flex items-center justify-center gap-2 rounded-lg font-semibold
+{% if size == "lg" %}h-12 px-5 text-base{% else %}h-11 px-4 text-sm{% endif %}
+{% if full %}w-full{% endif %}
+transition-colors
+focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2
+disabled:cursor-not-allowed disabled:bg-ink-200 disabled:text-ink-600 disabled:border-transparent
+{% if variant == "secondary" %}
+  border border-ink-300 bg-white text-ink-800 hover:bg-ink-50
+{% elif variant == "ghost" %}
+  text-ink-700 hover:bg-ink-100
+{% elif variant == "danger" %}
+  border border-bad-600 bg-white text-bad-700 hover:bg-bad-50
+{% else %}
+  bg-brand-700 text-white hover:bg-brand-800
+{% endif %}
+{% endspaceless %}

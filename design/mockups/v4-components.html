@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alongside — component gallery (approved palette)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {50:'#F1F6F2',100:'#DFEAE3',200:'#BCD3C4',300:'#8DB29C',400:'#5E9478',
+                  500:'#3F7A58',600:'#2E6144',700:'#1F4A34',800:'#183A29',900:'#11291D'},
+          ink:   {50:'#F7F8F6',100:'#EFF0EC',200:'#E0E0E0',300:'#C9CCC4',400:'#A9AE85',
+                  500:'#8A9188',600:'#6E7570',700:'#565C58',800:'#3C403D',900:'#232624'},
+          spark: {50:'#FDF3EE',100:'#F9E2D6',200:'#F0C3AB',
+                  500:'#C85A22',600:'#A8461B',700:'#8A3A14'},
+          ok:    {50:'#F1F6F2',300:'#8DB29C',600:'#2E6144',700:'#1F4A34'},
+          warn:  {50:'#FDF6E3',200:'#E8D9A8',600:'#8A6100',700:'#6B4A00'},
+          bad:   {50:'#FCEEEE',200:'#F0C9C6',600:'#B3261E',700:'#8C1D18'},
+        },
+        fontFamily: {
+          sans: ['ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto',
+                 'Helvetica Neue','Arial','sans-serif'],
+        },
+      }
+    }
+  }
+</script>
+<style>
+  .frame { width: 375px; }
+  @media (max-width: 460px) { .frame { width: 100%; } }
+</style>
+</head>
+<body class="bg-ink-100 font-sans text-ink-900 antialiased">
+
+<header class="bg-brand-900 px-5 py-7 text-white">
+  <div class="mx-auto max-w-5xl">
+    <div class="mb-2 flex items-center gap-2">
+      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-300"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>
+      <span class="font-bold tracking-tight">Alongside</span>
+      <span class="text-sm text-brand-300">— nobody builds alone</span>
+    </div>
+    <h1 class="text-2xl font-bold">Component gallery</h1>
+    <p class="mt-1 max-w-xl text-sm text-brand-200">Every component in <code class="rounded bg-brand-800 px-1">templates/components/</code>, rendered with the approved palette. This is the reference a feature seat checks their screen against.</p>
+  </div>
+</header>
+
+<main class="mx-auto flex max-w-5xl flex-col gap-10 px-5 py-8">
+
+  <!-- palette -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Tokens</h2>
+    <div class="grid gap-3 sm:grid-cols-3">
+      <div class="rounded-2xl border border-ink-300 bg-white p-4">
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">brand — forest</p>
+        <div class="flex gap-1">
+          <div class="h-10 flex-1 rounded bg-brand-50"></div>
+          <div class="h-10 flex-1 rounded bg-brand-100"></div>
+          <div class="h-10 flex-1 rounded bg-brand-300"></div>
+          <div class="h-10 flex-1 rounded bg-brand-500"></div>
+          <div class="h-10 flex-1 rounded bg-brand-700"></div>
+          <div class="h-10 flex-1 rounded bg-brand-900"></div>
+        </div>
+        <p class="mt-2 text-xs text-ink-700"><b>700 #1F4A34</b> — 10.06:1 both directions</p>
+      </div>
+      <div class="rounded-2xl border border-ink-300 bg-white p-4">
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">ink — sage neutrals</p>
+        <div class="flex gap-1">
+          <div class="h-10 flex-1 rounded bg-ink-50"></div>
+          <div class="h-10 flex-1 rounded bg-ink-100"></div>
+          <div class="h-10 flex-1 rounded bg-ink-300"></div>
+          <div class="h-10 flex-1 rounded bg-ink-400"></div>
+          <div class="h-10 flex-1 rounded bg-ink-600"></div>
+          <div class="h-10 flex-1 rounded bg-ink-900"></div>
+        </div>
+        <p class="mt-2 text-xs text-ink-700"><b>600</b> is the lightest legal text. <b>400</b> is olive — never text.</p>
+      </div>
+      <div class="rounded-2xl border border-ink-300 bg-white p-4">
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">spark — Spark only</p>
+        <div class="flex gap-1">
+          <div class="h-10 flex-1 rounded bg-spark-50"></div>
+          <div class="h-10 flex-1 rounded bg-spark-100"></div>
+          <div class="h-10 flex-1 rounded bg-spark-200"></div>
+          <div class="h-10 flex-1 rounded bg-spark-500"></div>
+          <div class="h-10 flex-1 rounded bg-spark-600"></div>
+          <div class="h-10 flex-1 rounded bg-spark-700"></div>
+        </div>
+        <p class="mt-2 text-xs text-ink-700">Never a button. Never a link. Never a banner.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- buttons -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Buttons — every state</h2>
+    <div class="flex flex-col gap-4 rounded-2xl border border-ink-300 bg-white p-5">
+      <div class="flex flex-wrap items-center gap-3">
+        <button class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Post your idea</button>
+        <button class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-ink-300 bg-white px-4 text-sm font-semibold text-ink-800 hover:bg-ink-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Follow</button>
+        <button class="inline-flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-ink-700 hover:bg-ink-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">Cancel</button>
+        <button class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-bad-600 bg-white px-4 text-sm font-semibold text-bad-700 hover:bg-bad-50">Block</button>
+        <button disabled class="inline-flex h-11 cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-ink-200 px-4 text-sm font-semibold text-ink-600">Disabled</button>
+        <button class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 text-base font-semibold text-white">Large (48)</button>
+      </div>
+      <div class="htmx-request">
+        <p class="mb-2 text-xs text-ink-600">HTMX busy state (simulated by putting <code class="rounded bg-ink-100 px-1">.htmx-request</code> on the wrapper):</p>
+        <button class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">
+          <span class="[.htmx-request_&]:hidden">Publish</span>
+          <span class="hidden items-center gap-2 [.htmx-request_&]:inline-flex">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 animate-spin" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" opacity=".3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            Publishing…
+          </span>
+        </button>
+      </div>
+      <p class="text-xs text-ink-600">44px minimum, always. Form submits go full width on mobile.</p>
+    </div>
+  </section>
+
+  <!-- inputs -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Inputs</h2>
+    <div class="grid gap-4 rounded-2xl border border-ink-300 bg-white p-5 sm:grid-cols-2">
+      <div class="flex flex-col gap-1.5">
+        <label for="g1" class="text-sm font-medium text-ink-800">Idea title</label>
+        <input id="g1" placeholder="What are you building?" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base text-ink-900 placeholder:text-ink-600 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+        <p class="text-xs text-ink-600">Placeholder is ink-600 — 4.73:1. The old ink-400 was 2.52:1 and failed.</p>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label for="g2" class="text-sm font-medium text-ink-800">Roles you need</label>
+        <input id="g2" aria-invalid="true" aria-describedby="g2e" class="h-11 w-full rounded-lg border border-bad-600 px-3 text-base focus:outline-none focus:ring-2 focus:ring-bad-600/30">
+        <p id="g2e" class="flex items-start gap-1.5 text-xs font-medium text-bad-700">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/></svg>
+          <span>Add at least one role so people know how to help.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- chips + badges -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Chips and badges</h2>
+    <div class="flex flex-col gap-5 rounded-2xl border border-ink-300 bg-white p-5">
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">Roles needed — the matching signal, brand-tinted</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+          <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Ops / NGO partnerships</span>
+          <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">+2 more</span>
+        </div>
+      </div>
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">Topic tags — navigation, deliberately quiet</p>
+        <div class="flex flex-wrap gap-2">
+          <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700 hover:bg-ink-200">sustainability</a>
+          <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700 hover:bg-ink-200">mobile</a>
+          <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700 hover:bg-ink-200">campus</a>
+        </div>
+      </div>
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">Stage (ordinal → meter) · commitment (binary → dot) · status</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700">
+            <span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i></span>Just an idea</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700">
+            <span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i></span>Already building</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700">
+            <span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i></span>Launched</span>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center gap-2">
+          <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-ink-400"></span>Casual / weekend</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Serious</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-ink-500"></span>Team formed</span>
+          <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-600"><span class="h-1.5 w-1.5 rounded-full bg-ink-400"></span>Closed</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- spark -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Spark — the signature control</h2>
+    <div class="flex flex-wrap items-center gap-5 rounded-2xl border border-ink-300 bg-white p-5">
+      <span class="flex items-center gap-2">
+        <button aria-pressed="false" class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600 hover:bg-spark-50 hover:text-spark-700">
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+          <span class="text-sm font-semibold tabular-nums">41</span></button>
+        <span class="text-xs text-ink-600">default</span>
+      </span>
+      <span class="flex items-center gap-2">
+        <button aria-pressed="true" class="inline-flex h-11 items-center gap-1.5 rounded-full bg-spark-50 px-3 text-spark-700">
+          <svg viewBox="0 0 24 24" class="h-5 w-5 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+          <span class="text-sm font-semibold tabular-nums">42</span></button>
+        <span class="text-xs text-ink-600">sparked</span>
+      </span>
+      <span class="flex items-center gap-2">
+        <button aria-pressed="true" class="inline-flex h-11 items-center gap-1.5 rounded-full bg-spark-50 px-3.5 text-spark-700">
+          <svg viewBox="0 0 24 24" class="h-6 w-6 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+          <span class="text-sm font-semibold tabular-nums">42</span></button>
+        <span class="text-xs text-ink-600">lg — post detail</span>
+      </span>
+    </div>
+  </section>
+
+  <!-- states -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Success, error, warning</h2>
+    <div class="flex flex-col gap-3 rounded-2xl border border-ink-300 bg-white p-5">
+      <div role="status" class="flex items-center gap-3 rounded-xl bg-ink-900 px-4 py-3 text-white shadow-lg">
+        <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 text-brand-300" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        <p class="text-sm">Your idea is live.</p>
+        <a href="#" class="ml-auto shrink-0 whitespace-nowrap text-sm font-bold text-brand-300 hover:underline">View</a>
+      </div>
+      <div role="alert" class="flex items-start gap-3 rounded-xl border border-bad-200 bg-bad-50 p-4 text-bad-700">
+        <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 text-bad-600" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/></svg>
+        <div class="min-w-0 flex-1">
+          <b class="block text-sm font-bold">Couldn't publish your idea</b>
+          <p class="mt-0.5 text-sm leading-relaxed">Your connection dropped partway through. Nothing was lost — try again.</p>
+          <div class="mt-3 flex flex-wrap gap-2"><button class="inline-flex h-11 items-center rounded-lg border border-bad-600 bg-white px-4 text-sm font-semibold text-bad-700">Try again</button></div>
+        </div>
+      </div>
+      <div role="status" class="flex items-start gap-3 rounded-xl border border-warn-200 bg-warn-50 p-4 text-warn-700">
+        <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 text-warn-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+        <div class="min-w-0 flex-1">
+          <b class="block text-sm font-bold">Still looking for teammates?</b>
+          <p class="mt-0.5 text-sm leading-relaxed">Nobody's touched this idea in 30 days. Confirm it's live, or it drops out of the feed.</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <button class="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Yes, still looking</button>
+            <button class="inline-flex h-11 items-center rounded-lg border border-ink-300 bg-white px-4 text-sm font-semibold text-ink-800">Team formed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- card + empty + skeleton at phone width -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">Post card, empty state, skeleton — at 375px</h2>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="frame overflow-hidden rounded-2xl border border-ink-300 bg-white">
+        <article class="border-b border-ink-200 bg-white p-4">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 text-sm">
+                  <a href="#" class="truncate font-semibold text-ink-900 hover:underline">Ananya Rao</a>
+                  <span class="shrink-0 text-ink-600">· 2 hours ago</span>
+                </div>
+                <p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru</p>
+              </div>
+              <button aria-label="More actions" class="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-600 hover:bg-ink-100">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+              </button>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <h3 class="text-balance text-lg font-semibold leading-snug tracking-tight"><a href="#" class="hover:underline">An app that moves leftover canteen food to hostels before it's binned</a></h3>
+              <p class="line-clamp-3 text-[15px] leading-relaxed text-ink-800">Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I've mapped the flow and talked to two canteen managers — they're in. I can do the backend and the NGO side, but I've never shipped Android.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i></span>Just an idea</span>
+              <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Serious</span>
+              <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+            </div>
+            <div>
+              <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">Looking for</p>
+              <div class="flex gap-2 overflow-x-auto pb-0.5">
+                <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+                <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Ops / NGO partnerships</span>
+                <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Designer</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">sustainability</a>
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">mobile</a>
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">campus</a>
+            </div>
+            <p class="text-xs text-ink-600">Bengaluru · remote ok</p>
+            <div class="-mx-1.5 -mb-1 flex items-center justify-between border-t border-ink-100 pt-1">
+              <div class="flex items-center">
+                <button aria-pressed="true" class="inline-flex h-11 items-center gap-1.5 rounded-full bg-spark-50 px-3 text-spark-700">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+                  <span class="text-sm font-semibold tabular-nums">42</span></button>
+                <a href="#" class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600 hover:bg-ink-100">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                  <span class="text-sm font-semibold tabular-nums">8</span></a>
+                <button aria-label="Save" class="grid h-11 w-11 place-items-center rounded-full text-ink-600 hover:bg-ink-100">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>
+                </button>
+              </div>
+              <a href="#" class="mr-1.5 inline-flex h-11 items-center rounded-lg border border-ink-300 px-4 text-xs font-semibold text-ink-800 hover:bg-ink-50">Message</a>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="frame flex flex-col gap-4">
+        <div class="rounded-2xl border border-ink-300 bg-white">
+          <div class="flex flex-col items-center px-6 py-10 text-center">
+            <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+            </div>
+            <p class="mt-3 text-base font-semibold text-ink-900">No conversations yet</p>
+            <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">Find an idea you'd want to help with and say hello. Most people reply — nobody posts here hoping to be left alone.</p>
+            <div class="mt-4"><a href="#" class="inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Browse ideas</a></div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-ink-300 bg-white">
+          <div class="border-b border-ink-200 bg-white p-4">
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-ink-200 motion-safe:animate-pulse"></div>
+                <div class="flex flex-col gap-2">
+                  <div class="h-3 w-28 rounded bg-ink-200 motion-safe:animate-pulse"></div>
+                  <div class="h-2.5 w-20 rounded bg-ink-100 motion-safe:animate-pulse"></div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <div class="h-4 w-11/12 rounded bg-ink-200 motion-safe:animate-pulse"></div>
+                <div class="h-3 w-full rounded bg-ink-100 motion-safe:animate-pulse"></div>
+                <div class="h-3 w-4/5 rounded bg-ink-100 motion-safe:animate-pulse"></div>
+              </div>
+              <div class="flex gap-2">
+                <div class="h-7 w-28 rounded-full bg-ink-100 motion-safe:animate-pulse"></div>
+                <div class="h-7 w-20 rounded-full bg-ink-100 motion-safe:animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-hidden rounded-2xl border border-ink-300">
+          <nav class="flex h-16 items-center justify-around border-t border-ink-200 bg-white pb-1">
+            <a href="#" aria-current="page" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] font-semibold text-brand-700">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/></svg>Home</a>
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/></svg>Explore</a>
+            <a href="#" aria-label="Post an idea" class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-700 text-white shadow-sm">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></a>
+            <a href="#" class="relative flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>
+              <span class="absolute right-2 top-0 grid h-[17px] min-w-[17px] place-items-center rounded-full bg-brand-700 px-1 text-[10px] font-bold text-white">3</span>Messages</a>
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alerts</a>
+          </nav>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="bg-brand-900 px-5 py-6 text-center text-xs text-brand-300">
+  Alongside · component gallery · mirrors templates/components/
+</footer>
+</body>
+</html>
