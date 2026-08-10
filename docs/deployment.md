@@ -406,9 +406,28 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 
 ---
 
-**Step 7 — Render (the web service).** ~10 min, plus a failed first deploy that is expected.
+**Step 6.5 — push, and watch CI.** ~5 min, mostly waiting.
 
-Do this **after** pushing to GitHub (§7.1), because Render needs a repo to read.
+Render needs a repo to read, so the push comes before the Render step, not after.
+
+```bash
+git push -u origin main
+```
+
+Then go to the repo's **Actions** tab and wait for the run to finish. Three jobs: Ruff, pytest,
+and a production Docker build.
+
+**The Docker build is the one that matters.** It builds the *exact* image Render will build,
+so green here means Render's build will succeed too. Fixing a red build here costs 90 seconds;
+finding the same failure on Render costs five minutes per attempt.
+
+**Expect pytest to fail** on this first run — `pyproject.toml` points at a `tests/` directory
+that doesn't exist yet (QA's to create; §11). That failure is known and does not block the
+deploy. Ruff and Docker going green is what you're looking for.
+
+---
+
+**Step 7 — Render (the web service).** ~10 min, plus a failed first deploy that is expected.
 
 1. render.com → sign up with GitHub → authorise access to the `alongside` repo.
 2. **New → Blueprint** → select the repo. Render finds `render.yaml` and prompts for every
@@ -467,21 +486,15 @@ Render mints a strong one, keeps it stable across deploys, and no human ever see
 
 ### 7.1 First deploy (one time)
 
-1. §7.0 steps 1–6 — accounts created, values collected, remote added.
-2. Push, which is also the first CI run:
+§7.0 is the click-by-click version. This is the same thing as a flight plan:
 
-```bash
-git push -u origin main
-```
-
-3. **Watch the Actions tab before touching Render.** Three jobs run: Ruff, pytest, and a
-   production Docker build. The Docker build is the one that matters here — it is the same
-   image Render will build, so if it goes green, Render's build will too. Fixing a red build
-   here costs 90 seconds; finding it on Render costs five minutes per attempt.
-4. §7.0 step 7 — Render Blueprint, paste the values, expect the `ALLOWED_HOSTS` failure, set
+1. **§7.0 steps 1–6** — accounts created, nine values collected, remote added.
+2. **§7.0 step 6.5** — push, watch the Actions tab. Ruff and Docker green before you touch
+   Render. (pytest is expected red until QA adds `tests/`.)
+3. **§7.0 step 7** — Render Blueprint, paste ① – ⑦, expect the `ALLOWED_HOSTS` failure, set
    ⑧ and ⑨, redeploy.
-5. §7.0 step 8 — GitHub secrets.
-6. Verify:
+4. **§7.0 step 8** — the two GitHub Actions secrets.
+5. Verify:
 
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" https://alongside-xxxx.onrender.com/healthz/
@@ -489,9 +502,9 @@ curl -sS -o /dev/null -w "%{http_code}\n" https://alongside-xxxx.onrender.com/he
 
    `200` means the container booted, migrations ran, and gunicorn is serving. The first
    request after an idle period takes ~30s — that's the cold start, not a failure.
-7. Smoke-test the admin at `/admin/`. There's no superuser yet; see §7 "Running migrations in
-   production" for how to create one from your laptop.
-8. Record the hostname in this doc, and tell the team the URL exists.
+6. Smoke-test the admin at `/admin/`. There's no superuser yet; see "Running migrations in
+   production" below for how to create one from your laptop.
+7. Record the hostname in this doc, and tell the team the URL exists.
 
 ### Every deploy after that
 
