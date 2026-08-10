@@ -1,0 +1,65 @@
+{% comment %}
+  Form field — OWNED BY THE DESIGNER.
+
+    {% include "components/_field.html" with field=form.title %}
+    {% include "components/_field.html" with field=form.body rows=8 %}
+    {% include "components/_field.html" with field=form.city help="City, or leave blank if you're remote-only." %}
+
+  Params:
+    field   a Django bound field. Errors, id, name and value all come from it.
+    help    optional hint under the label. Overrides field.help_text.
+    rows    textarea rows. Presence of this or field.field.widget=Textarea
+            renders a textarea.
+
+  Renders the label, the control, the hint and the errors, wired together with
+  aria-describedby and aria-invalid so a screen reader reads the error with the
+  field instead of leaving it stranded somewhere on the page.
+
+  16px text is not a style choice: below 16px, iOS Safari zooms the viewport on
+  focus and the user is left scrolled sideways on a form.
+{% endcomment %}
+<div class="flex flex-col gap-1.5">
+
+  <label for="{{ field.id_for_label }}" class="text-sm font-medium text-ink-800">
+    {{ field.label }}
+    {% if not field.field.required %}<span class="font-normal text-ink-600">(optional)</span>{% endif %}
+  </label>
+
+  {% firstof help field.help_text as hint %}
+
+  {% if rows or field.field.widget.input_type == None %}
+    <textarea name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+              rows="{% firstof rows 6 %}"
+              {% if field.field.required %}required{% endif %}
+              {% if field.errors %}aria-invalid="true"{% endif %}
+              aria-describedby="{% if hint %}{{ field.id_for_label }}-hint {% endif %}{% if field.errors %}{{ field.id_for_label }}-err{% endif %}"
+              class="w-full rounded-lg border px-3 py-2.5 text-base text-ink-900 placeholder:text-ink-600
+                     focus:outline-none focus:ring-2
+                     {% if field.errors %}border-bad-600 focus:border-bad-600 focus:ring-bad-600/30
+                     {% else %}border-ink-300 focus:border-brand-600 focus:ring-brand-600/30{% endif %}"
+              >{{ field.value|default:"" }}</textarea>
+  {% else %}
+    <input type="{% firstof field.field.widget.input_type 'text' %}"
+           name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+           value="{{ field.value|default:'' }}"
+           {% if field.field.required %}required{% endif %}
+           {% if field.errors %}aria-invalid="true"{% endif %}
+           aria-describedby="{% if hint %}{{ field.id_for_label }}-hint {% endif %}{% if field.errors %}{{ field.id_for_label }}-err{% endif %}"
+           class="h-11 w-full rounded-lg border px-3 text-base text-ink-900 placeholder:text-ink-600
+                  focus:outline-none focus:ring-2
+                  {% if field.errors %}border-bad-600 focus:border-bad-600 focus:ring-bad-600/30
+                  {% else %}border-ink-300 focus:border-brand-600 focus:ring-brand-600/30{% endif %}">
+  {% endif %}
+
+  {% if hint %}
+    <p id="{{ field.id_for_label }}-hint" class="text-xs text-ink-600">{{ hint }}</p>
+  {% endif %}
+
+  {% if field.errors %}
+    <p id="{{ field.id_for_label }}-err" class="flex items-start gap-1.5 text-xs font-medium text-bad-700">
+      {% include "components/_icon.html" with name="alert-circle" class="h-4 w-4 shrink-0" %}
+      <span>{{ field.errors|join:" " }}</span>
+    </p>
+  {% endif %}
+
+</div>

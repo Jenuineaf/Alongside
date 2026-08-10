@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alongside — forest green: sage only vs sage + ember</title>
+<style>
+/* ==========================================================
+   Alongside · palette proposal v3 · forest green
+   Light-only on purpose: this page exists to judge colour at
+   real scale, and a dark repaint would corrupt the judgement.
+   ========================================================== */
+:root {
+  color-scheme: light;
+
+  /* forest — brand, primary buttons, links, active nav, focus */
+  --forest-50:#F1F6F2; --forest-100:#DFEAE3; --forest-200:#BCD3C4; --forest-300:#8DB29C;
+  --forest-500:#3F7A58; --forest-600:#2E6144; --forest-700:#1F4A34; --forest-800:#183A29;
+  --forest-900:#11291D;
+
+  /* sage — surfaces, borders, muted text, tag pills */
+  --sage-50:#F7F8F6; --sage-100:#EFF0EC; --sage-200:#E0E0E0; --sage-300:#C9CCC4;
+  --sage-400:#A9AE85; --sage-500:#8A9188; --sage-600:#6E7570; --sage-700:#565C58;
+  --sage-800:#3C403D; --sage-900:#232624;
+
+  /* ember — Spark and only Spark */
+  --ember-50:#FDF3EE; --ember-100:#F9E2D6; --ember-200:#F0C3AB;
+  --ember-500:#C85A22; --ember-600:#A8461B; --ember-700:#8A3A14;
+
+  /* semantic — deliberately not green. see section 4 */
+  --err:#B3261E; --err-ink:#8C1D18; --err-bg:#FCEEEE;
+  --warn:#8A6100; --warn-ink:#6B4A00; --warn-bg:#FDF6E3;
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* the single variable under test: what colour is Spark */
+.opt-sage  { --spark-fill:var(--forest-700); --spark-ink:var(--forest-700); --spark-bg:var(--forest-100); }
+.opt-ember { --spark-fill:var(--ember-500);  --spark-ink:var(--ember-700);  --spark-bg:var(--ember-50); }
+
+*, *::before, *::after { box-sizing:border-box; }
+:where(.pg button) { font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
+.pg { margin:0; font-family:var(--font); color:var(--sage-900); background:var(--sage-100);
+      line-height:1.5; -webkit-font-smoothing:antialiased; }
+.pg svg, .pg img { display:block; max-width:100%; }
+.pg h1,.pg h2,.pg h3,.pg h4,.pg p { margin:0; }
+.pg ul { margin:0; padding:0; list-style:none; }
+.pg code { font-family:var(--mono); font-size:.85em; background:var(--sage-200);
+           padding:.1em .35em; border-radius:4px; }
+.pg :focus-visible { outline:3px solid var(--forest-600); outline-offset:2px; border-radius:4px; }
+
+/* ---------- page shell ---------- */
+.pg-head { background:var(--forest-900); color:#fff; padding:28px 20px; }
+.pg-head .in { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:10px; }
+.wordmark { display:flex; align-items:center; gap:8px; font-weight:700; font-size:19px; letter-spacing:-.02em; }
+.wordmark .tl { font-weight:400; font-size:13px; color:var(--forest-300); letter-spacing:0; }
+.pg-head h1 { font-size:23px; line-height:1.25; font-weight:700; text-wrap:balance; }
+.pg-head p { font-size:14px; color:var(--forest-200); max-width:60ch; }
+
+.pg-main { max-width:1180px; margin:0 auto; padding:26px 20px 40px;
+           display:flex; flex-direction:column; gap:32px; }
+.panel { background:#fff; border:1px solid var(--sage-300); border-radius:14px; padding:18px;
+         display:flex; flex-direction:column; gap:14px; }
+.h-sec { font-size:17px; font-weight:700; letter-spacing:-.01em; }
+.p-sec { font-size:14.5px; color:var(--sage-700); line-height:1.6; max-width:68ch; }
+.p-sec strong { color:var(--sage-900); }
+.eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+           color:var(--sage-600); }
+.col { display:flex; flex-direction:column; gap:8px; }
+
+/* ---------- callouts ---------- */
+.note { border-left:4px solid var(--forest-600); background:var(--forest-50);
+        border-radius:0 10px 10px 0; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.note.amber { border-left-color:var(--ember-600); background:var(--ember-50); }
+.note h3 { font-size:14.5px; font-weight:700; }
+.note p { font-size:14px; color:var(--sage-800); line-height:1.6; }
+.flag { align-self:flex-start; display:inline-flex; align-items:center; gap:6px;
+        font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px;
+        background:var(--forest-100); color:var(--forest-800); border:1px solid var(--forest-200); }
+.flag.no { background:var(--ember-50); color:var(--ember-700); border-color:var(--ember-200); }
+
+/* ---------- tables ---------- */
+.scroller { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; min-width:430px; font-size:13.5px; }
+caption { text-align:left; font-size:12.5px; color:var(--sage-700); padding-bottom:8px; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--sage-200); }
+th { font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--sage-600); }
+td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.sw { display:inline-block; width:13px; height:13px; border-radius:3px;
+      border:1px solid rgba(0,0,0,.15); vertical-align:-2px; margin-right:7px; }
+.ok { color:var(--forest-700); font-weight:700; }
+.no { color:var(--err-ink); font-weight:700; }
+
+/* ---------- semantic state demos ---------- */
+.states { display:flex; flex-direction:column; gap:10px; }
+.toast { background:var(--sage-900); color:#fff; border-radius:12px; padding:13px 15px;
+         display:flex; align-items:center; gap:11px; }
+.toast svg { width:20px; height:20px; flex-shrink:0; fill:none; stroke:var(--forest-300);
+             stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.toast p { font-size:14px; }
+.toast .undo { margin-left:auto; font-size:13px; font-weight:700; color:var(--forest-300);
+               white-space:nowrap; }
+.banner { border-radius:12px; padding:13px 15px; display:flex; align-items:flex-start; gap:11px;
+          border:1px solid; }
+.banner svg { width:20px; height:20px; flex-shrink:0; fill:none; stroke-width:2.2;
+              stroke-linecap:round; stroke-linejoin:round; }
+.banner b { font-size:14px; font-weight:700; display:block; }
+.banner p { font-size:13.5px; margin-top:2px; line-height:1.5; }
+.banner.err { background:var(--err-bg); border-color:#F0C9C6; color:var(--err-ink); }
+.banner.err svg { stroke:var(--err); }
+.banner.warn { background:var(--warn-bg); border-color:#E8D9A8; color:var(--warn-ink); }
+.banner.warn svg { stroke:var(--warn); }
+.banner .acts { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.banner .acts button { height:34px; padding:0 12px; border-radius:8px; font-size:12.5px;
+                       font-weight:700; border:1px solid currentColor; }
+
+/* ---------- spark comparison ---------- */
+.two { display:grid; gap:14px; }
+@media (min-width:720px){ .two { grid-template-columns:1fr 1fr; } }
+.sp-card { border:1px solid var(--sage-300); border-radius:12px; overflow:hidden; background:#fff; }
+.sp-card > header { padding:10px 14px; border-bottom:1px solid var(--sage-200);
+                    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+.sp-card > header b { font-size:13.5px; }
+.sp-card > header span { font-size:11.5px; color:var(--sage-600); }
+.sp-demo { padding:18px 14px; display:flex; align-items:center; gap:10px 22px; flex-wrap:wrap; }
+.sp-demo .pair { display:flex; align-items:center; gap:9px; }
+.sp-demo .cap { font-size:11.5px; color:var(--sage-600); white-space:nowrap; }
+.sp-row { border-top:1px dashed var(--sage-300); padding:12px 14px; display:flex;
+          align-items:center; gap:4px; }
+
+/* ---------- the Spark control ---------- */
+.spark { display:inline-flex; align-items:center; gap:6px; height:44px; padding:0 12px;
+         border-radius:999px; color:var(--sage-600); }
+.spark svg { width:21px; height:21px; }
+.spark .c { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
+.spark[aria-pressed="false"] svg { fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
+.spark[aria-pressed="true"] { background:var(--spark-bg); color:var(--spark-ink); }
+.spark[aria-pressed="true"] svg { fill:var(--spark-fill); stroke:none; }
+
+/* ---------- phone ---------- */
+.rack { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start; }
+.slot { display:flex; flex-direction:column; gap:10px; width:375px; max-width:100%; }
+.slot > .cap { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.slot > .cap b { font-size:14.5px; }
+.slot > .cap span { font-size:12.5px; color:var(--sage-600); }
+.phone { width:375px; max-width:100%; border:8px solid var(--sage-900); border-radius:30px;
+         overflow:hidden; background:var(--sage-50);
+         box-shadow:0 16px 30px -12px rgba(35,38,36,.35); }
+.after { font-size:12.5px; color:var(--sage-700); line-height:1.55; }
+@media (max-width:820px){
+  .slot { width:100%; }
+  .phone { width:100%; border-width:0; border-radius:0; box-shadow:0 0 0 1px var(--sage-300); }
+}
+
+/* ---------- the Feed screen ---------- */
+.bar { background:#fff; border-bottom:1px solid var(--sage-200); height:56px; padding:0 16px;
+       display:flex; align-items:center; justify-content:space-between; }
+.bar .mark { display:flex; align-items:center; gap:7px; font-weight:700; font-size:16px; letter-spacing:-.02em; }
+.bar .mark svg { width:20px; height:20px; fill:var(--forest-700); }
+.ib { width:44px; height:44px; display:grid; place-items:center; border-radius:999px; color:var(--sage-700); }
+.ib svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.av { border-radius:999px; display:grid; place-items:center; font-weight:700;
+      box-shadow:inset 0 0 0 1px var(--sage-300); flex-shrink:0; }
+.av-32 { width:32px; height:32px; font-size:12px; }
+.av-40 { width:40px; height:40px; font-size:14px; }
+
+.segs { background:#fff; border-bottom:1px solid var(--sage-200); display:flex; }
+.segs button { flex:1; height:48px; font-size:14px; font-weight:500; color:var(--sage-600);
+               border-bottom:2px solid transparent; }
+.segs button[aria-selected="true"] { color:var(--sage-900); font-weight:600;
+                                     border-bottom-color:var(--forest-700); }
+
+.filt { background:#fff; border-bottom:1px solid var(--sage-200); padding:10px 16px;
+        display:flex; gap:8px; overflow-x:auto; }
+.filt button { flex-shrink:0; height:40px; padding:0 13px; border-radius:999px; font-size:12.5px;
+               font-weight:600; border:1px solid var(--sage-300); color:var(--sage-700);
+               display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.filt button.sel { background:var(--forest-700); border-color:var(--forest-700); color:#fff; }
+.filt svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.5; }
+
+.card { background:#fff; border-bottom:1px solid var(--sage-200); padding:16px;
+        display:flex; flex-direction:column; gap:12px; }
+.card > header { display:flex; align-items:flex-start; gap:12px; }
+.who { min-width:0; flex:1; }
+.who .nm { font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px; }
+.who .nm i { font-style:normal; font-weight:400; color:var(--sage-600); }
+.who .rl { font-size:12px; color:var(--sage-600); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.card h3 { font-size:18px; line-height:1.33; font-weight:600; letter-spacing:-.01em; text-wrap:balance; }
+.card .body { font-size:15px; line-height:1.55; color:var(--sage-800);
+              display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+/* stage + commitment badges — stage is ordinal, so it gets a 3-step meter */
+.badges { display:flex; flex-wrap:wrap; gap:8px; }
+.badge { display:inline-flex; align-items:center; gap:7px; height:28px; padding:0 11px;
+         border-radius:999px; border:1px solid var(--sage-300); background:var(--sage-50);
+         font-size:12px; font-weight:600; color:var(--sage-700); white-space:nowrap; }
+.meter { display:flex; gap:2.5px; }
+.meter i { width:7px; height:4px; border-radius:2px; background:var(--sage-300); }
+.meter i.on { background:var(--forest-600); }
+.badge.commit::before { content:""; width:7px; height:7px; border-radius:999px;
+                        background:var(--sage-400); }
+.badge.commit.hi::before { background:var(--forest-600); }
+
+.rolewrap .eyebrow { display:block; margin-bottom:7px; }
+.roles { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; }
+.role { flex-shrink:0; border-radius:999px; background:var(--forest-50); border:1px solid var(--forest-200);
+        color:var(--forest-800); font-size:12px; font-weight:600; padding:5px 11px; white-space:nowrap; }
+.tags { display:flex; flex-wrap:wrap; gap:6px; }
+.tag { border-radius:999px; background:var(--sage-100); color:var(--sage-700); font-size:12px;
+       padding:4px 10px; }
+.where { display:flex; flex-wrap:wrap; gap:4px 13px; font-size:12px; color:var(--sage-600); }
+.live { display:inline-flex; align-items:center; gap:5px; color:var(--forest-700); font-weight:600; }
+.live::before { content:""; width:6px; height:6px; border-radius:999px; background:var(--forest-600); }
+
+.acts { display:flex; align-items:center; justify-content:space-between;
+        border-top:1px solid var(--sage-100); padding-top:4px; margin:0 -6px -4px; }
+.acts .l { display:flex; align-items:center; }
+.act { display:inline-flex; align-items:center; gap:6px; height:44px; padding:0 10px;
+       border-radius:999px; color:var(--sage-600); }
+.act svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
+.act .c { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
+.msg { height:40px; padding:0 14px; margin-right:6px; border-radius:8px; border:1px solid var(--sage-300);
+       color:var(--sage-800); font-size:12.5px; font-weight:600; }
+.shot { border-radius:12px; border:1px solid var(--sage-200); background:var(--sage-100);
+        aspect-ratio:16/9; display:grid; place-items:center; font-size:11.5px; color:var(--sage-600); }
+.formed { display:inline-flex; align-items:center; gap:6px; border-radius:999px; background:var(--sage-100);
+          color:var(--sage-700); font-size:11px; font-weight:600; padding:4px 9px; white-space:nowrap; }
+.formed::before { content:""; width:6px; height:6px; border-radius:999px; background:var(--sage-500); }
+.rule { padding:12px 16px; background:var(--sage-50); border-bottom:1px solid var(--sage-200); }
+.rule b { font-size:14px; font-weight:600; }
+.rule p { font-size:12px; color:var(--sage-700); margin-top:2px; }
+
+.nav { background:#fff; border-top:1px solid var(--sage-200); height:64px; display:flex;
+       align-items:center; justify-content:space-around; padding-bottom:4px; }
+.nav button { display:flex; flex-direction:column; align-items:center; gap:3px; width:56px;
+              font-size:11px; color:var(--sage-600); }
+.nav button svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linejoin:round; }
+.nav button[aria-current="page"] { color:var(--forest-700); font-weight:600; }
+.pg .plus { width:48px; height:48px; border-radius:15px; background:var(--forest-700); color:#fff;
+            display:grid; place-items:center; }
+.plus svg { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:2.5; stroke-linecap:round; }
+.dot { position:relative; }
+.dot .k { position:absolute; top:-2px; right:8px; min-width:17px; height:17px; padding:0 4px;
+          border-radius:999px; background:var(--forest-700); color:#fff; font-size:10px;
+          font-weight:700; display:grid; place-items:center; }
+
+/* ---------- decision ---------- */
+.opts { display:grid; gap:12px; }
+@media (min-width:720px){ .opts { grid-template-columns:1fr 1fr; } }
+.opt { border:1px solid var(--sage-300); border-radius:12px; padding:15px; background:#fff;
+       display:flex; flex-direction:column; gap:8px; }
+.opt.pick { border-color:var(--forest-600); box-shadow:inset 0 0 0 1px var(--forest-600); }
+.opt h3 { font-size:14.5px; font-weight:700; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.opt .rec { font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+            background:var(--forest-700); color:#fff; padding:2px 8px; border-radius:999px; }
+.opt p, .opt li { font-size:13.5px; color:var(--sage-800); line-height:1.55; }
+.opt li { padding-left:16px; position:relative; }
+.opt li::before { content:""; position:absolute; left:2px; top:8px; width:5px; height:5px;
+                  border-radius:999px; background:var(--sage-500); }
+
+.pg-foot { background:var(--forest-900); color:var(--forest-300); font-size:12px;
+           text-align:center; padding:20px; }
+@media (prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+
+<div class="pg">
+
+<header class="pg-head">
+  <div class="in">
+    <div class="wordmark">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="#8DB29C" aria-hidden="true"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>
+      Alongside <span class="tl">— nobody builds alone</span>
+    </div>
+    <h1>Forest green: can it carry Spark on its own?</h1>
+    <p>The Feed screen, drawn twice at real phone size with real posts. Everything is identical between them except one thing: what colour Spark is. Plus the forest green I picked, and how success and error survive a green brand.</p>
+  </div>
+</header>
+
+<main class="pg-main">
+
+  <!-- ============ 1. THE GREEN ============ -->
+  <section class="panel">
+    <h2 class="h-sec">1 · The forest green</h2>
+    <p class="p-sec">You asked me to pick the value. It's <strong>#1F4A34</strong> — hue 149°, saturation 41%. That puts it in the same family as the sages (which run 67°–178°), just far deeper, and it is the only member of the set with enough chroma to hold a filled button.</p>
+
+    <div class="scroller">
+      <table>
+        <caption>The candidates I tested, and why this one.</caption>
+        <thead><tr><th>Candidate</th><th class="n">Hue</th><th class="n">Sat</th><th class="n">On white</th><th>Why not</th></tr></thead>
+        <tbody>
+          <tr><td><span class="sw" style="background:#2D6A4F"></span>#2D6A4F</td><td class="n">153°</td><td class="n">40%</td><td class="n">6.39</td><td>Misses AAA; too light under white text at small sizes</td></tr>
+          <tr><td><span class="sw" style="background:#2E5D3E"></span>#2E5D3E</td><td class="n">140°</td><td class="n">34%</td><td class="n">7.63</td><td>Works, but muddier — reads grey-green next to the sages</td></tr>
+          <tr><td><span class="sw" style="background:#1F4A34"></span><strong>#1F4A34</strong></td><td class="n">149°</td><td class="n">41%</td><td class="n">10.06</td><td class="ok">Chosen</td></tr>
+          <tr><td><span class="sw" style="background:#14532D"></span>#14532D</td><td class="n">144°</td><td class="n">61%</td><td class="n">9.11</td><td>61% saturation reads emerald, not forest — fights the sages</td></tr>
+          <tr><td><span class="sw" style="background:#1B4332"></span>#1B4332</td><td class="n">154°</td><td class="n">43%</td><td class="n">11.08</td><td>Fine too — nearly black in sunlight, loses its green</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="p-sec">It works in both directions, which is what a brand colour has to do: <strong>10.06:1 as text on white</strong> and <strong>10.06:1 as a fill under white text</strong>. Same number — that's the point of a value this deep. The lighter steps (#3F7A58, #2E6144) exist for hover and for large text; #8DB29C and paler are surfaces only.</p>
+  </section>
+
+  <!-- ============ 2. THE CONTRAST QUESTIONS ============ -->
+  <section class="panel">
+    <h2 class="h-sec">2 · The two questions you asked</h2>
+
+    <div class="note">
+      <span class="flag">No — it can stay as it is</span>
+      <h3>Does burnt orange #A8461B pass AA on white at text size?</h3>
+      <p>Yes — <strong>5.90:1</strong>, against the 4.5:1 that normal text needs. It does not need to go darker. It clears the bar even for a 12px spark count. The one place it needs help is orange text sitting on the pale orange "sparked" pill, where the tint eats contrast — there I use <strong>#8A3A14</strong> (7.13:1). So: <strong>#C85A22</strong> fills the star, <strong>#8A3A14</strong> sets the count.</p>
+    </div>
+
+    <div class="note amber">
+      <span class="flag no">Both — but not for body copy</span>
+      <h3>Does forest green work as body text, or only as a fill?</h3>
+      <p>It genuinely works as both — 10.06:1 clears AAA in either direction, so there's no accessibility reason to avoid it. But I'd still <strong>keep post bodies and comments in sage-800 #3C403D</strong> (10.54:1) and spend the green on links, active nav, headings and button fills.</p>
+      <p>The reason isn't contrast, it's economics. If body text is green and links are green, links stop announcing themselves — you've spent the brand colour on the one element that didn't need it. Green has to mean <em>"this does something"</em>. That only holds if the surrounding text isn't green.</p>
+    </div>
+
+    <div class="scroller">
+      <table>
+        <caption>Every pairing in the mockups below, measured. Nothing here fails.</caption>
+        <thead><tr><th>Pairing</th><th class="n">Ratio</th><th class="n">AA</th></tr></thead>
+        <tbody>
+          <tr><td>Post title — sage-900 on white</td><td class="n">15.28</td><td class="n ok">PASS</td></tr>
+          <tr><td>Post body — sage-800 on white</td><td class="n">10.54</td><td class="n ok">PASS</td></tr>
+          <tr><td>Links / active nav — forest-700 on white</td><td class="n">10.06</td><td class="n ok">PASS</td></tr>
+          <tr><td>White on the primary button</td><td class="n">10.06</td><td class="n ok">PASS</td></tr>
+          <tr><td>Role chip — forest-800 on forest-50</td><td class="n">11.46</td><td class="n ok">PASS</td></tr>
+          <tr><td>Topic tag — sage-700 on sage-100</td><td class="n">5.98</td><td class="n ok">PASS</td></tr>
+          <tr><td>Stage / commitment badge — sage-700 on sage-50</td><td class="n">6.43</td><td class="n ok">PASS</td></tr>
+          <tr><td>Meta &amp; timestamps — sage-600 on white</td><td class="n">4.73</td><td class="n ok">PASS</td></tr>
+          <tr><td>Spark, default — sage-600 on white</td><td class="n">4.73</td><td class="n ok">PASS</td></tr>
+          <tr><td>Spark, sparked (A) — forest-700 on forest-100</td><td class="n">8.15</td><td class="n ok">PASS</td></tr>
+          <tr><td>Spark, sparked (B) — ember-700 on ember-50</td><td class="n">7.13</td><td class="n ok">PASS</td></tr>
+          <tr><td>Focus ring — forest-600 on white</td><td class="n">7.22</td><td class="n ok">PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      <h3>One that did fail, and how I fixed it</h3>
+      <p>My first pass put a forest-green tick on the dark confirmation toast in section 4. That's <strong>1.52:1</strong> — invisible. Dark green on a dark surface never works. The tick is now <strong>forest-300 #8DB29C</strong> at 6.54:1. Worth saying out loud because it's the trap with a deep brand colour: it's superb on white and useless on anything dark, so a dark surface needs the pale end of the ramp, not the brand value.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. THE GREEN/SUCCESS PROBLEM ============ -->
+  <section class="panel">
+    <h2 class="h-sec">3 · Green means success — solving that</h2>
+    <p class="p-sec">You're right that this is a real problem, and it's worse than it first looks. Conventional success green is <strong>#2E7D32</strong>. Against our brand that's <strong>26° of hue apart and 1.96:1 in contrast</strong> — two greens close enough that neither can signal anything the other doesn't. A green toast on a green-branded app reads as chrome, not confirmation.</p>
+
+    <p class="p-sec"><strong>My recommendation: success stops being a green surface.</strong> Confirmation moves to a dark neutral toast with a green tick — the green becomes the mark of approval inside the message rather than the field it sits on. Nothing about a green brand makes a charcoal toast with a pale-green check ambiguous, and it reads instantly as "the app is answering you".</p>
+
+    <div class="states">
+      <div class="toast">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        <p>Your idea is live.</p>
+        <span class="undo">View</span>
+      </div>
+      <div class="banner err">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/></svg>
+        <div>
+          <b>Couldn't publish your idea</b>
+          <p>Your connection dropped partway through. Nothing was lost — try again.</p>
+          <div class="acts"><button>Try again</button></div>
+        </div>
+      </div>
+      <div class="banner warn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+        <div>
+          <b>Still looking for teammates?</b>
+          <p>Nobody's touched this idea in 30 days. Confirm it's live, or it drops out of the feed.</p>
+          <div class="acts"><button>Yes, still looking</button><button>Team formed</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>The second collision, which nobody mentions until it ships</h3>
+      <p>Warning is conventionally amber — and conventional amber <strong>#B45309 is only 8° from Spark's ember</strong>. A warning banner would read as a giant Spark. So warning moves off orange onto <strong>amber-yellow #8A6100</strong>, which puts 24° and a large lightness gap between them. Error red #B3261E is 15° from ember, which is tighter than I'd like — but error is always an icon-plus-text banner in a form, never a filled pill in a card's action row, so they never appear in the same context. I'd watch it rather than solve it.</p>
+    </div>
+
+    <div class="note">
+      <h3>The rule that makes all of this safe</h3>
+      <p><strong>Every state is an icon plus words. Colour only ever reinforces.</strong> That was already the plan for colour-blind users, and here it earns its keep twice over — with a green brand and a green-adjacent success convention, red/green colour blindness is a bigger risk for us than for a blue app. Any state that would be ambiguous in greyscale is wrong, regardless of what the ratios say.</p>
+    </div>
+
+    <div class="note amber">
+      <h3>What I considered and rejected</h3>
+      <p>The obvious alternative is a <em>brighter</em> success green, distinct from the deep brand. I don't recommend it: it puts two greens on screen that people must learn to tell apart, it weakens both, and the first time a success toast appears next to a green button the distinction collapses. Better to give success a different channel entirely than a slightly different shade. <strong>Your call, though — say the word and I'll mock the two-greens version so you can see it rather than take my word for it.</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ 4. SPARK, REAL SIZE ============ -->
+  <section class="panel">
+    <h2 class="h-sec">4 · Spark at real size — the deciding detail</h2>
+    <p class="p-sec">Both states at the size your thumb meets them. The dashed row shows Spark beside comment and save, which is the only context that counts — a control is noticeable relative to its neighbours, not on its own.</p>
+
+    <div class="two">
+      <div class="sp-card opt-sage">
+        <header><b>A · Sage only</b><span>Spark = forest #1F4A34</span></header>
+        <div class="sp-demo">
+          <span class="pair"><button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">41</span></button><span class="cap">default</span></span>
+          <span class="pair"><button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button><span class="cap">sparked</span></span>
+        </div>
+        <div class="sp-row">
+          <button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button>
+          <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">8</span></button>
+          <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+        </div>
+      </div>
+
+      <div class="sp-card opt-ember">
+        <header><b>B · Sage + ember</b><span>Spark = ember #C85A22</span></header>
+        <div class="sp-demo">
+          <span class="pair"><button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">41</span></button><span class="cap">default</span></span>
+          <span class="pair"><button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button><span class="cap">sparked</span></span>
+        </div>
+        <div class="sp-row">
+          <button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button>
+          <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">8</span></button>
+          <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <h3>Why the ratio can't decide this for you — and why A is closer than you'd expect</h3>
+      <p>I measured the sparked state against the unsparked state as they actually render. <strong>Option A scores 2.13. Option B scores 1.65.</strong> By the numbers <em>A is the better design</em> — the deep forest is a bigger luminance jump from the muted default than the ember is. A numbers-led process would pick A here, confidently, and I think it would be wrong.</p>
+      <p>It would be wrong because contrast ratio measures luminance and nothing else. What makes a control findable mid-scroll is whether it looks like a <em>different kind of thing</em> from its neighbours, and that's carried by hue and saturation. Scroll down to the two cards and the point makes itself: in A, the sparked Spark is a green pill sitting directly under a row of green role chips, beside green "Still looking" text, on a screen with a green nav button. It's perfectly legible — it just reads as one more tag rather than something you switched on. In B it's the only warm thing on the screen.</p>
+      <p>I'll be straight that the deep forest narrows this considerably. Against the earlier teal, A was genuinely hard to read; with #1F4A34 it isn't. A is a defensible choice now in a way it wasn't before. The case for B is no longer "you can't see it" — it's "you can't tell what it is."</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. THE TWO FEEDS ============ -->
+  <section class="col">
+    <h2 class="h-sec">5 · The Feed screen, drawn twice</h2>
+    <p class="p-sec">Same three posts, same layout, same everything — only Spark's colour differs. Scroll each like an app rather than reading it like a document.</p>
+
+    <div class="rack">
+
+      <!-- ============ OPTION A ============ -->
+      <div class="slot">
+        <div class="cap"><b>A · Sage only</b><span>no accent colour anywhere</span></div>
+        <div class="phone opt-sage">
+          <div class="bar">
+            <div class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>Alongside</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <button class="ib" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+              <button class="ib" aria-label="Your profile"><span class="av av-32" style="background:var(--sage-200);color:var(--sage-800)">J</span></button>
+            </div>
+          </div>
+          <div class="segs" role="tablist">
+            <button role="tab" aria-selected="true">Home</button>
+            <button role="tab" aria-selected="false">Feed</button>
+          </div>
+          <div class="filt">
+            <button class="sel">Newest <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Role <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Commitment <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Location</button>
+          </div>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--forest-100);color:var(--forest-800)">AR</span>
+              <div class="who"><div class="nm">Ananya Rao <i>· 2h</i></div><div class="rl">Final-year CS · Bengaluru</div></div>
+              <button class="ib" aria-label="More" style="width:36px;height:36px;margin-right:-6px"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+            </header>
+            <h3>An app that moves leftover canteen food to hostels before it's binned</h3>
+            <p class="body">Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I've mapped the flow and talked to two canteen managers — they're in. I can do the backend and the NGO side, but I've never shipped Android…</p>
+            <div class="badges">
+              <span class="badge"><span class="meter"><i class="on"></i><i></i><i></i></span>Just an idea</span>
+              <span class="badge commit hi">Serious</span>
+            </div>
+            <div class="rolewrap">
+              <span class="eyebrow">Looking for</span>
+              <div class="roles"><span class="role">Android dev</span><span class="role">Ops / NGO partnerships</span><span class="role">Designer</span></div>
+            </div>
+            <div class="tags"><span class="tag">sustainability</span><span class="tag">mobile</span><span class="tag">campus</span><span class="tag">social impact</span></div>
+            <div class="where"><span>Bengaluru · remote ok</span><span class="live">Still looking</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">8</span></button>
+                <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <button class="msg">Message</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--sage-200);color:var(--sage-800)">MN</span>
+              <div class="who"><div class="nm">Meera Nair <i>· 5h</i></div><div class="rl">Runs a crochet business · Kochi</div></div>
+              <button class="ib" aria-label="More" style="width:36px;height:36px;margin-right:-6px"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+            </header>
+            <h3>I make everything by hand and sell it on WhatsApp. I need an actual shop.</h3>
+            <p class="body">Three years of orders in a notebook. I don't need a big startup — just a simple online store, decent photos, and someone patient enough to explain it to me. Happy to share revenue…</p>
+            <div class="shot">product photo · 16:9</div>
+            <div class="badges">
+              <span class="badge"><span class="meter"><i class="on"></i><i class="on"></i><i></i></span>Already building</span>
+              <span class="badge commit">Casual / weekend</span>
+            </div>
+            <div class="rolewrap">
+              <span class="eyebrow">Looking for</span>
+              <div class="roles"><span class="role">Web developer</span><span class="role">Photographer</span></div>
+            </div>
+            <div class="tags"><span class="tag">e-commerce</span><span class="tag">crafts</span><span class="tag">small business</span></div>
+            <div class="where"><span>Kochi · remote ok</span><span class="live">Still looking</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">27</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">12</span></button>
+                <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <button class="msg">Message</button>
+            </div>
+          </article>
+
+          <div class="rule"><b>You're all caught up</b><p>Popular in <strong>Design</strong> this week — because the feed should never be empty.</p></div>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--sage-300);color:var(--sage-800)">RK</span>
+              <div class="who"><div class="nm">Rohit Kulkarni <i>· 3d</i></div><div class="rl">Product design · Pune</div></div>
+              <span class="formed">Team formed</span>
+            </header>
+            <h3>A Kannada-first OCR for old land records</h3>
+            <p class="body">We found our third person last week — leaving this up because the dataset notes might help someone…</p>
+            <div class="tags"><span class="tag">ocr</span><span class="tag">regional languages</span><span class="tag">civic tech</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">88</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">31</span></button>
+              </div>
+            </div>
+          </article>
+
+          <div class="nav">
+            <button aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/></svg>Home</button>
+            <button><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Explore</button>
+            <button class="plus" aria-label="Post an idea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3V5z"/></svg><span class="k">3</span>Messages</button>
+            <button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alerts</button>
+          </div>
+        </div>
+        <p class="after"><strong>What to look for:</strong> scroll it fast, the way you'd scroll Instagram. Can you tell which of these three you've already sparked without stopping to read? That's the whole test.</p>
+      </div>
+
+      <!-- ============ OPTION B ============ -->
+      <div class="slot">
+        <div class="cap"><b>B · Sage + ember</b><span>orange on Spark only</span></div>
+        <div class="phone opt-ember">
+          <div class="bar">
+            <div class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>Alongside</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <button class="ib" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+              <button class="ib" aria-label="Your profile"><span class="av av-32" style="background:var(--sage-200);color:var(--sage-800)">J</span></button>
+            </div>
+          </div>
+          <div class="segs" role="tablist">
+            <button role="tab" aria-selected="true">Home</button>
+            <button role="tab" aria-selected="false">Feed</button>
+          </div>
+          <div class="filt">
+            <button class="sel">Newest <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Role <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Commitment <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button>Location</button>
+          </div>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--forest-100);color:var(--forest-800)">AR</span>
+              <div class="who"><div class="nm">Ananya Rao <i>· 2h</i></div><div class="rl">Final-year CS · Bengaluru</div></div>
+              <button class="ib" aria-label="More" style="width:36px;height:36px;margin-right:-6px"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+            </header>
+            <h3>An app that moves leftover canteen food to hostels before it's binned</h3>
+            <p class="body">Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I've mapped the flow and talked to two canteen managers — they're in. I can do the backend and the NGO side, but I've never shipped Android…</p>
+            <div class="badges">
+              <span class="badge"><span class="meter"><i class="on"></i><i></i><i></i></span>Just an idea</span>
+              <span class="badge commit hi">Serious</span>
+            </div>
+            <div class="rolewrap">
+              <span class="eyebrow">Looking for</span>
+              <div class="roles"><span class="role">Android dev</span><span class="role">Ops / NGO partnerships</span><span class="role">Designer</span></div>
+            </div>
+            <div class="tags"><span class="tag">sustainability</span><span class="tag">mobile</span><span class="tag">campus</span><span class="tag">social impact</span></div>
+            <div class="where"><span>Bengaluru · remote ok</span><span class="live">Still looking</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">42</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">8</span></button>
+                <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <button class="msg">Message</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--sage-200);color:var(--sage-800)">MN</span>
+              <div class="who"><div class="nm">Meera Nair <i>· 5h</i></div><div class="rl">Runs a crochet business · Kochi</div></div>
+              <button class="ib" aria-label="More" style="width:36px;height:36px;margin-right:-6px"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+            </header>
+            <h3>I make everything by hand and sell it on WhatsApp. I need an actual shop.</h3>
+            <p class="body">Three years of orders in a notebook. I don't need a big startup — just a simple online store, decent photos, and someone patient enough to explain it to me. Happy to share revenue…</p>
+            <div class="shot">product photo · 16:9</div>
+            <div class="badges">
+              <span class="badge"><span class="meter"><i class="on"></i><i class="on"></i><i></i></span>Already building</span>
+              <span class="badge commit">Casual / weekend</span>
+            </div>
+            <div class="rolewrap">
+              <span class="eyebrow">Looking for</span>
+              <div class="roles"><span class="role">Web developer</span><span class="role">Photographer</span></div>
+            </div>
+            <div class="tags"><span class="tag">e-commerce</span><span class="tag">crafts</span><span class="tag">small business</span></div>
+            <div class="where"><span>Kochi · remote ok</span><span class="live">Still looking</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">27</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">12</span></button>
+                <button class="act" aria-label="Save"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <button class="msg">Message</button>
+            </div>
+          </article>
+
+          <div class="rule"><b>You're all caught up</b><p>Popular in <strong>Design</strong> this week — because the feed should never be empty.</p></div>
+
+          <article class="card">
+            <header>
+              <span class="av av-40" style="background:var(--sage-300);color:var(--sage-800)">RK</span>
+              <div class="who"><div class="nm">Rohit Kulkarni <i>· 3d</i></div><div class="rl">Product design · Pune</div></div>
+              <span class="formed">Team formed</span>
+            </header>
+            <h3>A Kannada-first OCR for old land records</h3>
+            <p class="body">We found our third person last week — leaving this up because the dataset notes might help someone…</p>
+            <div class="tags"><span class="tag">ocr</span><span class="tag">regional languages</span><span class="tag">civic tech</span></div>
+            <div class="acts">
+              <div class="l">
+                <button class="spark" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="c">88</span></button>
+                <button class="act"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="c">31</span></button>
+              </div>
+            </div>
+          </article>
+
+          <div class="nav">
+            <button aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/></svg>Home</button>
+            <button><svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Explore</button>
+            <button class="plus" aria-label="Post an idea"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3V5z"/></svg><span class="k">3</span>Messages</button>
+            <button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alerts</button>
+          </div>
+        </div>
+        <p class="after"><strong>What to look for:</strong> the same scroll. Notice the orange appears exactly once on the whole screen — that scarcity is what makes it work. Everything else is still Mystic Forest.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 6. DECISION ============ -->
+  <section class="panel">
+    <h2 class="h-sec">6 · Your call</h2>
+    <p class="p-sec">Both are honest options. A isn't a straw man — a single-family palette is calmer, more distinctive against every blue competitor in the category, and simpler to keep consistent. It costs you legibility on one control.</p>
+
+    <div class="opts">
+      <div class="opt">
+        <h3>A · Sage only</h3>
+        <p>Forest and sages, nothing else. Spark is forest green, one step off the primary button.</p>
+        <ul class="col">
+          <li>Calmest. Nothing on screen shouts.</li>
+          <li>No accent to misuse later.</li>
+          <li>Stronger than it was with the earlier teal — the deep forest is genuinely legible when sparked.</li>
+          <li><strong>The cost:</strong> green is doing five jobs on one card — avatar, badges, role chips, "Still looking", and Spark. The sparked state reads as one more green pill rather than a control you toggled.</li>
+        </ul>
+      </div>
+      <div class="opt pick">
+        <h3>B · Sage + ember <span class="rec">my recommendation</span></h3>
+        <p>Mystic Forest everywhere, burnt orange on Spark and nothing else — the role split exactly as you proposed it.</p>
+        <ul class="col">
+          <li>The sparked state is unmistakable mid-scroll.</li>
+          <li>Ember stays scarce — once per screen — so it keeps its force.</li>
+          <li>Passes AA at 5.90:1 without going darker.</li>
+          <li><strong>The cost:</strong> one rule to police forever — <em>ember is never a button, never a link.</em> The moment it lands on a CTA, Spark stops being special.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="p-sec">Tell me <strong>A or B</strong>, and whether you accept the <strong>dark-toast success</strong> proposal in section 3. Then I'll write <code>docs/design-system.md</code> and build <code>templates/components/</code>. Nothing is committed until you do.</p>
+  </section>
+
+</main>
+
+<footer class="pg-foot">Alongside · palette proposal v3 · nothing is written down until Jeni picks</footer>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% comment %}
+  Topic tag — OWNED BY THE DESIGNER.
+
+    {% include "components/_chip_tag.html" with tag=tag %}
+
+  Params: tag (uses .name and .slug) or label · href (defaults to the tag filter)
+
+  Deliberately quiet. Tags are navigation, not signal — if they competed with
+  the role chips, the one thing a joiner is scanning for would get lost in a row
+  of colour. Grey on grey, 5.98:1.
+
+  32px tall with 8px gaps — the navigation tier in design-system.md §7. Not 44:
+  a row of 44px tag pills becomes the loudest thing on a card, which is exactly
+  what tags must not be. 32 still clears WCAG 2.2 AA.
+{% endcomment %}
+{% firstof label tag.name as tag_label %}
+{% firstof href tag.get_absolute_url as tag_href %}
+{% if tag_href %}
+<a href="{{ tag_href }}"
+   class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700
+          hover:bg-ink-200
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ tag_label }}</a>
+{% else %}
+<span class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">{{ tag_label }}</span>
+{% endif %}

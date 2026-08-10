@@ -1,9 +1,13 @@
 {% comment %}
   Tailwind theme — OWNED BY THE DESIGNER.
 
-  Seeded by the Architect from design/mockups/v1-design-system-feed-post.html so
-  the skeleton renders in the approved palette from day one. The Designer edits
-  this file directly; the Architect does not.
+  Approved by Jeni on 5 Aug 2026: forest green brand, Mystic Forest sages as
+  neutrals, burnt orange reserved for Spark. Full rationale, contrast numbers
+  and usage rules: docs/design-system.md.
+
+  The token FAMILY NAMES are deliberately unchanged from the Architect's seed
+  (brand / ink / ok / warn / bad) so that templates/base.html keeps working
+  without an edit. Only the values changed. `spark` is new and additive.
 
   Loaded by templates/base.html. It lives in its own partial precisely so that
   changing the palette never means touching a file the Architect owns.
@@ -19,17 +23,46 @@
     theme: {
       extend: {
         colors: {
-          // Brand — "ember". Spark is the hero interaction, so the brand is warm.
-          brand: {50:'#FFF7ED',100:'#FFEDD5',200:'#FED7AA',300:'#FDBA74',400:'#FB923C',
-                  500:'#F97316',600:'#EA580C',700:'#C2410C',800:'#9A3412',900:'#7C2D12'},
-          // Neutrals — warm grey (stone), so greys don't fight the brand.
-          ink:   {50:'#FAFAF9',100:'#F5F5F4',200:'#E7E5E4',300:'#D6D3D1',400:'#A8A29E',
-                  500:'#78716C',600:'#57534E',700:'#44403C',800:'#292524',900:'#1C1917'},
-          ok:    {50:'#ECFDF5',600:'#059669',700:'#047857'},
-          warn:  {50:'#FFFBEB',600:'#D97706'},
-          bad:   {50:'#FFF1F2',600:'#E11D48',700:'#BE123C'},
+          // BRAND — forest green. Primary buttons, links, active nav, focus rings.
+          // 700 #1F4A34 is the brand value: 10.06:1 on white AND 10.06:1 under
+          // white text, so it works as ink and as a fill. 500/600 are for hover
+          // and large text. 300 and paler are surfaces — except on dark, where
+          // 300 is the only step that reads (see the success toast).
+          brand: {50:'#F1F6F2',100:'#DFEAE3',200:'#BCD3C4',300:'#8DB29C',400:'#5E9478',
+                  500:'#3F7A58',600:'#2E6144',700:'#1F4A34',800:'#183A29',900:'#11291D'},
+
+          // INK — the Mystic Forest sages, used as neutrals. Surfaces, borders,
+          // muted text, topic tags. 600 is the lightest step legal for text on
+          // white (4.73:1). 400 is the olive — decoration only, never text.
+          ink:   {50:'#F7F8F6',100:'#EFF0EC',200:'#E0E0E0',300:'#C9CCC4',400:'#A9AE85',
+                  500:'#8A9188',600:'#6E7570',700:'#565C58',800:'#3C403D',900:'#232624'},
+
+          // SPARK — burnt orange. THE SPARK REACTION AND NOTHING ELSE.
+          // Never a button, never a link, never a banner. Its whole power is
+          // that it appears roughly once per screen. See design-system.md §4.
+          spark: {50:'#FDF3EE',100:'#F9E2D6',200:'#F0C3AB',
+                  500:'#C85A22',600:'#A8461B',700:'#8A3A14'},
+
+          // SUCCESS — deliberately NOT a green surface; a green brand makes a
+          // green toast read as chrome. The real pattern is the dark toast in
+          // components/_toast.html, where ok-300 is the tick. These tokens stay
+          // defined so base.html's fallback messages block still renders.
+          ok:    {50:'#F1F6F2',300:'#8DB29C',600:'#2E6144',700:'#1F4A34'},
+
+          // WARNING — amber-YELLOW, not amber-orange. Conventional warning amber
+          // (#B45309) sits 8° from Spark's ember and would read as a giant Spark.
+          warn:  {50:'#FDF6E3',200:'#E8D9A8',600:'#8A6100',700:'#6B4A00'},
+
+          // ERROR — red. 15° from ember, which is tight, but error is always an
+          // icon-and-text banner in a form and never a filled pill in a card's
+          // action row, so the two never share a context.
+          bad:   {50:'#FCEEEE',200:'#F0C9C6',600:'#B3261E',700:'#8C1D18'},
         },
         fontFamily: {
+          // No webfont, on purpose. This stack renders Roboto on Android and
+          // Segoe on Windows: zero download, zero layout shift, instant first
+          // paint over 4G on a mid-range phone. Personality lives in the
+          // wordmark and the colour, not in a 90KB font file.
           sans: ['ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto',
                  'Helvetica Neue','Arial','sans-serif'],
         },

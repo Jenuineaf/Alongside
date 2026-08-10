@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alongside — the remaining 13 screens</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {50:'#F1F6F2',100:'#DFEAE3',200:'#BCD3C4',300:'#8DB29C',400:'#5E9478',
+                  500:'#3F7A58',600:'#2E6144',700:'#1F4A34',800:'#183A29',900:'#11291D'},
+          ink:   {50:'#F7F8F6',100:'#EFF0EC',200:'#E0E0E0',300:'#C9CCC4',400:'#A9AE85',
+                  500:'#8A9188',600:'#6E7570',700:'#565C58',800:'#3C403D',900:'#232624'},
+          spark: {50:'#FDF3EE',100:'#F9E2D6',200:'#F0C3AB',
+                  500:'#C85A22',600:'#A8461B',700:'#8A3A14'},
+          ok:    {50:'#F1F6F2',300:'#8DB29C',600:'#2E6144',700:'#1F4A34'},
+          warn:  {50:'#FDF6E3',200:'#E8D9A8',600:'#8A6100',700:'#6B4A00'},
+          bad:   {50:'#FCEEEE',200:'#F0C9C6',600:'#B3261E',700:'#8C1D18'},
+        },
+        fontFamily: { sans: ['ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Helvetica Neue','Arial','sans-serif'] },
+      }
+    }
+  }
+</script>
+<style>
+  .phone { width: 375px; }
+  @media (max-width: 820px) {
+    .phone { width: 100%; border-width: 0 !important; border-radius: 0 !important; box-shadow: 0 0 0 1px #C9CCC4 !important; }
+    .slot { width: 100% !important; }
+  }
+</style>
+</head>
+<body class="bg-ink-100 font-sans text-ink-900 antialiased">
+
+<header class="bg-brand-900 px-5 py-7 text-white">
+  <div class="mx-auto flex max-w-6xl flex-col gap-2">
+    <div class="flex items-center gap-2">
+      <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-300" aria-hidden="true"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>
+      <span class="font-bold tracking-tight">Alongside</span>
+      <span class="text-sm text-brand-300">— nobody builds alone</span>
+    </div>
+    <h1 class="text-balance text-2xl font-bold">The remaining 13 screens</h1>
+    <p class="max-w-2xl text-sm text-brand-200">Everything in roadmap §1.2 that wasn't already drawn, in the approved palette, built from the components in <code class="rounded bg-brand-800 px-1">templates/components/</code>. Phone width, real content. Nothing is built until you've been through these.</p>
+  </div>
+</header>
+
+<main class="mx-auto flex max-w-6xl flex-col gap-12 px-5 py-8">
+
+  <nav class="rounded-2xl border border-ink-300 bg-white p-5">
+    <h2 class="mb-2 text-base font-bold">What's here</h2>
+    <ol class="grid gap-x-6 gap-y-1 text-sm text-ink-800 sm:grid-cols-2">
+      <li>1 · Landing (public, no login wall)</li>
+      <li>2 · Sign up &amp; log in</li>
+      <li>3 · Onboarding — three steps</li>
+      <li>4 · <b>Home for a brand-new user</b> — the cold start</li>
+      <li>5 · Post detail</li>
+      <li>6 · Create an idea</li>
+      <li>7 · Profile — someone else's, and your own</li>
+      <li>8 · Search results — posts and people</li>
+      <li>9 · Messages — conversation list</li>
+      <li>10 · Chat thread</li>
+      <li>11 · Notifications</li>
+      <li>12 · Saved</li>
+      <li>13 · Settings</li>
+    </ol>
+    <p class="mt-3 text-sm text-ink-700">Feed was approved separately (<code class="rounded bg-ink-100 px-1">v3-palette-forest.html</code>). Home shares its shell — what's new here is the empty-ish version a new account actually lands on.</p>
+  </nav>
+
+  <!-- =============== 1 LANDING =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">1 · Landing — public, no login wall</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Rule 7 and the demo plan both land here: a visitor sees real ideas before they see a form. The sign-up card sits <em>after</em> two real posts, not before them. The demo account is on the page because an interviewer should be one tap from the logged-in experience.</p>
+    <div class="flex flex-wrap items-start gap-6">
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-4">
+            <span class="flex items-center gap-1.5 font-bold tracking-tight">
+              <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-700"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>Alongside</span>
+            <a href="#" class="inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand-700">Log in</a>
+          </div>
+
+          <div class="bg-white px-5 pb-6 pt-7">
+            <h1 class="text-balance text-[28px] font-bold leading-[34px]">Nobody builds alone.</h1>
+            <p class="mt-2 text-[15px] leading-relaxed text-ink-800">Post an idea and the roles you need. Find people who want to build it with you — students, makers, small-business owners.</p>
+            <div class="mt-4 flex flex-col gap-2">
+              <a href="#" class="inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 px-5 text-base font-semibold text-white">Post your idea</a>
+              <a href="#" class="inline-flex h-11 w-full items-center justify-center rounded-lg border border-ink-300 bg-white px-4 text-sm font-semibold text-ink-800">Browse ideas first</a>
+            </div>
+            <p class="mt-3 text-xs text-ink-600">Reading needs no account. Sparking, commenting and messaging do.</p>
+          </div>
+
+          <div class="border-y border-ink-200 bg-ink-50 px-4 py-2.5">
+            <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Live on Alongside right now</p>
+          </div>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Ananya Rao</p><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru</p></div>
+            </div>
+            <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">An app that moves leftover canteen food to hostels before it's binned</h3>
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Ops / NGO partnerships</span>
+            </div>
+            <div class="mt-3 flex items-center gap-3 text-sm text-ink-600">
+              <span class="inline-flex items-center gap-1.5"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><b class="tabular-nums text-ink-900">42</b> sparks</span>
+              <span><b class="tabular-nums text-ink-900">8</b> comments</span>
+            </div>
+          </article>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">MN</span>
+              <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Meera Nair</p><p class="truncate text-xs text-ink-600">Runs a crochet business · Kochi</p></div>
+            </div>
+            <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">I make everything by hand and sell it on WhatsApp. I need an actual shop.</h3>
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Web developer</span>
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Photographer</span>
+            </div>
+            <div class="mt-3 flex items-center gap-3 text-sm text-ink-600">
+              <span class="inline-flex items-center gap-1.5"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><b class="tabular-nums text-ink-900">27</b> sparks</span>
+              <span><b class="tabular-nums text-ink-900">12</b> comments</span>
+            </div>
+          </article>
+
+          <div class="bg-white p-4">
+            <div class="rounded-xl border border-brand-200 bg-brand-50 p-4">
+              <p class="text-sm font-bold text-brand-900">Want to reply to Ananya?</p>
+              <p class="mt-1 text-sm leading-relaxed text-ink-800">Takes about thirty seconds. You'll be asked what you're into so your feed isn't empty.</p>
+              <a href="#" class="mt-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Create an account</a>
+            </div>
+            <div class="mt-3 rounded-xl border border-ink-300 bg-ink-50 p-3">
+              <p class="text-xs font-semibold text-ink-800">Just looking around?</p>
+              <p class="mt-0.5 text-xs leading-relaxed text-ink-700">Use the demo account — <code class="rounded bg-white px-1 text-ink-900">demo@alongside.app</code> / <code class="rounded bg-white px-1 text-ink-900">buildtogether</code></p>
+              <a href="#" class="mt-2 inline-flex h-11 items-center rounded-lg border border-ink-300 bg-white px-4 text-xs font-semibold text-ink-800">Log in as the demo user</a>
+            </div>
+            <p class="mt-4 text-center text-[11px] leading-relaxed text-ink-600">Alongside is a portfolio project. The ideas above are sample data, not real traction.</p>
+          </div>
+
+        </div>
+        <p class="text-xs leading-relaxed text-ink-700"><b>Note:</b> the honesty line at the bottom is from product-spec §5.4. It costs nothing and it's the difference between a demo and a lie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== 2 AUTH =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">2 · Sign up &amp; log in</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">One screen, two tabs — people arrive not knowing which they need. Email and password only; social login is a dependency we don't need for v1.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Sign up</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center px-2">
+            <a href="#" aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></a>
+          </div>
+          <div class="px-5 pb-6">
+            <div class="flex border-b border-ink-200">
+              <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Sign up</button>
+              <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Log in</button>
+            </div>
+
+            <h1 class="mt-6 text-[22px] font-semibold leading-7">Create your account</h1>
+            <p class="mt-1 text-sm text-ink-700">Then tell us what you're into, so your feed isn't empty on day one.</p>
+
+            <div class="mt-5 flex flex-col gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label for="s-name" class="text-sm font-medium text-ink-800">Your name</label>
+                <input id="s-name" value="Dev Krishnan" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label for="s-mail" class="text-sm font-medium text-ink-800">Email</label>
+                <input id="s-mail" type="email" placeholder="you@example.com" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base placeholder:text-ink-600">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <label for="s-pass" class="text-sm font-medium text-ink-800">Password</label>
+                <input id="s-pass" type="password" value="········" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base">
+                <p class="text-xs text-ink-600">At least 8 characters. A short phrase beats a clever word.</p>
+              </div>
+            </div>
+
+            <button class="mt-5 inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Create account</button>
+            <p class="mt-3 text-center text-xs leading-relaxed text-ink-600">By creating an account you agree to be decent to other people. Reports go to a human.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Log in — with an error, and the demo way in</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center px-2">
+            <a href="#" aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800">
+              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></a>
+          </div>
+          <div class="px-5 pb-6">
+            <div class="flex border-b border-ink-200">
+              <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Sign up</button>
+              <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Log in</button>
+            </div>
+
+            <h1 class="mt-6 text-[22px] font-semibold leading-7">Welcome back</h1>
+
+            <div role="alert" class="mt-4 flex items-start gap-3 rounded-xl border border-bad-200 bg-bad-50 p-4 text-bad-700">
+              <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 text-bad-600" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/></svg>
+              <div class="min-w-0 flex-1">
+                <b class="block text-sm font-bold">That email and password don't match</b>
+                <p class="mt-0.5 text-sm leading-relaxed">Check for a typo, or reset your password.</p>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-col gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label for="l-mail" class="text-sm font-medium text-ink-800">Email</label>
+                <input id="l-mail" type="email" value="dev@example.com" aria-invalid="true" class="h-11 w-full rounded-lg border border-bad-600 px-3 text-base">
+              </div>
+              <div class="flex flex-col gap-1.5">
+                <div class="flex items-baseline justify-between">
+                  <label for="l-pass" class="text-sm font-medium text-ink-800">Password</label>
+                  <a href="#" class="-my-2 inline-flex h-11 items-center px-1 text-xs font-semibold text-brand-700 underline-offset-2 hover:underline">Forgot it?</a>
+                </div>
+                <input id="l-pass" type="password" value="······" aria-invalid="true" class="h-11 w-full rounded-lg border border-bad-600 px-3 text-base">
+              </div>
+            </div>
+
+            <button class="mt-5 inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Log in</button>
+
+            <div class="mt-5 rounded-xl border border-ink-300 bg-ink-50 p-3">
+              <p class="text-xs font-semibold text-ink-800">Here to look around?</p>
+              <p class="mt-0.5 text-xs leading-relaxed text-ink-700"><code class="rounded bg-white px-1 text-ink-900">demo@alongside.app</code> / <code class="rounded bg-white px-1 text-ink-900">buildtogether</code></p>
+              <button class="mt-2 inline-flex h-11 items-center rounded-lg border border-ink-300 bg-white px-4 text-xs font-semibold text-ink-800">Fill in the demo account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 3 ONBOARDING =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">3 · Onboarding — three steps, all skippable</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">This exists for one reason: <b>value before the graph</b> (product-spec §2.6). Every answer feeds the Home fallback so a brand-new account lands on something worth reading. Skip is always visible and never punished — but each step says what skipping costs, which is the honest way to make it rare.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Step 1 — what are you here for?</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between px-4">
+            <span class="flex gap-1.5" aria-label="Step 1 of 3">
+              <i class="h-1.5 w-8 rounded-full bg-brand-700"></i><i class="h-1.5 w-8 rounded-full bg-ink-200"></i><i class="h-1.5 w-8 rounded-full bg-ink-200"></i>
+            </span>
+            <a href="#" class="inline-flex h-11 items-center px-3 text-sm font-semibold text-ink-700">Skip</a>
+          </div>
+          <div class="px-5 pb-6">
+            <h1 class="text-balance text-[22px] font-semibold leading-7">What brings you here?</h1>
+            <p class="mt-1.5 text-sm leading-relaxed text-ink-700">Pick either — or both. Most people do both eventually.</p>
+            <div class="mt-5 flex flex-col gap-3">
+              <button class="flex w-full items-start gap-3 rounded-xl border-2 border-brand-700 bg-brand-50 p-4 text-left">
+                <span class="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-700">
+                  <svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                <span><b class="block text-sm font-bold text-brand-900">I have an idea</b><span class="mt-0.5 block text-sm leading-relaxed text-ink-800">I want to find people to build it with me.</span></span>
+              </button>
+              <button class="flex w-full items-start gap-3 rounded-xl border border-ink-300 p-4 text-left">
+                <span class="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-ink-300"></span>
+                <span><b class="block text-sm font-bold">I want to join something</b><span class="mt-0.5 block text-sm leading-relaxed text-ink-800">I have skills and time and I'd like to help build.</span></span>
+              </button>
+            </div>
+            <button class="mt-6 inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Step 2 — your field, then topics</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between px-4">
+            <span class="flex gap-1.5" aria-label="Step 2 of 3">
+              <i class="h-1.5 w-8 rounded-full bg-brand-700"></i><i class="h-1.5 w-8 rounded-full bg-brand-700"></i><i class="h-1.5 w-8 rounded-full bg-ink-200"></i>
+            </span>
+            <a href="#" class="inline-flex h-11 items-center px-3 text-sm font-semibold text-ink-700">Skip</a>
+          </div>
+          <div class="px-5 pb-6">
+            <h1 class="text-balance text-[22px] font-semibold leading-7">What do you do?</h1>
+            <p class="mt-1.5 text-sm leading-relaxed text-ink-700">One line. It goes under your name on every post, and it's how we pick your first feed.</p>
+            <input value="Android developer, 2 yrs Kotlin" class="mt-4 h-11 w-full rounded-lg border border-ink-300 px-3 text-base">
+
+            <p class="mt-6 text-sm font-medium text-ink-800">Topics you'd want to see</p>
+            <p class="mt-0.5 text-xs text-ink-600">Suggested from what you just wrote. Tap to toggle.</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full border border-brand-700 bg-brand-50 px-4 text-sm font-semibold text-brand-800">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>mobile</button>
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full border border-brand-700 bg-brand-50 px-4 text-sm font-semibold text-brand-800">
+                <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>android</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">social impact</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">fintech</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">campus</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">civic tech</button>
+            </div>
+            <button class="mt-6 inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Step 3 — leave with a graph already started</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between px-4">
+            <span class="flex gap-1.5" aria-label="Step 3 of 3">
+              <i class="h-1.5 w-8 rounded-full bg-brand-700"></i><i class="h-1.5 w-8 rounded-full bg-brand-700"></i><i class="h-1.5 w-8 rounded-full bg-brand-700"></i>
+            </span>
+            <a href="#" class="inline-flex h-11 items-center px-3 text-sm font-semibold text-ink-700">Skip</a>
+          </div>
+          <div class="px-5 pb-6">
+            <h1 class="text-balance text-[22px] font-semibold leading-7">People building things you care about</h1>
+            <p class="mt-1.5 text-sm leading-relaxed text-ink-700">Follow a few and your Home fills up straight away. One-way and instant — they just get a notification.</p>
+
+            <div class="mt-5 flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Ananya Rao</p><p class="truncate text-xs text-ink-600">Final-year CS · 3 ideas · mobile, campus</p></div>
+                <button class="inline-flex h-11 shrink-0 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Follow</button>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">SV</span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Sneha Venkatesh</p><p class="truncate text-xs text-ink-600">Product · 1 idea · social impact</p></div>
+                <button class="inline-flex h-11 shrink-0 items-center rounded-lg border border-ink-300 px-4 text-sm font-semibold text-ink-800">Following</button>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-1 ring-ink-200">RK</span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Rohit Kulkarni</p><p class="truncate text-xs text-ink-600">Product design · 2 ideas · civic tech</p></div>
+                <button class="inline-flex h-11 shrink-0 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Follow</button>
+              </div>
+            </div>
+
+            <p class="mt-5 text-sm font-medium text-ink-800">Or follow a topic</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">#mobile</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">#android</button>
+              <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">#campus</button>
+            </div>
+
+            <button class="mt-6 inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Take me to Home</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 4 NEW USER HOME =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">4 · Home for a brand-new user — the cold start</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">The most important screen in the product and the one that was missing. A new account has almost no graph, so the cascading fallback (§4.3) does the work — and the design job is <b>saying out loud where each block came from</b>. An unexplained feed feels random; a labelled one feels like the app is working on your behalf. Each divider is also a nudge toward the action that would improve it.</p>
+    <div class="flex flex-wrap items-start gap-6">
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-4">
+            <span class="flex items-center gap-1.5 font-bold tracking-tight">
+              <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-700"><path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/></svg>Alongside</span>
+            <div class="flex items-center gap-1">
+              <button class="grid h-11 w-11 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+              <button class="grid h-11 w-11 place-items-center rounded-full"><span class="grid h-8 w-8 place-items-center rounded-full bg-ink-200 text-xs font-bold text-ink-800 ring-1 ring-ink-200">DK</span></button>
+            </div>
+          </div>
+          <div class="flex border-b border-ink-200 bg-white">
+            <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Home</button>
+            <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Feed</button>
+          </div>
+
+          <div class="border-b border-ink-200 bg-brand-50 px-4 py-3">
+            <p class="text-sm font-semibold text-brand-900">Welcome, Dev.</p>
+            <p class="mt-0.5 text-sm leading-relaxed text-ink-800">You follow 1 person so far, so we've filled the rest from <b>android</b> and <b>mobile</b>. It gets more yours as you follow people.</p>
+          </div>
+
+          <div class="border-b border-ink-200 bg-ink-50 px-4 py-2.5">
+            <p class="text-xs font-bold uppercase tracking-wide text-ink-600">From people you follow</p>
+          </div>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">SV</span>
+              <div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 text-sm"><span class="truncate font-semibold">Sneha Venkatesh</span><span class="shrink-0 text-ink-600">· 4h</span></div><p class="truncate text-xs text-ink-600">Product · Chennai</p></div>
+            </div>
+            <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">A tool that tells you which govt scheme you actually qualify for</h3>
+            <p class="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-ink-800">My mother spent four months chasing a pension she was never eligible for. The rules exist, they're just unreadable.</p>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i></span>Just an idea</span>
+              <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+            </div>
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Policy researcher</span>
+            </div>
+            <div class="-mx-1.5 -mb-1 mt-3 flex items-center border-t border-ink-100 pt-1">
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="text-sm font-semibold tabular-nums">14</span></button>
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="text-sm font-semibold tabular-nums">3</span></button>
+            </div>
+          </article>
+
+          <div class="border-b border-ink-200 bg-ink-50 px-4 py-3">
+            <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Because you picked android</p>
+            <p class="mt-1 text-sm leading-relaxed text-ink-800">Nobody you follow has posted since. These are the most-sparked android ideas this week.</p>
+          </div>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 text-sm"><span class="truncate font-semibold">Ananya Rao</span><span class="shrink-0 text-ink-600">· 2h</span></div><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru</p></div>
+              <button class="inline-flex h-11 shrink-0 items-center rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800">Follow</button>
+            </div>
+            <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">An app that moves leftover canteen food to hostels before it's binned</h3>
+            <p class="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-ink-800">Our campus throws out trays of food every night while people two blocks away are eating instant noodles.</p>
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Ops / NGO partnerships</span>
+            </div>
+            <div class="-mx-1.5 -mb-1 mt-3 flex items-center border-t border-ink-100 pt-1">
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full bg-spark-50 px-3 text-spark-700"><svg viewBox="0 0 24 24" class="h-5 w-5 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="text-sm font-semibold tabular-nums">42</span></button>
+              <button class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span class="text-sm font-semibold tabular-nums">8</span></button>
+            </div>
+          </article>
+
+          <div class="bg-white p-4">
+            <div class="rounded-xl border border-ink-300 bg-ink-50 p-4 text-center">
+              <p class="text-sm font-semibold text-ink-900">Want a Home that's actually yours?</p>
+              <p class="mt-1 text-sm leading-relaxed text-ink-700">Follow three more people and this stops being a guess.</p>
+              <a href="#" class="mt-3 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Find people to follow</a>
+            </div>
+          </div>
+
+          <div class="flex h-16 items-center justify-around border-t border-ink-200 bg-white pb-1">
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] font-semibold text-brand-700"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V10z"/></svg>Home</a>
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5 5-2z"/></svg>Explore</a>
+            <a href="#" aria-label="Post an idea" class="grid h-12 w-12 place-items-center rounded-2xl bg-brand-700 text-white"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></a>
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg>Messages</a>
+            <a href="#" class="flex w-14 flex-col items-center gap-0.5 py-1 text-[11px] text-ink-600"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alerts</a>
+          </div>
+        </div>
+        <p class="text-xs leading-relaxed text-ink-700"><b>The design decision:</b> three labelled bands instead of one undifferentiated list — <i>from people you follow</i> → <i>because you picked android</i> → the nudge. Each band names its own source, so the feed explains itself.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== 5 POST DETAIL =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">5 · Post detail</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Redrawn in the approved palette. "Looking for" is the loudest block after the title — it's the whole point of the post. The sticky bar keeps Spark and Message under a thumb however long the body runs. The signed-out version swaps the composer for a sign-up prompt.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Signed in</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-2">
+            <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="text-sm font-semibold">Idea</span>
+            <button aria-label="More" class="grid h-11 w-11 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+          </div>
+
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Ananya Rao</p><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru · 2h ago</p></div>
+              <button class="inline-flex h-11 shrink-0 items-center rounded-lg border border-ink-300 px-4 text-sm font-semibold text-ink-800">Follow</button>
+            </div>
+
+            <h1 class="mt-4 text-balance text-[22px] font-semibold leading-7">An app that moves leftover canteen food to hostels before it's binned</h1>
+
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="flex gap-0.5"><i class="h-1 w-1.5 rounded-sm bg-brand-600"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i><i class="h-1 w-1.5 rounded-sm bg-ink-300"></i></span>Just an idea</span>
+              <span class="inline-flex h-7 items-center gap-2 rounded-full border border-ink-300 bg-ink-50 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Serious</span>
+              <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+            </div>
+
+            <div class="mt-4 flex flex-col gap-3 text-base leading-relaxed text-ink-800">
+              <p>Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I spent a month actually watching how it works instead of guessing.</p>
+              <p>I've mapped the flow and talked to two canteen managers — both are in, as long as nobody asks them to use a spreadsheet. The hard part isn't the app, it's the 40-minute window between "this is surplus" and "this is unsafe."</p>
+              <p>I can do the backend and the NGO side. I've never shipped Android and I'm not going to pretend otherwise.</p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">sustainability</a>
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">mobile</a>
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">campus</a>
+              <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">social impact</a>
+            </div>
+
+            <div class="mt-5 rounded-2xl border border-brand-200 bg-brand-50 p-4">
+              <p class="text-sm font-bold text-brand-900">Looking for</p>
+              <div class="mt-2.5 flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-2 text-sm font-semibold text-brand-800">Android dev</span>
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-2 text-sm font-semibold text-brand-800">Ops / NGO partnerships</span>
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-2 text-sm font-semibold text-brand-800">Designer</span>
+              </div>
+              <p class="mt-3 text-xs leading-relaxed text-ink-800">Ananya decides who joins — there's no application to fill in. Just say hello.</p>
+            </div>
+
+            <div class="mt-5 flex items-center gap-4 border-b border-ink-200 pb-3 text-sm text-ink-700">
+              <span><b class="tabular-nums text-ink-900">42</b> sparks</span>
+              <span><b class="tabular-nums text-ink-900">8</b> comments</span>
+              <button class="ml-auto inline-flex h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>Save</button>
+            </div>
+
+            <h2 id="comments" class="mt-5 text-base font-bold">Suggestions &amp; comments</h2>
+            <p class="mt-0.5 text-xs text-ink-600">You don't have to join to be useful.</p>
+
+            <div class="mt-3 flex items-start gap-2.5">
+              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-200 text-xs font-bold text-ink-800 ring-1 ring-ink-200">DK</span>
+              <input placeholder="Add a suggestion…" class="h-11 w-full rounded-full border border-ink-300 px-4 text-base placeholder:text-ink-600">
+            </div>
+
+            <div class="mt-5 flex flex-col gap-5">
+              <div class="flex items-start gap-2.5">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-ink-200">SV</span>
+                <div class="min-w-0">
+                  <p class="text-sm"><span class="font-semibold">Sneha Venkatesh</span> <span class="text-ink-600">· 1h</span></p>
+                  <p class="mt-0.5 text-[15px] leading-relaxed text-ink-800">The 40-minute window is the whole product. Robin Hood Army solved it with WhatsApp groups per neighbourhood — worth copying before you build routing.</p>
+                  <button class="-ml-1 mt-1.5 inline-flex h-11 items-center gap-1 rounded-full px-2.5 text-xs font-semibold text-ink-600"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>6</button>
+                </div>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-200 text-xs font-bold text-ink-800 ring-1 ring-ink-200">DK</span>
+                <div class="min-w-0">
+                  <p class="text-sm"><span class="font-semibold">Dev Krishnan</span> <span class="text-ink-600">· 40m</span></p>
+                  <p class="mt-0.5 text-[15px] leading-relaxed text-ink-800">Android dev here, 2 yrs Kotlin. Free weekends. DM'ing you.</p>
+                  <button class="-ml-1 mt-1.5 inline-flex h-11 items-center gap-1 rounded-full bg-spark-50 px-2.5 text-xs font-semibold text-spark-700"><svg viewBox="0 0 24 24" class="h-4 w-4 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>3</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="mt-5 inline-flex h-11 w-full items-center justify-center rounded-lg border border-ink-300 text-sm font-semibold text-ink-800">Load 6 more comments</button>
+          </div>
+
+          <div class="flex items-center gap-3 border-t border-ink-200 bg-white px-3 py-2.5">
+            <button class="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-spark-50 px-3.5 text-spark-700"><svg viewBox="0 0 24 24" class="h-6 w-6 fill-spark-500"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg><span class="text-sm font-bold tabular-nums">42</span></button>
+            <button class="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-brand-700 text-sm font-semibold text-white">Message Ananya</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Signed out — the same page, minus the doing</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 px-2">
+            <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="text-sm font-semibold">Idea</span>
+            <a href="#" class="inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand-700">Log in</a>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Ananya Rao</p><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru · 2h ago</p></div>
+            </div>
+            <h1 class="mt-4 text-balance text-[22px] font-semibold leading-7">An app that moves leftover canteen food to hostels before it's binned</h1>
+            <div class="mt-4 flex flex-col gap-3 text-base leading-relaxed text-ink-800">
+              <p>Our campus throws out trays of food every night while people two blocks away are eating instant noodles. I spent a month actually watching how it works instead of guessing.</p>
+              <p class="line-clamp-3">I've mapped the flow and talked to two canteen managers — both are in, as long as nobody asks them to use a spreadsheet. The hard part isn't the app, it's the 40-minute window.</p>
+            </div>
+            <div class="mt-5 rounded-2xl border border-brand-200 bg-brand-50 p-4">
+              <p class="text-sm font-bold text-brand-900">Looking for</p>
+              <div class="mt-2.5 flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-2 text-sm font-semibold text-brand-800">Android dev</span>
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-white px-3 py-2 text-sm font-semibold text-brand-800">Designer</span>
+              </div>
+            </div>
+
+            <div class="mt-5 rounded-xl border border-ink-300 bg-ink-50 p-4">
+              <p class="text-sm font-bold text-ink-900">Join to reply to Ananya</p>
+              <p class="mt-1 text-sm leading-relaxed text-ink-700">You can read everything without an account. Sparking, commenting and messaging need one.</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <a href="#" class="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Sign up</a>
+                <a href="#" class="inline-flex h-11 items-center rounded-lg border border-ink-300 bg-white px-4 text-sm font-semibold text-ink-800">Log in</a>
+                <a href="#" class="inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-ink-700">Try the demo</a>
+              </div>
+            </div>
+
+            <h2 class="mt-6 text-base font-bold">Suggestions &amp; comments</h2>
+            <div class="mt-3 flex items-start gap-2.5">
+              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-50 text-xs font-bold text-brand-700 ring-1 ring-ink-200">SV</span>
+              <div class="min-w-0">
+                <p class="text-sm"><span class="font-semibold">Sneha Venkatesh</span> <span class="text-ink-600">· 1h</span></p>
+                <p class="mt-0.5 text-[15px] leading-relaxed text-ink-800">The 40-minute window is the whole product. Robin Hood Army solved it with WhatsApp groups per neighbourhood.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 6 CREATE =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">6 · Create an idea</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Write first, classify second. The body is the biggest thing on screen and everything structured sits below it — asking someone to pick a commitment level before they've said what they're making is how you get blank posts. Roles is the only required field besides the title, because a post without roles can't be matched to anyone.</p>
+    <div class="flex flex-wrap items-start gap-6">
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 px-2">
+            <button aria-label="Cancel" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <span class="text-sm font-semibold">New idea</span>
+            <span class="h-11 w-11"></span>
+          </div>
+
+          <div class="flex flex-col gap-5 p-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="c-title" class="text-sm font-medium text-ink-800">What are you building?</label>
+              <input id="c-title" value="A Kannada-first OCR for old land records" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="c-body" class="text-sm font-medium text-ink-800">Tell people about it</label>
+              <textarea id="c-body" rows="6" class="w-full rounded-lg border border-ink-300 px-3 py-2.5 text-base leading-relaxed">Most land records in rural Karnataka are handwritten Kannada on paper that's falling apart. Existing OCR is trained on printed English and gets maybe 40% of it.
+
+I have a labelled dataset of about 3,000 pages.</textarea>
+              <p class="text-xs text-ink-600">Write it like you'd explain it to a friend. No pitch deck voice.</p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="c-roles" class="text-sm font-medium text-ink-800">Roles you need</label>
+              <div class="flex flex-wrap gap-2 rounded-lg border border-ink-300 p-2">
+                <span class="inline-flex h-11 items-center gap-1 rounded-full border border-brand-200 bg-brand-50 py-0 pl-3 pr-1 text-xs font-semibold text-brand-800">ML engineer
+                  <button aria-label="Remove ML engineer" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-brand-700 hover:bg-brand-100"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+                <span class="inline-flex h-11 items-center gap-1 rounded-full border border-brand-200 bg-brand-50 py-0 pl-3 pr-1 text-xs font-semibold text-brand-800">Kannada speaker
+                  <button aria-label="Remove Kannada speaker" class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-brand-700 hover:bg-brand-100"><svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>
+                <input id="c-roles" placeholder="Add a role…" class="h-9 min-w-[9rem] flex-1 border-0 px-1 text-base placeholder:text-ink-600 focus:outline-none">
+              </div>
+              <p class="text-xs text-ink-600">This is how people find you. Be specific — "Kannada speaker" matches better than "helper".</p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-ink-800">How far along is it?</span>
+              <div class="flex gap-2">
+                <button class="h-11 flex-1 rounded-lg border border-ink-300 text-xs font-semibold text-ink-800">Just an idea</button>
+                <button class="h-11 flex-1 rounded-lg border-2 border-brand-700 bg-brand-50 text-xs font-semibold text-brand-800">Already building</button>
+                <button class="h-11 flex-1 rounded-lg border border-ink-300 text-xs font-semibold text-ink-800">Launched</button>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-ink-800">How serious is it?</span>
+              <div class="flex gap-2">
+                <button class="h-11 flex-1 rounded-lg border border-ink-300 px-2 text-xs font-semibold text-ink-800">Casual / weekend</button>
+                <button class="h-11 flex-1 rounded-lg border-2 border-brand-700 bg-brand-50 px-2 text-xs font-semibold text-brand-800">Building a company</button>
+              </div>
+              <p class="text-xs text-ink-600">The single best thing you can do to avoid wasting each other's time.</p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="c-city" class="text-sm font-medium text-ink-800">Where are you? <span class="font-normal text-ink-600">(optional)</span></label>
+              <input id="c-city" value="Pune" class="h-11 w-full rounded-lg border border-ink-300 px-3 text-base">
+              <label class="mt-1 flex items-center gap-2.5 text-sm text-ink-800">
+                <span class="grid h-5 w-5 place-items-center rounded border-2 border-brand-700 bg-brand-700"><svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                Remote is fine
+              </label>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-ink-800">Images <span class="font-normal text-ink-600">(optional)</span></span>
+              <button class="flex h-24 w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-ink-300 text-ink-600">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="M21 16l-5-5-9 8"/></svg>
+                <span class="text-xs font-semibold">Add a photo or sketch</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="sticky bottom-0 border-t border-ink-200 bg-white p-3">
+            <button class="inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Publish idea</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== 7 PROFILE =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">7 · Profile</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Someone else's profile has to answer one question fast: <i>is this person worth messaging?</i> So skills and what they've actually done sit above the post list. <b>Follow-with-a-note</b> is designed here for the first time — it was in the spec (§4.4) and had no UI.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Someone else's</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-2">
+            <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="text-sm font-semibold">Profile</span>
+            <button aria-label="More" class="grid h-11 w-11 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+          </div>
+
+          <div class="bg-white p-4">
+            <div class="flex items-start gap-4">
+              <span class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-brand-100 text-lg font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1">
+                <h1 class="truncate text-[22px] font-semibold leading-7">Ananya Rao</h1>
+                <p class="text-sm text-ink-700">Final-year CS · Bengaluru</p>
+                <p class="mt-1 text-xs text-ink-600"><b class="text-ink-900">128</b> followers · <b class="text-ink-900">64</b> following</p>
+              </div>
+            </div>
+
+            <p class="mt-3 text-[15px] leading-relaxed text-ink-800">I like problems where the software is the easy part. Currently doing my thesis on food logistics. Will absolutely talk your ear off about cold chains.</p>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+              <a href="#" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800">github.com/ananyar</a>
+              <a href="#" class="inline-flex h-11 items-center gap-1.5 rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800">ananya.works</a>
+            </div>
+
+            <div class="mt-4">
+              <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Can fill these roles</p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Backend</span>
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Python</span>
+                <span class="inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Partnerships</span>
+              </div>
+            </div>
+
+            <div class="mt-4 flex gap-2">
+              <button class="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-brand-700 text-sm font-semibold text-white">Follow</button>
+              <button class="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-ink-300 text-sm font-semibold text-ink-800">Message</button>
+            </div>
+          </div>
+
+          <div class="mt-2 flex border-b border-ink-200 bg-white">
+            <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Ideas <span class="tabular-nums text-ink-600">3</span></button>
+            <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Sparked</button>
+          </div>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <h3 class="text-balance text-lg font-semibold leading-snug">An app that moves leftover canteen food to hostels before it's binned</h3>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+              <span class="text-xs text-ink-600">42 sparks · 8 comments</span>
+            </div>
+          </article>
+          <article class="border-b border-ink-200 bg-white p-4">
+            <h3 class="text-balance text-lg font-semibold leading-snug">A shared bike-repair log for the hostel blocks</h3>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-ink-500"></span>Team formed</span>
+              <span class="text-xs text-ink-600">17 sparks · 4 comments</span>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Follow with a note — new, and your own profile</p>
+        <div class="flex flex-col gap-4">
+
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+            <div class="flex items-center justify-between border-b border-ink-200 px-4 py-3">
+              <span class="text-sm font-semibold">Following Ananya</span>
+              <button aria-label="Close" class="grid h-11 w-11 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <div class="p-4">
+              <div class="flex items-start gap-3 rounded-xl bg-brand-50 p-3">
+                <svg viewBox="0 0 24 24" class="mt-0.5 h-5 w-5 shrink-0 text-brand-700" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                <p class="text-sm leading-relaxed text-brand-900">You're following Ananya. She's been notified.</p>
+              </div>
+              <label for="f-note" class="mt-4 block text-sm font-medium text-ink-800">Say why, if you like <span class="font-normal text-ink-600">(optional)</span></label>
+              <p class="mt-0.5 text-xs leading-relaxed text-ink-600">This goes in her notification. It's the difference between a number going up and a conversation starting.</p>
+              <textarea id="f-note" rows="3" class="mt-2 w-full rounded-lg border border-ink-300 px-3 py-2.5 text-base leading-relaxed" placeholder="I'd want the Android role — 2 yrs Kotlin, free weekends."></textarea>
+              <div class="mt-3 flex gap-2">
+                <button class="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-brand-700 text-sm font-semibold text-white">Send note</button>
+                <button class="inline-flex h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold text-ink-700">Not now</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+            <div class="bg-white p-4">
+              <div class="flex items-start gap-4">
+                <span class="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-ink-200 text-lg font-bold text-ink-800 ring-1 ring-ink-200">DK</span>
+                <div class="min-w-0 flex-1">
+                  <h1 class="truncate text-[22px] font-semibold leading-7">Dev Krishnan</h1>
+                  <p class="text-sm text-ink-700">Android developer, 2 yrs Kotlin</p>
+                  <p class="mt-1 text-xs text-ink-600"><b class="text-ink-900">4</b> followers · <b class="text-ink-900">12</b> following</p>
+                </div>
+              </div>
+              <div class="mt-4 flex gap-2">
+                <button class="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-ink-300 text-sm font-semibold text-ink-800">Edit profile</button>
+                <a href="#" aria-label="Settings" class="grid h-11 w-11 place-items-center rounded-lg border border-ink-300 text-ink-800"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></a>
+              </div>
+            </div>
+            <div class="mt-2 flex border-b border-ink-200 bg-white">
+              <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Ideas</button>
+              <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Sparked</button>
+              <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">Saved</button>
+            </div>
+            <div class="bg-white">
+              <div class="flex flex-col items-center px-6 py-10 text-center">
+                <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+                  <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <p class="mt-3 text-base font-semibold text-ink-900">You haven't posted an idea yet</p>
+                <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">You don't need it fully formed. Half the ideas here started as a paragraph and a question.</p>
+                <a href="#" class="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Post your first idea</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 8 SEARCH =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">8 · Search results — ideas and people</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Search covers posts <i>and</i> people (§4.3), so the tab has counts on it — otherwise nobody discovers the People half. Filters live in a sheet, not a permanently open panel, because at 375px a filter panel is the screen.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Results</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+          <div class="flex h-14 items-center gap-2 border-b border-ink-200 bg-white px-2">
+            <button aria-label="Back" class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <div class="flex h-11 flex-1 items-center gap-2 rounded-full bg-ink-100 px-3">
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input value="android" class="w-full bg-transparent text-base focus:outline-none">
+            </div>
+          </div>
+
+          <div class="flex border-b border-ink-200 bg-white">
+            <button class="h-12 flex-1 border-b-2 border-brand-700 text-sm font-semibold text-ink-900">Ideas <span class="tabular-nums text-ink-600">12</span></button>
+            <button class="h-12 flex-1 border-b-2 border-transparent text-sm font-medium text-ink-600">People <span class="tabular-nums">5</span></button>
+          </div>
+
+          <div class="flex gap-2 overflow-x-auto border-b border-ink-200 bg-white px-4 py-2.5">
+            <button class="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand-700 px-4 text-xs font-semibold text-white">Role: Android dev
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <button class="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-ink-300 px-4 text-xs font-semibold text-ink-800">Commitment
+              <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="inline-flex h-11 shrink-0 items-center rounded-full border border-ink-300 px-4 text-xs font-semibold text-ink-800">Location</button>
+          </div>
+
+          <article class="border-b border-ink-200 bg-white p-4">
+            <div class="flex items-start gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 text-sm"><span class="truncate font-semibold">Ananya Rao</span><span class="shrink-0 text-ink-600">· 2h</span></div><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru</p></div>
+            </div>
+            <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">An app that moves leftover canteen food to hostels before it's binned</h3>
+            <p class="mt-1.5 line-clamp-2 text-[15px] leading-relaxed text-ink-800">I can do the backend and the NGO side, but I've never shipped <mark class="rounded bg-brand-100 px-0.5 text-brand-900">Android</mark>…</p>
+            <div class="mt-3 flex gap-2 overflow-x-auto pb-0.5">
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Android dev</span>
+              <span class="inline-flex shrink-0 items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-xs font-semibold text-brand-800">Designer</span>
+            </div>
+          </article>
+
+          <div class="border-b border-ink-200 bg-white p-4">
+            <p class="mb-3 text-xs font-bold uppercase tracking-wide text-ink-600">People matching "android"</p>
+            <div class="flex items-center gap-3">
+              <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">PS</span>
+              <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Priya Shetty</p><p class="truncate text-xs text-ink-600">Android + Flutter · Mangaluru</p></div>
+              <button class="inline-flex h-11 shrink-0 items-center rounded-lg border border-ink-300 px-4 text-sm font-semibold text-ink-800">Follow</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Filter sheet, and nothing found</p>
+        <div class="flex flex-col gap-4">
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+            <div class="border-b border-ink-200 px-4 py-3">
+              <div class="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-300"></div>
+              <div class="flex items-center justify-between">
+                <span class="text-base font-bold">Filters</span>
+                <button class="-mr-2 inline-flex h-11 items-center px-2 text-sm font-semibold text-brand-700">Clear all</button>
+              </div>
+            </div>
+            <div class="flex flex-col gap-5 p-4">
+              <div>
+                <p class="text-sm font-medium text-ink-800">Role needed</p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <button class="inline-flex h-11 items-center rounded-full border-2 border-brand-700 bg-brand-50 px-4 text-sm font-semibold text-brand-800">Android dev</button>
+                  <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">Designer</button>
+                  <button class="inline-flex h-11 items-center rounded-full border border-ink-300 px-4 text-sm font-medium text-ink-800">Backend</button>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-ink-800">Commitment</p>
+                <div class="mt-2 flex gap-2">
+                  <button class="h-11 flex-1 rounded-lg border border-ink-300 px-2 text-xs font-semibold text-ink-800">Casual / weekend</button>
+                  <button class="h-11 flex-1 rounded-lg border border-ink-300 px-2 text-xs font-semibold text-ink-800">Building a company</button>
+                </div>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-ink-800">Location</p>
+                <input placeholder="Any city" class="mt-2 h-11 w-full rounded-lg border border-ink-300 px-3 text-base placeholder:text-ink-600">
+                <label class="mt-3 flex items-center gap-2.5 text-sm text-ink-800">
+                  <span class="grid h-5 w-5 place-items-center rounded border-2 border-brand-700 bg-brand-700"><svg viewBox="0 0 24 24" class="h-3 w-3" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+                  Remote-friendly only
+                </label>
+              </div>
+              <button class="inline-flex h-12 w-full items-center justify-center rounded-lg bg-brand-700 text-base font-semibold text-white">Show 12 ideas</button>
+            </div>
+          </div>
+
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+            <div class="flex flex-col items-center px-6 py-10 text-center">
+              <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              </div>
+              <p class="mt-3 text-base font-semibold text-ink-900">No ideas match "kannada ocr" with 2 filters</p>
+              <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">Filters cause this far more often than the words do.</p>
+              <button class="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Clear filters</button>
+              <p class="mt-5 text-xs font-bold uppercase tracking-wide text-ink-600">Try instead</p>
+              <div class="mt-2 flex flex-wrap justify-center gap-2">
+                <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">ocr</a>
+                <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">regional languages</a>
+                <a href="#" class="inline-flex items-center rounded-full bg-ink-100 px-3 py-2 text-xs text-ink-700">civic tech</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 9+10 MESSAGING =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">9 &amp; 10 · Messages and the chat thread</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Anyone can message anyone — no request gate. The receiver decides whether to open it, so an unopened thread from a stranger is simply an unread row, not a permission prompt. The thread carries a small context header showing which idea the conversation came from, because "why is this person messaging me" is the first question every time.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Conversation list</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 px-4">
+            <span class="text-lg font-bold">Messages</span>
+            <button aria-label="Search messages" class="grid h-11 w-11 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+          </div>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 bg-brand-50 p-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-2">
+                <p class="truncate text-sm font-bold">Ananya Rao</p>
+                <span class="ml-auto shrink-0 text-xs text-ink-600">2m</span>
+              </div>
+              <p class="mt-0.5 line-clamp-2 text-sm leading-relaxed text-ink-900">That would be brilliant actually. The dataset's a mess but it's labelled — when are you free this week?</p>
+            </div>
+            <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-brand-700"></span>
+          </a>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 p-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">MN</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-2">
+                <p class="truncate text-sm font-semibold">Meera Nair</p>
+                <span class="ml-auto shrink-0 text-xs text-ink-600">Tue</span>
+              </div>
+              <p class="mt-0.5 line-clamp-2 text-sm leading-relaxed text-ink-700"><span class="text-ink-600">You:</span> Sent you the mockup — no rush, have a look when you can.</p>
+            </div>
+          </a>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 p-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-1 ring-ink-200">RK</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-baseline gap-2">
+                <p class="truncate text-sm font-semibold">Rohit Kulkarni</p>
+                <span class="ml-auto shrink-0 text-xs text-ink-600">12 Jul</span>
+              </div>
+              <p class="mt-0.5 line-clamp-2 text-sm leading-relaxed text-ink-700">Thanks for the note! We filled the role last week but I'll keep you in mind.</p>
+            </div>
+          </a>
+
+          <div class="flex flex-col items-center px-6 py-10 text-center">
+            <p class="text-sm text-ink-700">That's everything.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Chat thread</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+          <div class="flex h-14 items-center gap-2 border-b border-ink-200 bg-white px-2">
+            <button aria-label="Back" class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+            <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Ananya Rao</p><p class="truncate text-xs text-ink-600">Final-year CS · Bengaluru</p></div>
+            <button aria-label="More" class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-700"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
+          </div>
+
+          <a href="#" class="flex h-11 items-center gap-2 border-b border-ink-200 bg-white px-4">
+            <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/></svg>
+            <p class="truncate text-xs text-ink-700">About <b class="text-ink-900">the canteen food app</b></p>
+          </a>
+
+          <div class="flex flex-col gap-3 p-4">
+            <p class="text-center text-xs text-ink-600">Today</p>
+
+            <div class="flex justify-end">
+              <div class="max-w-[80%] rounded-2xl rounded-br-md bg-brand-700 px-3.5 py-2.5">
+                <p class="text-[15px] leading-relaxed text-white">Hi! Saw your canteen post. I'm an Android dev, 2 yrs Kotlin, free most weekends. The 40-minute window bit is a fun constraint.</p>
+                <p class="mt-1 text-right text-[11px] text-brand-200">09:14</p>
+              </div>
+            </div>
+
+            <div class="flex justify-start gap-2">
+              <span class="mt-auto grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="max-w-[80%] rounded-2xl rounded-bl-md border border-ink-200 bg-white px-3.5 py-2.5">
+                <p class="text-[15px] leading-relaxed text-ink-900">Oh nice — did you look at the notes I linked? The routing is the bit I keep going round in circles on.</p>
+                <p class="mt-1 text-[11px] text-ink-600">09:31</p>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <div class="max-w-[80%] rounded-2xl rounded-br-md bg-brand-700 px-3.5 py-2.5">
+                <p class="text-[15px] leading-relaxed text-white">Yeah. Honestly I'd skip routing for v1 and just do neighbourhood groups like Sneha said. Ship the boring version, see if canteens actually post.</p>
+                <p class="mt-1 text-right text-[11px] text-brand-200">09:33</p>
+              </div>
+            </div>
+
+            <div class="flex justify-start gap-2">
+              <span class="mt-auto grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+              <div class="max-w-[80%] rounded-2xl rounded-bl-md border border-ink-200 bg-white px-3.5 py-2.5">
+                <p class="text-[15px] leading-relaxed text-ink-900">That would be brilliant actually. The dataset's a mess but it's labelled — when are you free this week?</p>
+                <p class="mt-1 text-[11px] text-ink-600">09:36</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sticky bottom-0 flex items-end gap-2 border-t border-ink-200 bg-white p-3">
+            <textarea rows="1" placeholder="Message Ananya…" class="max-h-28 flex-1 resize-none rounded-2xl border border-ink-300 px-3.5 py-2.5 text-base placeholder:text-ink-600"></textarea>
+            <button aria-label="Send" class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-700 text-white">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 8 6 8-16-8z"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="text-xs leading-relaxed text-ink-700"><b>Note:</b> no read receipts and no typing indicator — both are Phase 2 / explicitly out of v1. Timestamps carry the weight instead.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 11+12 NOTIFICATIONS + SAVED =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">11 &amp; 12 · Notifications and Saved</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Notifications are the return loop (roadmap §1.3) — without them the place is a ghost town. Three triggers in v1: new DM, new follower, new comment. A follow that came with a note shows the note, because that's the one that's actually worth opening.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Notifications</p>
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 px-4">
+            <span class="text-lg font-bold">Alerts</span>
+            <button class="inline-flex h-11 items-center rounded-lg px-2 text-sm font-semibold text-brand-700">Mark all read</button>
+          </div>
+
+          <div class="border-b border-ink-200 bg-ink-50 px-4 py-2"><p class="text-xs font-bold uppercase tracking-wide text-ink-600">New</p></div>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 bg-brand-50 p-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-100 text-sm font-bold text-brand-800 ring-1 ring-ink-200">AR</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm leading-relaxed text-ink-900"><b>Ananya Rao</b> replied to your message</p>
+              <p class="mt-0.5 line-clamp-1 text-sm text-ink-700">That would be brilliant actually. The dataset's…</p>
+              <p class="mt-1 text-xs text-ink-600">2 minutes ago</p>
+            </div>
+            <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-brand-700"></span>
+          </a>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 bg-brand-50 p-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">PS</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm leading-relaxed text-ink-900"><b>Priya Shetty</b> followed you</p>
+              <div class="mt-1.5 rounded-lg border-l-2 border-brand-300 bg-white px-3 py-2">
+                <p class="text-sm leading-relaxed text-ink-800">"Saw your Kotlin comment — I'm building something similar, would love to compare notes."</p>
+              </div>
+              <p class="mt-1.5 text-xs text-ink-600">1 hour ago</p>
+            </div>
+            <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-brand-700"></span>
+          </a>
+
+          <div class="border-b border-ink-200 bg-ink-50 px-4 py-2"><p class="text-xs font-bold uppercase tracking-wide text-ink-600">Earlier</p></div>
+
+          <a href="#" class="flex items-start gap-3 border-b border-ink-200 p-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-1 ring-ink-200">SV</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm leading-relaxed text-ink-900"><b>Sneha Venkatesh</b> commented on <b>your bike-repair log idea</b></p>
+              <p class="mt-0.5 line-clamp-2 text-sm text-ink-700">Have you talked to the hostel wardens? They keep a paper log already…</p>
+              <p class="mt-1 text-xs text-ink-600">Yesterday</p>
+            </div>
+          </a>
+
+          <div class="p-4">
+            <div role="status" class="flex items-start gap-3 rounded-xl border border-warn-200 bg-warn-50 p-4 text-warn-700">
+              <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 text-warn-600" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+              <div class="min-w-0 flex-1">
+                <b class="block text-sm font-bold">Still looking for teammates?</b>
+                <p class="mt-0.5 text-sm leading-relaxed">Nobody's touched <b>your bike-repair log idea</b> in 30 days. Confirm it's live, or it drops out of the feed.</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button class="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Yes, still looking</button>
+                  <button class="inline-flex h-11 items-center rounded-lg border border-ink-300 bg-white px-4 text-sm font-semibold text-ink-800">Team formed</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <p class="text-sm font-bold">Saved — and its empty state</p>
+        <div class="flex flex-col gap-4">
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+            <div class="flex h-14 items-center justify-between border-b border-ink-200 px-2">
+              <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+              <span class="text-sm font-semibold">Saved</span>
+              <span class="h-11 w-11"></span>
+            </div>
+            <article class="border-b border-ink-200 p-4">
+              <div class="flex items-start gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink-200 text-sm font-bold text-ink-800 ring-1 ring-ink-200">MN</span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Meera Nair</p><p class="truncate text-xs text-ink-600">Saved 3 days ago</p></div>
+                <button aria-label="Remove from saved" class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-brand-700">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">I make everything by hand and sell it on WhatsApp. I need an actual shop.</h3>
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="inline-flex h-7 items-center gap-2 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-800"><span class="h-1.5 w-1.5 rounded-full bg-brand-600"></span>Still looking</span>
+                <span class="text-xs text-ink-600">27 sparks</span>
+              </div>
+            </article>
+            <article class="border-b border-ink-200 p-4 opacity-75">
+              <div class="flex items-start gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-700 ring-1 ring-ink-200">RK</span>
+                <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">Rohit Kulkarni</p><p class="truncate text-xs text-ink-600">Saved 2 weeks ago</p></div>
+                <button aria-label="Remove from saved" class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-brand-700">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg></button>
+              </div>
+              <h3 class="mt-3 text-balance text-lg font-semibold leading-snug">A Kannada-first OCR for old land records</h3>
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <span class="inline-flex h-7 items-center gap-2 rounded-full bg-ink-100 px-3 text-xs font-semibold text-ink-700"><span class="h-1.5 w-1.5 rounded-full bg-ink-500"></span>Team formed</span>
+                <span class="text-xs text-ink-600">88 sparks</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-white shadow-xl">
+            <div class="flex h-14 items-center justify-between border-b border-ink-200 px-2">
+              <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+              <span class="text-sm font-semibold">Saved</span>
+              <span class="h-11 w-11"></span>
+            </div>
+            <div class="flex flex-col items-center px-6 py-10 text-center">
+              <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4V4z"/></svg>
+              </div>
+              <p class="mt-3 text-base font-semibold text-ink-900">Nothing saved yet</p>
+              <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">The bookmark on any idea keeps it here. Useful when you want to think about it before you say hello.</p>
+              <a href="#" class="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white">Browse ideas</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============== 13 SETTINGS =============== -->
+  <section class="flex flex-col gap-3">
+    <h2 class="text-lg font-bold">13 · Settings</h2>
+    <p class="max-w-2xl text-sm leading-relaxed text-ink-700">Everything from onboarding is editable here — that promise was made on the sign-up screen and this is where it's kept. Destructive things sit at the bottom, visually separated, and deleting an account states plainly what happens to your posts.</p>
+    <div class="flex flex-wrap items-start gap-6">
+
+      <div class="slot flex w-[375px] flex-col gap-2">
+        <div class="phone overflow-hidden rounded-[30px] border-8 border-ink-900 bg-ink-50 shadow-xl">
+          <div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-2">
+            <button aria-label="Back" class="grid h-11 w-11 place-items-center rounded-full text-ink-800"><svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg></button>
+            <span class="text-sm font-semibold">Settings</span>
+            <span class="h-11 w-11"></span>
+          </div>
+
+          <div class="mt-2 bg-white">
+            <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">You</p>
+            <a href="#" class="flex items-center gap-3 border-b border-ink-200 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Edit profile</p><p class="truncate text-xs text-ink-600">Name, bio, links, roles you can fill</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#" class="flex items-center gap-3 border-b border-ink-200 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Your field</p><p class="truncate text-xs text-ink-600">Android developer, 2 yrs Kotlin</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Interests</p><p class="truncate text-xs text-ink-600">mobile, android, campus</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+
+          <div class="mt-4 bg-white">
+            <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">Account</p>
+            <a href="#" class="flex items-center gap-3 border-b border-ink-200 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Email &amp; password</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Blocked people</p><p class="truncate text-xs text-ink-600">2 people</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+
+          <div class="mt-4 bg-white">
+            <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">About</p>
+            <a href="#" class="flex items-center gap-3 border-b border-ink-200 px-4 py-3.5">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">What Alongside is</p></div>
+              <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink-600" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            </a>
+            <button class="flex w-full items-center gap-3 px-4 py-3.5 text-left">
+              <div class="min-w-0 flex-1"><p class="text-sm font-semibold">Log out</p></div>
+            </button>
+          </div>
+
+          <div class="mt-4 bg-white p-4">
+            <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Danger zone</p>
+            <p class="mt-2 text-sm leading-relaxed text-ink-800">Deleting your account removes your profile and messages. <b>Your ideas stay up, credited to "a former member"</b> — so the comment threads other people built don't vanish with you.</p>
+            <button class="mt-3 inline-flex h-11 items-center rounded-lg border border-bad-600 bg-white px-4 text-sm font-semibold text-bad-700">Delete my account</button>
+          </div>
+
+          <div class="h-6"></div>
+        </div>
+        <p class="text-xs leading-relaxed text-ink-700"><b>Check this one:</b> the deletion copy reflects ADR-0001 (anonymise, don't cascade). If that ADR says something different from what I've written, the ADR wins and I'll fix the copy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============== WHAT I NEED =============== -->
+  <section class="rounded-2xl border border-ink-300 bg-white p-5">
+    <h2 class="text-lg font-bold">What I need from you</h2>
+    <ol class="mt-3 flex flex-col gap-2.5 text-sm leading-relaxed text-ink-800">
+      <li><b>1 · The new-user Home (§4).</b> The most consequential screen here. I've made each band label its own source — "from people you follow", "because you picked android". Does that feel helpful or does it feel like the app apologising?</li>
+      <li><b>2 · Follow-with-a-note (§7).</b> This had no design and I've invented one: the follow happens <i>immediately</i>, then the note is offered as an optional extra. The alternative is asking for the note first, which adds friction to a one-tap action. I think follow-first is right — confirm?</li>
+      <li><b>3 · The "About" context line in the chat thread (§10).</b> Showing which idea a conversation came from isn't in the spec. I think it's necessary, since anyone can DM anyone and "why is this person messaging me" is the first question every time. It's a small ask of the Messaging seat.</li>
+      <li><b>4 · Delete-account copy (§13).</b> I've written it to match ADR-0001. Worth a check that "credited to a former member" is the actual behaviour.</li>
+    </ol>
+    <p class="mt-4 text-sm leading-relaxed text-ink-800">Once you're happy, the feature seats have everything: <code class="rounded bg-ink-100 px-1">docs/design-system.md</code> for the rules, <code class="rounded bg-ink-100 px-1">templates/components/</code> for the parts, and these screens for the layouts.</p>
+  </section>
+
+</main>
+
+<footer class="bg-brand-900 px-5 py-6 text-center text-xs text-brand-300">
+  Alongside · the remaining 13 screens · nothing is built until Jeni approves
+</footer>
+</body>
+</html>

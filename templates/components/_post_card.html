@@ -1,0 +1,126 @@
+{% comment %}
+  Post card — OWNED BY THE DESIGNER. The unit the whole feed is made of.
+
+    {% include "components/_post_card.html" with post=post %}
+
+  Params:
+    post          the Post. Needs .author, .title, .body, .stage, .commitment,
+                  .status, .roles_needed, .tags, .spark_count, .is_sparked,
+                  .comment_count, .city, .remote_ok, .created_at, .cover_image
+    show_message  default True. The Message shortcut on the card.
+
+  READING ORDER — this is the design, not an accident
+    who → what → how far along → what they need → what it's about → where →
+    what you can do. A joiner scanning the feed is looking for one thing: a
+    role they can fill. Roles sit above the tags and below the stage badges so
+    that by the time you reach them you already know whether the commitment
+    level is worth your time.
+
+  The title is the only link to the detail page. Do NOT wrap the whole card in
+  an anchor: it swallows the Spark button, the author link and the tags, and it
+  makes the card unusable with a keyboard.
+{% endcomment %}
+<article class="border-b border-ink-200 bg-white p-4">
+
+  <div class="flex flex-col gap-3">
+
+    {# --- who --- #}
+    <div class="flex items-start gap-3">
+      {% include "components/_avatar.html" with user=post.author %}
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5 text-sm">
+          <a href="{{ post.author.get_absolute_url }}"
+             class="truncate font-semibold text-ink-900 hover:underline
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ post.author.name }}</a>
+          <span class="shrink-0 text-ink-600">· <time datetime="{{ post.created_at|date:'c' }}">{{ post.created_at|timesince }}</time></span>
+        </div>
+        <p class="truncate text-xs text-ink-600">{{ post.author.headline }}</p>
+      </div>
+      <button type="button" aria-label="More actions for “{{ post.title }}”"
+              class="-mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-600 hover:bg-ink-100
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+        {% include "components/_icon.html" with name="more" %}
+      </button>
+    </div>
+
+    {# --- what --- #}
+    <div class="flex flex-col gap-1.5">
+      <h3 class="text-lg font-semibold leading-snug tracking-tight text-balance">
+        <a href="{{ post.get_absolute_url }}"
+           class="hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ post.title }}</a>
+      </h3>
+      <p class="line-clamp-3 text-[15px] leading-relaxed text-ink-800">{{ post.body }}</p>
+    </div>
+
+    {% if post.cover_image %}
+      <img src="{{ post.cover_image.url }}" alt="" width="800" height="450"
+           loading="lazy" decoding="async"
+           class="aspect-video w-full rounded-xl border border-ink-200 object-cover">
+    {% endif %}
+
+    {# --- how far along --- #}
+    {% include "components/_badges.html" with post=post %}
+
+    {# --- what they need --- #}
+    {% if post.roles_needed.exists %}
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-ink-600">Looking for</p>
+        <div class="flex gap-2 overflow-x-auto pb-0.5">
+          {% for role in post.roles_needed.all %}
+            {% include "components/_chip_role.html" with role=role %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {# --- what it's about --- #}
+    {% if post.tags.exists %}
+      <div class="flex flex-wrap gap-2">
+        {% for tag in post.tags.all %}
+          {% include "components/_chip_tag.html" with tag=tag %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {# --- where --- #}
+    {% if post.city or post.remote_ok %}
+      <p class="text-xs text-ink-600">
+        {{ post.city }}{% if post.city and post.remote_ok %} · {% endif %}{% if post.remote_ok %}remote ok{% endif %}
+      </p>
+    {% endif %}
+
+    {# --- what you can do --- #}
+    <div class="-mx-1.5 -mb-1 flex items-center justify-between border-t border-ink-100 pt-1">
+      <div class="flex items-center">
+        {% include "components/_spark.html" with post=post %}
+
+        <a href="{{ post.get_absolute_url }}#comments"
+           class="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-ink-600 hover:bg-ink-100
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+          {% include "components/_icon.html" with name="comment" %}
+          <span class="text-sm font-semibold tabular-nums">{{ post.comment_count }}</span>
+          <span class="sr-only">comments</span>
+        </a>
+
+        <button type="button"
+                hx-post="{% url 'social:save' post.pk %}" hx-swap="outerHTML"
+                aria-pressed="{% if post.is_saved %}true{% else %}false{% endif %}"
+                aria-label="{% if post.is_saved %}Remove “{{ post.title }}” from saved{% else %}Save “{{ post.title }}” for later{% endif %}"
+                class="grid h-11 w-11 place-items-center rounded-full hover:bg-ink-100
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+                       {% if post.is_saved %}text-brand-700{% else %}text-ink-600{% endif %}">
+          {% include "components/_icon.html" with name="save" filled=post.is_saved %}
+        </button>
+      </div>
+
+      {% if show_message|default_if_none:True and post.author != request.user %}
+        <a href="{% url 'messaging:start' post.author.pk %}"
+           class="mr-1.5 inline-flex h-11 items-center rounded-lg border border-ink-300 px-4 text-xs font-semibold text-ink-800 hover:bg-ink-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+          Message
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+</article>

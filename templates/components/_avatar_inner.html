@@ -1,0 +1,21 @@
+{% comment %}
+  Avatar body — OWNED BY THE DESIGNER.
+  Internal to components/_avatar.html. Do not include this directly; it expects
+  `box` (the size classes) to already be in context.
+
+  The four tints are each >= 7:1 against their own ink, so initials stay legible
+  on every one of them.
+{% endcomment %}
+{% if user.avatar_url %}
+  <img src="{{ user.avatar_url }}" alt=""
+       width="112" height="112" loading="lazy" decoding="async"
+       class="{{ box }} shrink-0 rounded-full object-cover ring-1 ring-ink-200">
+{% elif user.pk|divisibleby:4 %}
+  <span aria-hidden="true" class="{{ box }} grid shrink-0 place-items-center rounded-full font-bold ring-1 ring-ink-200 bg-brand-100 text-brand-800">{{ user.initials }}</span>
+{% elif user.pk|divisibleby:3 %}
+  <span aria-hidden="true" class="{{ box }} grid shrink-0 place-items-center rounded-full font-bold ring-1 ring-ink-200 bg-ink-200 text-ink-800">{{ user.initials }}</span>
+{% elif user.pk|divisibleby:2 %}
+  <span aria-hidden="true" class="{{ box }} grid shrink-0 place-items-center rounded-full font-bold ring-1 ring-ink-200 bg-brand-50 text-brand-700">{{ user.initials }}</span>
+{% else %}
+  <span aria-hidden="true" class="{{ box }} grid shrink-0 place-items-center rounded-full font-bold ring-1 ring-ink-200 bg-ink-100 text-ink-700">{{ user.initials }}</span>
+{% endif %}

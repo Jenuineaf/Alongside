@@ -1,0 +1,28 @@
+{% comment %}
+  Avatar — OWNED BY THE DESIGNER.
+
+    {% include "components/_avatar.html" with user=post.author %}
+    {% include "components/_avatar.html" with user=request.user size="sm" %}
+
+  Params:
+    user   needs .pk, .initials and optionally .avatar_url.
+    size   sm 32 (comments, nav) · md 40 (default, feed) · lg 56 (profile)
+
+  Falls back to initials on a tinted ground when there's no image — which is
+  most users most of the time, so the fallback is the real design and the photo
+  is the exception. The tint is derived from the user id so a person keeps the
+  same colour everywhere; that consistency is what makes initials scannable in
+  a comment thread.
+
+  The image carries alt="" on purpose: the author's name is always rendered
+  next to it, and a screen reader announcing the name twice is worse than not
+  describing a decorative thumbnail. If you ever use this WITHOUT an adjacent
+  name, wrap it in a link with an aria-label.
+{% endcomment %}
+{% if size == "sm" %}
+  {% with box="h-8 w-8 text-xs" %}{% include "components/_avatar_inner.html" %}{% endwith %}
+{% elif size == "lg" %}
+  {% with box="h-14 w-14 text-lg" %}{% include "components/_avatar_inner.html" %}{% endwith %}
+{% else %}
+  {% with box="h-10 w-10 text-sm" %}{% include "components/_avatar_inner.html" %}{% endwith %}
+{% endif %}
