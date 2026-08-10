@@ -69,9 +69,14 @@ change later, so only identity and auth live here. Everything that churns lives 
 | `is_demo` | BooleanField, default False | **Seed-data marker.** Every user created by `seed_demo` has it. `--reset` deletes only these rows |
 | `is_public_demo` | BooleanField, default False | **Write restriction.** The three accounts whose credentials are published on the login screen. Cannot post, comment or DM — see §1.1.1 |
 | `deletion_requested_at` | DateTimeField, null, indexed | Start of the 30-day grace window (ADR-0001). Null = not deleting |
+| `anonymised_at` | DateTimeField, null, indexed | **Set by the scrub job.** The single field that means "this account has been scrubbed" — see §12.1. `User.name` returns `[deleted]` off this and nothing else |
 
 - `first_name` / `last_name` are set to `None` — we use `display_name`.
 - **Not** on User: bio, avatar, links, onboarding answers, counters → all on `Profile`.
+- **No `Meta.ordering`** (ACC-14) — a default ordering leaks into joins, subqueries and
+  aggregates, not just the queries that want it.
+- **Indexes:** trigram GIN on `display_name` **and** `username`, for fuzzy people search (D4).
+  These live here, not on `Profile`, and therefore in an `accounts` migration — see §10.
 
 #### 1.1.1 Why `is_demo` and `is_public_demo` are two fields
 
@@ -99,7 +104,7 @@ that renders a user uses `select_related("profile")`.
 | Field | Type | Notes |
 |---|---|---|
 | `user` | OneToOne → User, primary_key=True | PK = user_id, so no extra id column and joins are free |
-| `avatar` | CloudinaryField, blank | Uploaded image. Never `ImageField` to local disk — Render's filesystem is ephemeral |
+| `avatar` | ImageField, blank | Uploaded image. Routed to Cloudinary by `STORAGES` whenever `CLOUDINARY_URL` is set, so the model needs no third-party import and the app still runs locally with no credentials — see §12.1 |
 | `avatar_url` | URLField, blank | **Externally-hosted fallback avatar** — see §1.2.1 |
 | `bio` | TextField(500), blank | |
 | `headline` | CharField(120), blank | One-liner under the name on cards |
@@ -123,8 +128,9 @@ that renders a user uses `select_related("profile")`.
 
 **Indexes**
 - `GinIndex(fields=["search_vector"])`
-- `Index(fields=["city_slug"])`
-- `Index(fields=["field_tag"])` — Home tier 2
+- **No explicit index on `city_slug` or `field_tag`** (ACC-4). `SlugField` sets `db_index=True`
+  by default and a `ForeignKey` indexes itself, so declaring either here builds a second,
+  identical btree — write amplification for nothing. Home tier 2 uses the FK's own index.
 
 #### 1.2.1 Why there are two avatar fields
 
@@ -738,21 +744,46 @@ Recorded because the reasoning is worth keeping, and because two of these were i
 
 ## 10. Migration order
 
-1. **`accounts` 0001** — `User` **only**. The custom user model must be first (roadmap ground
-   rule 2), with `AUTH_USER_MODEL` set in `config/settings/base.py` before anything runs
-2. `django.contrib.sites` + **allauth's own migrations** — allauth requires the sites framework
-   and `SITE_ID`; this must precede any account flow
-3. **`posts` 0001** — `Tag`, `Role`
-4. **`posts` 0002 (data)** — seed ~15 curated field tags + ~40 curated roles. Must be a data
-   migration, not ad hoc, or `Profile.field_tag` points at rows that differ per environment
-5. **`accounts` 0002** — `Profile`, `ProfileSkill`, `ProfileInterest`, `Follow`, `Block`
-6. **`posts` 0003** — `Post`, `PostTag`, `PostRole`, `PostImage`, `Comment`, `PostSpark`,
-   `CommentSpark`, `SavedPost`
-7. **`posts` 0004** — `pg_trgm` + `unaccent` extensions, `search_vector` columns, GIN indexes,
-   trigram index on `User.display_name`
-8. `messaging` 0001, `notifications` 0001, `moderation` 0001
+**Shipped and verified against real Postgres, 10 Aug 2026.** The order below is what the
+migration graph actually produces — asserted, not assumed.
 
-Steps 1–5 must land before any feature seat starts. Steps 7–8 can follow their phases.
+| # | Migration | Contents |
+|---|---|---|
+| 1 | **`accounts` 0001_initial** | `User` **only** — the custom user model, alone and first (roadmap ground rule 2) |
+| 2 | **`posts` 0001_vocabulary** | `Tag`, `Role` |
+| 3 | **`posts` 0002_seed_curated_vocabulary** | Data migration: 15 curated field tags + 41 curated roles |
+| 4 | **`accounts` 0002_postgres_extensions** | `pg_trgm`, `unaccent`, **and the `english_unaccent` text search configuration** |
+| 5 | **`accounts` 0003_profile_and_graph** | `Profile`, `ProfileSkill`, `ProfileInterest`, `Follow`, `Block`, + `Profile` GIN and `User` trigram indexes |
+| 6 | **`posts` 0003_post_and_attachments** | `Post`, `PostTag`, `PostRole`, `PostImage` and all feed/filter indexes |
+| 7 | **`posts` 0004_comments_sparks_saves** | `Comment`, `PostSpark`, `CommentSpark`, `SavedPost` |
+| — | *(pending)* | `messaging` 0001, `notifications` 0001, `moderation` 0001 |
+
+`django.contrib.sites` and allauth's own migrations interleave automatically after step 1.
+
+### Two dependencies added by hand
+
+Django cannot infer either, and both are load-bearing:
+
+- **`posts` 0001 → `accounts` 0001.** Nothing in the vocabulary migration references the user
+  model, so Django left it free-floating — and the resulting plan ran `posts` 0001 *before* the
+  custom user model, contradicting ground rule 2. Harmless today; stops being harmless the
+  moment `Tag` or `Role` gains a user FK, at which point nobody would think to check.
+- **`posts` 0003 → `accounts` 0002.** `post_title_trgm` uses `gin_trgm_ops`, which does not
+  exist until `CREATE EXTENSION pg_trgm` has run. Without the explicit dependency the graph is
+  free to order them the other way and a fresh deploy fails with
+  `operator class "gin_trgm_ops" does not exist`.
+
+### Why the extensions moved earlier
+
+The original §10 put extensions and all GIN indexes in a late `posts` migration. Discovery (D4)
+showed that cannot build: an `AddIndex` against `accounts.User` **cannot live in a `posts`
+migration** — `makemigrations` generates it into `accounts` and CI's drift check fails — and
+§1.2 and §10 disagreed about where `Profile`'s GIN index went. Extensions are database-global,
+so creating them early lets every index live with its own model.
+
+> **Deploy note (DevOps):** `CREATE EXTENSION` needs elevated privileges. The local container
+> runs as superuser and Neon permits both extensions for the database owner, but if the
+> production role is not the owner, `accounts` 0002 is where the first deploy fails.
 
 > **allauth's username generation** derives a username from the email address on Google sign-in,
 > which can produce values that fail our `[a-z0-9_]{3,30}` validator (dots, plus signs,
@@ -777,3 +808,132 @@ Steps 1–5 must land before any feature seat starts. Steps 7–8 can follow the
 and admin deliberately do not.
 
 Schema change requests go: seat → Jeni → Architect → this document → migration.
+
+---
+
+## 12. Schema review changes — what shipped, and what is still pending
+
+**Status: `accounts` and `posts` are migrated and verified against real Postgres.
+`messaging`, `notifications` and `moderation` are not yet written.**
+
+The eight reviews in `docs/review/` produced ~100 findings. This section records the ones that
+changed the schema, so no seat has to diff the models against §1–§8 to find out what moved.
+Eleven product decisions are still open with Jeni; §12.4 lists what is blocked on them.
+
+### 12.1 Fields added or changed
+
+| Change | Requested by | Why |
+|---|---|---|
+| `User.anonymised_at` | Accounts, Messaging, QA — independently | The old two-field proxy (`deletion_requested_at AND NOT is_active`) is wrong in a state that really happens: request deletion, get banned during the grace window, and every card renders `[deleted]` while the bio and avatar are still on screen. Also the key ADR-0001's idempotency requirement needs |
+| `Post.last_activity_at` → `default=timezone.now`, writable | Posts, Trust & Safety, QA | Without it every seeded post has `last_activity_at = now`, so **not one can ever go stale** and the anti-ghosting feature is invisible on the deployed demo |
+| `Post.custom_roles` / `Profile.custom_skills`, capped at 3 | ADR-0004 | The "Other" escape hatch. Searchable at weight B, never filterable |
+| `PostImage.image_url` | QA | Mirrors `Profile.avatar_url`. Without it the seed cannot put a single image on the demo site, and the crochet-business case the spec names by hand has no picture |
+| `Post.published_at` declared **before** `last_activity_at` | — | Both default to `timezone.now`, and Django evaluates field defaults in declaration order. Reversed, the CheckConstraint below fails on *every* insert |
+| `Role.usage_count` = live posts only | Posts (PF-6a) | Left ambiguous, two seats would increment the same column with different meanings and the reconciliation task could not be written |
+| `Comment` has no `is_edited` | — | Comments are deletable, not editable. Nothing to flag |
+| No `Post.view_count` | — | Unrequested scope, and the only counter needing a write on every anonymous page load |
+
+`Profile.avatar` and `PostImage.image` are plain `ImageField`s rather than `CloudinaryField`s.
+The storage backend already routes to Cloudinary when `CLOUDINARY_URL` is set (`STORAGES` in
+`base.py`), so this keeps the models free of a third-party import and lets the app run locally
+with no credentials. Same behaviour in production, one less coupling.
+
+### 12.2 Constraints and indexes
+
+- **`-id` appended to both feed indexes** (PF-1). `(is_stale, spark_count, published_at)` is not
+  unique, so any pagination over it repeats some cards and silently drops others as the user
+  scrolls — worse on "most sparked", where the sort key mutates while you paginate.
+- **`is_stale` added to the three filter indexes** (D3), so a filtered view keeps the stale
+  demotion instead of dropping it — most visible exactly where result sets are small enough that
+  a stale post at the top is the whole screen.
+- **`post_stale_candidates_idx`** — partial on the nudge job's own predicate (TS-11).
+- **`CheckConstraint(last_activity_at >= published_at)`** (QA-10) — makes a seed bug fail loudly
+  instead of shipping posts whose "last activity" predates their existence. Verified firing.
+- **`PROTECT` on `ProfileSkill.role` and `ProfileInterest.tag`** (ACC-3), matching `PostTag` /
+  `PostRole`. Deleting a `Role` must not silently strip that skill off every profile claiming it.
+- **Four redundant indexes dropped** (ACC-4): `Block(blocker)`, `Block(blocked)`,
+  `Profile(field_tag)`, `Profile(city_slug)` — each already indexed by its FK or by `SlugField`.
+- **Trigram indexes on `User.display_name` *and* `User.username`** (D4). A unique btree serves
+  equality, not `ILIKE '%jen%'`, and people search by handle.
+
+### 12.3 New shared code — call these, do not reimplement them
+
+| Callable | Rule |
+|---|---|
+| `Post.touch_activity()` | **The only way `last_activity_at` is written.** Sets it, clears `is_stale`, clears `nudged_at` |
+| `<QuerySet>.visible_to(user)` | Block filter. No-op for anonymous **and** for a logged-in user with an empty block set (D11) |
+| `Post.objects.for_viewer(user)` | `is_sparked` / `is_saved` in one query (Designer GAP 3). Anonymous short-circuits with no query |
+| `accounts.blocking.invalidate_block_cache(*users)` | Call for **both** users inside the block/unblock transaction, and pass **instances, not ids** |
+
+Nothing in the original document ever set `is_stale` back to `False` (PF-2), so an author who
+answered the nudge, edited the post and collected sparks and comments sat at the bottom of every
+feed permanently. It never errors, so it reads as "the feed is a bit weird" and nobody finds it.
+`touch_activity()` also clears `nudged_at` (TS-10) — without that a post gets exactly one nudge
+in its entire life.
+
+**`last_activity_at` is bumped by author edit, new comment, and the author's explicit "yes, still
+looking". Not by sparks** (TS-6, Q-S1). A spark is a stranger's one click and says nothing about
+whether the author is still looking, which is the only question the nudge asks — left in, any
+passer-by keeps a dead post alive and a two-person ring can farm the top of the feed.
+
+**System writes to `Post` use `.update()`, never `.save()`** (PF-11). `updated_at` is `auto_now`,
+so a `.save()` from the stale job or a vector refresh stamps "edited just now" on a post whose
+author did nothing.
+
+#### The `visible_to()` field mapping (S9, M15)
+
+ADR-0003 originally said `.exclude(<author field>__in=…)`. Three of the six models it listed have
+no author field, and the naive reading of one of them is a **privacy leak**:
+
+| Model | Field | Naive reading gives |
+|---|---|---|
+| `Post`, `Comment` | `author` | correct |
+| `Profile` | `user` | — |
+| `SavedPost` | `post__author` | `user` — always the viewer, so Saved filters **nothing** |
+| `Notification` | `actor` | no field called "author" |
+| `Conversation` | `participants__user` | no field called "author" |
+| `Message` | **none — deliberately** | the conversation is already hidden; per-message filtering only produces a thread with holes in it |
+
+It must be `.exclude()`, never `.filter(~Q(...))`. On a multi-valued relation those are not
+equivalent — `filter(~Q())` negates per joined row and lets the conversation back in via the
+*other* participant's row.
+
+#### The block cache has a same-request trap
+
+`blocked_user_ids()` memoises on the user instance as well as in Redis, so clearing only the
+shared cache is **not** sufficient: the request that *creates* a block still holds the stale
+memo, and the page confirming "you blocked this person" would still show that person's posts.
+`refresh_from_db()` does not clear it either. Found by executing the code, not by reading it.
+Pass the instance — `invalidate_block_cache(request.user, other)` — and the memo goes too.
+
+### 12.4 Still blocked on Jeni's open decisions
+
+| Decision | Blocks |
+|---|---|
+| **E** — unread dot or number | `ConversationParticipant.unread_count` and its partial index. `messaging` 0001 cannot be finalised |
+| **F** — require ≥1 role/tag, caps | Form and serializer validation only. The `Open to anyone / not sure yet` role **is already seeded**, so the escape hatch exists either way |
+| **H** — sign-in to report | `Report.reporter` nullability semantics, and whether the anti-brigading constraint holds at all |
+| **I** — demo staff account | Whether a `demo_moderator` Group goes in a data migration |
+| **A** — grace-window visibility | Whether pending-deletion content is hidden from anonymous viewers, which reaches into ADR-0003's anonymous fast path |
+
+Everything else in §12 is settled and shipped.
+
+### 12.5 Verification performed
+
+Run against **PostgreSQL 18** (a throwaway local cluster; production targets 16 — the DDL used
+here is common to both):
+
+- the full migration chain applies from empty, in the order §10 asserts
+- `pg_trgm`, `unaccent` and `english_unaccent` all exist, and accent folding **works** under
+  `english_unaccent` while demonstrably **failing** under plain `english` — which is the bug D1
+  raised, reproduced and then fixed
+- 15 curated tags and 41 curated roles seeded
+- both feed indexes serve their `ORDER BY` as **index-only scans with no Sort node**, and the
+  commitment filter index likewise
+- `CheckConstraint(last_activity_at >= published_at)` rejects a violating insert
+- block symmetry, `visible_to()` in both directions, anonymous still seeing everything,
+  `SavedPost` filtering on `post__author`, `for_viewer()` annotations, `touch_activity()`
+  clearing both flags, and the soft-delete manager split
+
+**Not verified:** anything requiring Redis. The block cache falls back to a local cache in the
+smoke test; CI has a real Redis service.
