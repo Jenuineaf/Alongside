@@ -73,15 +73,41 @@ def _fetch(user_id: int) -> frozenset[int]:
     return frozenset(pairs) | frozenset(reverse)
 
 
-def invalidate_block_cache(*user_ids: int) -> None:
+def invalidate_block_cache(*users_or_ids) -> None:
     """Drop the cached set for every user whose visibility just changed.
 
-    **Must be called for BOTH users**, inside the same `transaction.atomic()` block
-    as the `Block` row write — blocking is symmetric, so one row changes two
-    people's view of the product. Missing one of them means the block appears to
-    work for the blocker and not for the blocked user, for up to `CACHE_TTL`.
+    Accepts user instances or bare ids. **Must be called for BOTH users**, inside
+    the same `transaction.atomic()` block as the `Block` row write — blocking is
+    symmetric, so one row changes two people's view of the product. Missing one
+    means the block appears to work for the blocker and not the blocked user, for
+    up to `CACHE_TTL`.
+
+    **Pass the acting `request.user` as an instance, not as `request.user.pk`.**
+    Clearing the shared cache is not sufficient on its own: `blocked_user_ids()`
+    also memoises on the user object, and that memo outlives the cache delete
+    within the same request — `refresh_from_db()` does not clear it either. The
+    request that *creates* a block would then render its own response from the
+    stale set, so the page confirming "you blocked this person" would still show
+    that person's posts. Passing the instance is what clears the memo.
     """
-    cache.delete_many([CACHE_KEY.format(user_id=uid) for uid in user_ids if uid])
+    keys = []
+    for item in users_or_ids:
+        if item is None:
+            continue
+        if hasattr(item, "pk"):
+            user_id = item.pk
+            # Drop the per-instance memo so the rest of THIS request sees the
+            # change, not just subsequent ones.
+            try:
+                delattr(item, _REQUEST_ATTR)
+            except AttributeError:
+                pass
+        else:
+            user_id = item
+        if user_id:
+            keys.append(CACHE_KEY.format(user_id=user_id))
+    if keys:
+        cache.delete_many(keys)
 
 
 class BlockAwareQuerySetMixin:

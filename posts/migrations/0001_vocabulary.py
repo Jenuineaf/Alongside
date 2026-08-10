@@ -8,6 +8,16 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        # Added by hand. Nothing in this migration references the user model, so
+        # Django left it free-floating — and the resulting plan ran it BEFORE
+        # accounts.0001, which contradicts roadmap.md ground rule 2 ("custom user
+        # model in the very first migration").
+        #
+        # It is harmless today and would stop being harmless the moment Tag or Role
+        # gains a user FK (an `added_by`, say), at which point the ordering becomes
+        # load-bearing and nobody would think to check it. Pinning it now makes
+        # "accounts.0001 runs first" an invariant instead of a coincidence.
+        ("accounts", "0001_initial"),
     ]
 
     operations = [

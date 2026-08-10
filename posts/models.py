@@ -187,12 +187,8 @@ class PostQuerySet(BlockAwareQuerySetMixin, models.QuerySet):
         from posts.models import PostSpark, SavedPost
 
         return self.annotate(
-            is_sparked=Exists(
-                PostSpark.objects.filter(post_id=OuterRef("pk"), user_id=user.pk)
-            ),
-            is_saved=Exists(
-                SavedPost.objects.filter(post_id=OuterRef("pk"), user_id=user.pk)
-            ),
+            is_sparked=Exists(PostSpark.objects.filter(post_id=OuterRef("pk"), user_id=user.pk)),
+            is_saved=Exists(SavedPost.objects.filter(post_id=OuterRef("pk"), user_id=user.pk)),
         )
 
 
@@ -375,9 +371,7 @@ class Post(models.Model):
             # ── Search ────────────────────────────────────────────────────────
             GinIndex(fields=["search_vector"], name="post_search_vector_gin"),
             GinIndex(fields=["keywords"], name="post_keywords_gin"),
-            GinIndex(
-                fields=["title"], opclasses=["gin_trgm_ops"], name="post_title_trgm"
-            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="post_title_trgm"),
             # ── Everything else ───────────────────────────────────────────────
             models.Index(fields=["author", "-published_at"], name="post_author_idx"),
             models.Index(fields=["status", "-published_at"], name="post_status_idx"),
@@ -385,9 +379,7 @@ class Post(models.Model):
             # predicate the job uses (TS-11). Free now, a migration later.
             models.Index(
                 fields=["last_activity_at"],
-                condition=Q(
-                    deleted_at__isnull=True, is_stale=False, status=PostStatus.LOOKING
-                ),
+                condition=Q(deleted_at__isnull=True, is_stale=False, status=PostStatus.LOOKING),
                 name="post_stale_candidates_idx",
             ),
         ]
@@ -436,6 +428,9 @@ class PostTag(models.Model):
             models.Index(fields=["tag", "post"], name="posttag_tag_idx"),
         ]
 
+    def __str__(self):
+        return f"{self.post_id} tagged {self.tag_id}"
+
 
 class PostRole(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_roles")
@@ -458,6 +453,9 @@ class PostRole(models.Model):
     # would turn team-forming into an application process, which the product
     # explicitly refuses to be.
 
+    def __str__(self):
+        return f"{self.post_id} needs {self.role_id}"
+
 
 class PostImage(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
@@ -478,9 +476,153 @@ class PostImage(models.Model):
             models.Index(fields=["post", "order"], name="postimage_post_order_idx"),
         ]
 
+    def __str__(self):
+        return f"Image {self.order} on post {self.post_id}"
+
     @property
     def display_url(self) -> str:
         """Uploaded image wins; falls back to the seeded external URL."""
         if self.image:
             return self.image.url
         return self.image_url or ""
+
+
+# ── Social layer (§2.6–2.8) ──────────────────────────────────────────────────
+# These live in `posts` because their lifecycle is the post's, but behaviour over
+# them belongs to the Social seat.
+
+
+class CommentQuerySet(BlockAwareQuerySetMixin, models.QuerySet):
+    block_filter_field = "author"
+
+
+class ActiveCommentManager(models.Manager.from_queryset(CommentQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class Comment(models.Model):
+    """Flat comments (spec §4.4). Deletable, not editable.
+
+    Comments are first-class: people who don't want to join still add value by
+    suggesting things (spec §2.5).
+    """
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments"
+    )
+    body = models.TextField(_("body"))
+    spark_count = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Kept even though comments are not editable: moderation redaction touches the
+    # row, and `auto_now` is free. No `is_edited` — there is nothing to flag.
+    updated_at = models.DateTimeField(auto_now=True)
+    # Soft delete: a deleted comment may still be attached to an open report.
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ActiveCommentManager()
+    all_objects = models.Manager.from_queryset(CommentQuerySet)()
+
+    class Meta:
+        verbose_name = _("comment")
+        verbose_name_plural = _("comments")
+        indexes = [
+            models.Index(
+                fields=["post", "created_at"],
+                condition=Q(deleted_at__isnull=True),
+                name="comment_post_idx",
+            ),
+            models.Index(fields=["author", "-created_at"], name="comment_author_idx"),
+        ]
+
+    def __str__(self):
+        return f"Comment<{self.pk}> on {self.post_id}"
+
+    # Deliberately NO `parent` field. Nested threads are Phase 2, and adding a
+    # nullable self-FK then is a one-line, zero-downtime migration. Not carrying
+    # speculative structure now.
+
+
+class PostSpark(models.Model):
+    """The reaction. Never "like" — sparking gives an idea energy and ranks the feed.
+
+    Two concrete models (this and `CommentSpark`) rather than one generic
+    ContentType spark: real FK integrity, `UniqueConstraint` that actually works,
+    and counting is a plain indexed count. A generic model buys flexibility we have
+    no use for — there will never be a third sparkable thing in v1.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="post_sparks"
+    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="sparks")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "post"], name="uniq_post_spark"),
+        ]
+        indexes = [
+            # Real work, not a duplicate: the unique constraint leads on `user`,
+            # so it cannot serve "how many sparks does this post have".
+            models.Index(fields=["post"], name="postspark_post_idx"),
+            models.Index(fields=["user", "-created_at"], name="postspark_user_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} sparked post {self.post_id}"
+
+
+class CommentSpark(models.Model):
+    """Sparks on comments — in v1, per spec §4.4 ("on posts *and* comments")."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comment_sparks"
+    )
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name="sparks")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "comment"], name="uniq_comment_spark"),
+        ]
+        indexes = [
+            models.Index(fields=["comment"], name="commentspark_comment_idx"),
+            models.Index(fields=["user", "-created_at"], name="commentspark_user_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} sparked comment {self.comment_id}"
+
+
+class SavedPostQuerySet(BlockAwareQuerySetMixin, models.QuerySet):
+    # `post__author`, NOT `user` (S9). ADR-0003's original wording said "<author
+    # field>", and the naive reading here is `user` — which is always the viewer,
+    # so the Saved screen would have filtered nothing and silently rendered blocked
+    # authors' posts. That is a privacy leak, not a cosmetic bug.
+    block_filter_field = "post__author"
+
+
+class SavedPost(models.Model):
+    """A private bookmark. Unlike a spark, never visible to anyone else."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_posts"
+    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="saves")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = SavedPostQuerySet.as_manager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "post"], name="uniq_saved_post"),
+        ]
+        indexes = [
+            models.Index(fields=["user", "-created_at"], name="savedpost_user_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} saved post {self.post_id}"

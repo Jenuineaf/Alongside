@@ -235,9 +235,7 @@ class Profile(models.Model):
 
     # The symmetric case to Post.custom_roles: a skill that isn't on the curated
     # list. Searchable, never filterable (ADR-0004).
-    custom_skills = ArrayField(
-        models.CharField(max_length=50), default=list, blank=True, size=3
-    )
+    custom_skills = ArrayField(models.CharField(max_length=50), default=list, blank=True, size=3)
 
     github_url = models.URLField(_("GitHub"), blank=True)
     portfolio_url = models.URLField(_("portfolio"), blank=True)
@@ -320,6 +318,9 @@ class ProfileSkill(models.Model):
             models.Index(fields=["role", "profile"], name="profileskill_role_idx"),
         ]
 
+    def __str__(self):
+        return f"{self.profile_id} can do {self.role_id}"
+
 
 class ProfileInterest(models.Model):
     """A topic this person wants to see. Drives Home tier 1."""
@@ -335,6 +336,9 @@ class ProfileInterest(models.Model):
         indexes = [
             models.Index(fields=["tag", "profile"], name="profileinterest_tag_idx"),
         ]
+
+    def __str__(self):
+        return f"{self.profile_id} interested in {self.tag_id}"
 
 
 class Follow(models.Model):
@@ -365,6 +369,9 @@ class Follow(models.Model):
             models.Index(fields=["following", "-created_at"], name="follow_followers_idx"),
             models.Index(fields=["follower", "-created_at"], name="follow_following_idx"),
         ]
+
+    def __str__(self):
+        return f"{self.follower_id} -> {self.following_id}"
 
 
 class Block(models.Model):
@@ -400,3 +407,6 @@ class Block(models.Model):
         # No explicit Index on either column (ACC-4) — both are FKs and therefore
         # already indexed, which is exactly what `blocked_user_ids()` needs for its
         # two-direction lookup.
+
+    def __str__(self):
+        return f"{self.blocker_id} blocks {self.blocked_id}"
