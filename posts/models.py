@@ -387,6 +387,36 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+
+        return reverse("posts:detail", kwargs={"slug": self.slug})
+
+    def get_spark_url(self):
+        """The endpoint `components/_spark.html` posts to.
+
+        The component reads `{% firstof url post.get_spark_url %}`, so without
+        this it renders `hx-post=""` — and HTMX treats an empty URL as "post to
+        the current page". The Spark button then submitted the *feed* and got a
+        405, which looks like a broken button rather than a missing method.
+        """
+        from django.urls import reverse
+
+        return reverse("social:spark", kwargs={"pk": self.pk})
+
+    @property
+    def remote_ok(self) -> bool:
+        """Alias expected by templates/components/_post_card.html."""
+        return self.is_remote_friendly
+
+    @property
+    def cover_image(self):
+        """First image attachment, or None — for feed cards."""
+        img = self.images.order_by("order").first()
+        if img is None or not img.display_url:
+            return None
+        return img
+
     def touch_activity(self):
         """Mark the post alive again. The ONLY way `last_activity_at` is written.
 

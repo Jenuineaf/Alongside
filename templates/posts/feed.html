@@ -1,0 +1,19 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}Screen 5 — public feed / explore. From v3-palette-forest + v5 mockups.{% endcomment %}
+
+{% block title %}Explore{% endblock %}
+
+{% block app_content %}
+<div class="border-b border-ink-200 bg-white px-4 py-3">
+  <h1 class="text-lg font-bold text-ink-900">All ideas</h1>
+  <p class="mt-0.5 text-sm text-ink-700">Browse everything — filter and search coming with Discovery.</p>
+</div>
+
+<div class="divide-y divide-ink-200">
+  {% for post in posts %}
+    {% include "components/_post_card.html" with post=post show_message=False %}
+  {% empty %}
+    {% include "components/_empty_state.html" with title="No ideas yet" body="Be the first to post — or run the demo seed command." cta_label="Post your idea" cta_href="/ideas/new/" %}
+  {% endfor %}
+</div>
+{% endblock app_content %}
