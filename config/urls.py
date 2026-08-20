@@ -1,7 +1,13 @@
 """Root URL configuration.
 
-Owned by the Architect. Feature seats add their own `<app>/urls.py` and request
-an `include()` line here through Jeni — that keeps ten seats out of one file.
+One `include()` per app. `posts.urls` is mounted last because it owns `""`,
+and a catch-all prefix in front of the named ones would shadow them.
+
+`discovery`, `messaging` and `notifications` are wired as **name-only stubs**:
+their views exist but render templates that do not, so visiting them 500s until
+their phase lands. They are included anyway because `components/_tab_bar.html`
+and `_app_bar.html` reverse those names on every authenticated page — without
+the includes, every signed-in screen dies with `NoReverseMatch` instead.
 """
 
 from django.conf import settings
@@ -18,14 +24,18 @@ urlpatterns = [
     path("healthz/", healthz, name="healthz"),
     # django-allauth: signup, login, logout, password reset, Google.
     path("accounts/", include("allauth.urls")),
+    # Accounts — profiles, settings, follow, block. `/u/<username>/` is the
+    # public profile URL the username validator's reserved list protects.
+    path("u/", include("accounts.urls")),
+    path("search/", include("discovery.urls")),
+    path("messages/", include("messaging.urls")),
+    path("notifications/", include("notifications.urls")),
+    path("s/", include("social.urls")),
+    # Last: owns "" (landing) and would otherwise shadow the prefixes above.
+    path("", include("posts.urls")),
 ]
 
-# Feature seats plug in here, one line each, as their phase lands:
-#   path("", include("posts.urls")),            # Posts & Feed — landing, feed, post detail
-#   path("u/", include("accounts.urls")),       # Accounts — profiles, settings, follow, block
-#   path("search/", include("discovery.urls")), # Discovery — search, filters, Home
-#   path("messages/", include("messaging.urls")),
-#   path("notifications/", include("notifications.urls")),
+# Still to land with their phases:
 #   path("report/", include("moderation.urls")),
 #   path("internal/cron/", include("moderation.cron_urls")),  # deployment.md §4
 #   path("api/", include("config.api_urls")),   # DRF — tech-stack.md §0

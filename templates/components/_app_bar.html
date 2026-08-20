@@ -47,7 +47,7 @@
           {% include "components/_avatar.html" with user=user size="sm" %}
         </a>
       {% else %}
-        <a href="{% url 'accounts:login' %}"
+        <a href="{% url 'account_login' %}"
            class="mr-1 inline-flex h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand-700 hover:bg-brand-50
                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Log in</a>
       {% endif %}

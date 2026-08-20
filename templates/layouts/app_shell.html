@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% comment %}
+  App shell — sticky top bar + scrollable content + bottom tab bar.
+  Used by Home, Feed, Messages, Alerts and other signed-in screens.
+
+  `{% extends %}` must be the first tag in the file — Django raises
+  TemplateSyntaxError if a comment precedes it, and every screen extending this
+  one dies with it.
+{% endcomment %}
+
+{% block nav %}{% endblock nav %}
+
+{% block content %}
+<div class="-mx-4 -my-6 flex min-h-[calc(100dvh-0px)] flex-col">
+
+  {% include "components/_app_bar.html" with back_url=back_url heading=heading %}
+
+  <div class="flex-1 bg-ink-50">
+    {% block app_content %}{% endblock app_content %}
+  </div>
+
+  {% if user.is_authenticated %}
+    {% include "components/_tab_bar.html" with active=tab_active unread_messages=unread_messages|default:0 unread_alerts=unread_alerts|default:0 %}
+  {% else %}
+    {% include "components/_guest_tab_bar.html" %}
+  {% endif %}
+
+</div>
+{% endblock content %}

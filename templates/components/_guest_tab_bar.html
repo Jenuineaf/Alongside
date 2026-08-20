@@ -1,0 +1,19 @@
+{% comment %}
+  Signed-out bottom bar — replaces _tab_bar.html on public browse screens.
+  design-system.md: public read access is non-negotiable; nudge toward sign-up.
+{% endcomment %}
+<nav aria-label="Sign up"
+     class="sticky bottom-0 z-40 border-t border-ink-200 bg-white px-4 py-3">
+  <div class="flex gap-2">
+    <a href="{% url 'account_signup' %}"
+       class="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-brand-700 text-sm font-semibold text-white hover:bg-brand-800
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      Sign up
+    </a>
+    <a href="{% url 'account_login' %}"
+       class="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-ink-300 bg-white text-sm font-semibold text-ink-800 hover:bg-ink-50
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      Log in
+    </a>
+  </div>
+</nav>
