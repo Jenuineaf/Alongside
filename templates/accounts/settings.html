@@ -1,0 +1,105 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Screen 13 — Settings. Layout from v5-remaining-screens.html §13.
+
+  Everything captured at onboarding is editable here; that promise is made on
+  the sign-up screen and this is where it is kept. Destructive things sit at the
+  bottom, visually separated.
+
+  DELETE COPY: the mockup says ideas are credited to "a former member" and asked
+  for that to be checked against ADR-0001. The ADR says the placeholder is
+  `[deleted]`, and `User.name` returns exactly that string, so the copy here
+  says `[deleted]` — the Designer's note says the ADR wins. Flagged to Jeni.
+{% endcomment %}
+
+{% block title %}Settings{% endblock %}
+
+{% block app_content %}
+
+{% if user.deletion_requested_at %}
+  <div class="p-4">
+    {% include "components/_banner.html" with kind="warning" title="This account is scheduled for deletion" body="It'll be anonymised 30 days after you asked. Logging in doesn't stop the clock on its own — cancel below if you've changed your mind." %}
+    <form method="post" action="{% url 'accounts:cancel_deletion' %}" class="mt-3">
+      {% csrf_token %}
+      {% include "components/_button.html" with label="Keep my account" full=True %}
+    </form>
+  </div>
+{% endif %}
+
+<div class="mt-2 bg-white">
+  <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">You</p>
+
+  <a href="{% url 'accounts:profile_edit' %}"
+     class="flex min-h-[44px] items-center gap-3 border-b border-ink-200 px-4 py-3.5 hover:bg-ink-50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+    <span class="min-w-0 flex-1">
+      <span class="block text-sm font-semibold text-ink-900">Edit profile</span>
+      <span class="block truncate text-xs text-ink-600">Name, bio, links, roles you can fill</span>
+    </span>
+    {% include "components/_icon.html" with name="chevron-down" class="h-4 w-4 shrink-0 -rotate-90 text-ink-600" %}
+  </a>
+
+  <a href="{% url 'accounts:profile_edit' %}"
+     class="flex min-h-[44px] items-center gap-3 border-b border-ink-200 px-4 py-3.5 hover:bg-ink-50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+    <span class="min-w-0 flex-1">
+      <span class="block text-sm font-semibold text-ink-900">Your field</span>
+      <span class="block truncate text-xs text-ink-600">{% firstof profile.occupation "Not set yet" %}</span>
+    </span>
+    {% include "components/_icon.html" with name="chevron-down" class="h-4 w-4 shrink-0 -rotate-90 text-ink-600" %}
+  </a>
+
+  <div class="flex min-h-[44px] items-center gap-3 px-4 py-3.5">
+    <span class="min-w-0 flex-1">
+      <span class="block text-sm font-semibold text-ink-900">Interests</span>
+      <span class="block truncate text-xs text-ink-600">
+        {% for tag in interests %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% empty %}Set during onboarding{% endfor %}
+      </span>
+    </span>
+  </div>
+</div>
+
+<div class="mt-4 bg-white">
+  <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">Account</p>
+
+  <a href="{% url 'account_change_password' %}"
+     class="flex min-h-[44px] items-center gap-3 border-b border-ink-200 px-4 py-3.5 hover:bg-ink-50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+    <span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-ink-900">Email &amp; password</span>
+      <span class="block truncate text-xs text-ink-600">{{ user.email }}</span></span>
+    {% include "components/_icon.html" with name="chevron-down" class="h-4 w-4 shrink-0 -rotate-90 text-ink-600" %}
+  </a>
+
+  <a href="{% url 'accounts:blocked' %}"
+     class="flex min-h-[44px] items-center gap-3 px-4 py-3.5 hover:bg-ink-50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+    <span class="min-w-0 flex-1"><span class="block text-sm font-semibold text-ink-900">Blocked people</span>
+      <span class="block truncate text-xs text-ink-600">{{ blocked_count }} {{ blocked_count|pluralize:"person,people" }}</span></span>
+    {% include "components/_icon.html" with name="chevron-down" class="h-4 w-4 shrink-0 -rotate-90 text-ink-600" %}
+  </a>
+</div>
+
+<div class="mt-4 bg-white">
+  <p class="border-b border-ink-200 px-4 py-2 text-xs font-bold uppercase tracking-wide text-ink-600">About</p>
+  <a href="{% url 'account_logout' %}"
+     class="flex min-h-[44px] items-center px-4 py-3.5 text-sm font-semibold text-ink-900 hover:bg-ink-50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Log out</a>
+</div>
+
+{% if not user.deletion_requested_at %}
+  <div class="mt-4 bg-white p-4">
+    <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Danger zone</p>
+    <p class="mt-2 text-sm leading-relaxed text-ink-800">
+      Deleting your account removes your profile, your name and your photo.
+      <b>Your ideas and comments stay up, shown as [deleted]</b> — so the threads other
+      people built with you don't vanish too.
+    </p>
+    {% url 'accounts:delete_account' as delete_url %}
+    <div class="mt-3">
+      {% include "components/_button.html" with label="Delete my account" href=delete_url variant="danger" %}
+    </div>
+  </div>
+{% endif %}
+
+<div class="h-6"></div>
+{% endblock app_content %}

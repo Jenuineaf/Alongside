@@ -1,0 +1,47 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% comment %}
+  Sign up — Accounts seat.
+
+  Four fields and one of them optional. product-spec.md §2.6 makes onboarding
+  the place where we ask about the person; the account form asks only what an
+  account needs. Anything moved from onboarding to here is a field someone has
+  to answer before they have seen a single idea, and onboarding is skippable
+  while this form is not.
+{% endcomment %}
+
+{% block head_title %}Sign up{% endblock %}
+
+{% block entry %}
+  <h1 class="text-[22px] font-semibold leading-7 text-balance text-ink-900">Nobody builds alone</h1>
+  <p class="mt-1 text-sm text-ink-700">Create an account to post ideas, follow people and message them.</p>
+
+  {% if form.non_field_errors %}
+    <div class="mt-4">
+      {% include "components/_banner.html" with kind="error" title="We couldn't create your account" body=form.non_field_errors|join:" " %}
+    </div>
+  {% endif %}
+
+  <form method="post" action="{% url 'account_signup' %}" class="mt-5 flex flex-col gap-4">
+    {% csrf_token %}
+
+    {% for field in form %}
+      {% include "components/_field.html" with field=field %}
+    {% endfor %}
+
+    {{ redirect_field }}
+
+    {% include "components/_button.html" with label="Create account" full=True %}
+  </form>
+
+  {% include "account/_social.html" with process="signup" %}
+{% endblock entry %}
+
+{% block entry_footer %}
+  <p class="mt-4 text-center text-sm text-ink-700">
+    Already have an account?
+    <a href="{{ login_url }}" class="font-semibold text-brand-700 hover:underline
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      Log in
+    </a>
+  </p>
+{% endblock entry_footer %}

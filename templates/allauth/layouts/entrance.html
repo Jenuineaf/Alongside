@@ -1,0 +1,27 @@
+{% extends "allauth/layouts/base.html" %}
+{% comment %}
+  The signed-out card — OWNED BY THE ACCOUNTS SEAT.
+
+  Wraps every entrance screen (login, signup, password reset, the Google
+  confirm step) in one narrow centred card so they cannot drift apart.
+
+  Screens written by this seat fill `{% block entry %}` and get the card.
+  allauth screens we have not hand-written fill `{% block content %}` instead,
+  which replaces the card but still renders inside base.html with the right
+  tokens — legible, just plainer. That is the intended fallback, not an
+  oversight.
+
+  Width: max-w-sm. design-system.md §3 caps the reading column at 640px, but a
+  form is not prose — a full-width email field on a laptop looks unfinished and
+  makes the two fields feel unrelated.
+{% endcomment %}
+
+{% block content %}
+  <div class="mx-auto w-full max-w-sm">
+    <div class="rounded-2xl border border-ink-200 bg-white p-6">
+      {% block entry %}{% endblock entry %}
+    </div>
+
+    {% block entry_footer %}{% endblock entry_footer %}
+  </div>
+{% endblock content %}

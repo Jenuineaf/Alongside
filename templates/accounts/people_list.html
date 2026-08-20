@@ -1,0 +1,32 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Followers / Following.
+
+  Filtered against the VIEWER's block set, not the profile owner's — ADR-0002
+  says a viewer must not encounter a block-related person wherever they turn up,
+  and someone else's follower list is one of the easier places to forget that.
+{% endcomment %}
+
+{% block title %}{{ heading }} — {{ person.name }}{% endblock %}
+
+{% block app_content %}
+<div class="bg-white">
+  {% for other in people %}
+    <a href="{{ other.get_absolute_url }}"
+       class="flex items-center gap-3 border-b border-ink-200 p-4 hover:bg-ink-50
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_avatar.html" with user=other %}
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-semibold text-ink-900">{{ other.name }}</p>
+        <p class="truncate text-xs text-ink-600">{% firstof other.profile.headline other.profile.occupation "" %}</p>
+      </div>
+    </a>
+  {% empty %}
+    {% if heading == "Followers" %}
+      {% include "components/_empty_state.html" with icon="people" title="Nobody yet" body="Following is one-way and instant here — the first one usually turns up after a good idea does." %}
+    {% else %}
+      {% include "components/_empty_state.html" with icon="people" title="Not following anyone yet" body="Following someone puts their ideas at the top of Home, and they get a notification saying you're interested." %}
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock app_content %}

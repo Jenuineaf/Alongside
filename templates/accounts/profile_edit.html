@@ -1,0 +1,79 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Settings → Edit profile.
+
+  Always the signed-in user's own profile — the view takes the target from the
+  session, not the URL, so there is no ownership check that can be forgotten.
+{% endcomment %}
+
+{% block title %}Edit profile{% endblock %}
+
+{% block app_content %}
+<form method="post" enctype="multipart/form-data" class="bg-white p-4">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="mb-4">
+      {% include "components/_banner.html" with kind="error" title="We couldn't save that" body=form.non_field_errors|join:" " %}
+    </div>
+  {% endif %}
+
+  <div class="flex flex-col gap-4">
+    {% include "components/_field.html" with field=form.display_name %}
+    {% include "components/_field.html" with field=form.headline %}
+    {% include "components/_field.html" with field=form.occupation %}
+    {% include "components/_field.html" with field=form.bio rows=4 %}
+    {% include "components/_field.html" with field=form.work_done rows=4 %}
+    {% include "components/_field.html" with field=form.city %}
+
+    {# Checkbox: _field.html is built for text controls and would render this
+       h-11 w-full. The 44px row around it is what design-system.md §7 asks for. #}
+    <label for="{{ form.is_remote_friendly.id_for_label }}"
+           class="inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 text-sm text-ink-800">
+      <input type="checkbox" name="{{ form.is_remote_friendly.html_name }}"
+             id="{{ form.is_remote_friendly.id_for_label }}"
+             {% if form.is_remote_friendly.value %}checked{% endif %}
+             class="h-5 w-5 rounded border-ink-300 text-brand-700
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      {{ form.is_remote_friendly.label }}
+    </label>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="text-sm font-medium text-ink-800">Avatar <span class="font-normal text-ink-600">(optional)</span></span>
+      {{ form.avatar }}
+      {% if form.avatar.errors %}
+        <p class="text-xs font-medium text-bad-700">{{ form.avatar.errors|join:" " }}</p>
+      {% endif %}
+    </div>
+
+    {% include "components/_field.html" with field=form.github_url %}
+    {% include "components/_field.html" with field=form.portfolio_url %}
+    {% include "components/_field.html" with field=form.website_url %}
+
+    {# Roles are the matching signal (design-system.md §4.2), so they get real
+       44px rows rather than a squeezed multi-select. #}
+    <fieldset class="flex flex-col gap-1.5">
+      <legend class="text-sm font-medium text-ink-800">{{ form.skills.label }}</legend>
+      <p class="text-xs text-ink-600">{{ form.skills.help_text }}</p>
+      <div class="mt-1 grid grid-cols-1 gap-1 sm:grid-cols-2">
+        {% for choice in form.skills %}
+          <label class="inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 text-sm text-ink-800">
+            {{ choice.tag }} {{ choice.choice_label }}
+          </label>
+        {% endfor %}
+      </div>
+      {% if form.skills.errors %}
+        <p class="text-xs font-medium text-bad-700">{{ form.skills.errors|join:" " }}</p>
+      {% endif %}
+    </fieldset>
+
+    {% include "components/_field.html" with field=form.custom_skills %}
+  </div>
+
+  <div class="mt-6 flex flex-col gap-2">
+    {% include "components/_button.html" with label="Save profile" full=True %}
+    {% url 'accounts:settings' as settings_url %}
+    {% include "components/_button.html" with label="Cancel" href=settings_url variant="ghost" full=True %}
+  </div>
+</form>
+{% endblock app_content %}

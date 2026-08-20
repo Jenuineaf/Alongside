@@ -1,0 +1,45 @@
+{% comment %}
+  Third-party sign-in block — Accounts seat.
+
+    {% include "account/_social.html" with process="login" %}
+    {% include "account/_social.html" with process="signup" %}
+
+  Renders nothing at all when no provider is configured, which is the normal
+  state locally and in CI: `get_providers` reads the `SocialApp` rows, and
+  there are none until someone adds Google's credentials. So the login page
+  works before Google is set up, and grows the button when it is — no settings
+  flag to remember, no dead divider hanging over an empty space.
+
+  POST, not a link. allauth 65 defaults SOCIALACCOUNT_LOGIN_ON_GET to False so
+  that starting an OAuth flow cannot be triggered by a prefetcher, a crawler, or
+  a link someone was sent.
+
+  NO GOOGLE LOGO — DELIBERATE. Google's brand guidelines specify their own mark
+  and it is not in components/_icon.html. Drawing an approximation would be both
+  a brand violation and me inventing UI. Flagged to Jeni for the Designer.
+{% endcomment %}
+{% load socialaccount %}
+{% get_providers as socialaccount_providers %}
+
+{% if socialaccount_providers %}
+  <div class="my-5 flex items-center gap-3">
+    <span class="h-px flex-1 bg-ink-200"></span>
+    <span class="text-xs text-ink-600">or</span>
+    <span class="h-px flex-1 bg-ink-200"></span>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    {% for provider in socialaccount_providers %}
+      <form method="post" action="{% provider_login_url provider process=process %}">
+        {% csrf_token %}
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+        <button type="submit"
+                class="{% include 'components/_btn_class.html' with variant='secondary' full=True %}">
+          Continue with {{ provider.name }}
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+{% endif %}

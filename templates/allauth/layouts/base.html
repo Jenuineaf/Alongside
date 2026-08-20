@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% comment %}
+  allauth's root layout — OWNED BY THE ACCOUNTS SEAT.
+
+  allauth 65 ships its own <html> document with an unstyled nav menu. Overriding
+  this one file redirects the whole allauth template tree — login, signup, every
+  password and email screen, and the ones we have not hand-written — into the
+  Architect's base.html, so they all get the viewport tag, the Tailwind tokens,
+  HTMX and the CSRF wiring for free.
+
+  WHY THIS FILE DECLARES ALMOST NOTHING
+
+  base.html and allauth's templates both use a block called `content`. Django
+  refuses two blocks of the same name in one template, so this layout
+  deliberately does NOT redeclare it: allauth's children define `{% block content %}`
+  and it flows straight through to base.html's `content`. The only real work here
+  is mapping allauth's `head_title` onto base.html's `title`.
+
+  Auth screens get a deliberately quiet header rather than components/_app_bar.html:
+  the app bar links to posts:home, discovery:search and user.get_absolute_url,
+  none of which exist yet, and a signed-out person on a login screen has nowhere
+  to navigate to anyway.
+{% endcomment %}
+
+{% block title %}{% block head_title %}{% endblock head_title %}{% endblock title %}
+
+{% block nav %}
+  <header class="border-b border-ink-200 bg-white">
+    <div class="mx-auto flex h-14 max-w-3xl items-center justify-center px-4">
+      <a href="/"
+         class="flex items-center gap-1.5 px-2 font-bold tracking-tight text-ink-900
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+        <svg viewBox="0 0 24 24" class="h-5 w-5 fill-brand-700" aria-hidden="true">
+          <path d="M12 2l2.2 6.1L20.5 10l-6.3 1.9L12 18l-2.2-6.1L3.5 10l6.3-1.9L12 2z"/>
+        </svg>
+        Alongside
+      </a>
+    </div>
+  </header>
+{% endblock nav %}

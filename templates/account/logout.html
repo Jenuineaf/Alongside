@@ -1,0 +1,25 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% comment %}
+  Log out — Accounts seat.
+
+  A confirm step, and it has to be a POST. `GET /accounts/logout/` would be
+  followed by every link prefetcher and crawler that touches a page containing
+  the link, which logs people out at random — the same reasoning testing.md §6
+  applies to every irreversible action.
+{% endcomment %}
+
+{% block head_title %}Log out{% endblock %}
+
+{% block entry %}
+  <h1 class="text-[22px] font-semibold leading-7 text-balance text-ink-900">Log out of Alongside?</h1>
+  <p class="mt-1 text-sm text-ink-700">
+    You can still browse ideas and profiles while logged out — the feed is public.
+  </p>
+
+  <form method="post" action="{% url 'account_logout' %}" class="mt-5 flex flex-col gap-2">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {% include "components/_button.html" with label="Log out" full=True %}
+    {% include "components/_button.html" with label="Stay logged in" href="/" variant="ghost" full=True %}
+  </form>
+{% endblock entry %}
