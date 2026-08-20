@@ -221,6 +221,18 @@ Two things that are deliberate and must not be "fixed":
   (`CLAUDE.md` rule 7), **not** a bug — and the wrong fix for it is a login wall, which would
   destroy the product. ADR-0002 spells this out.
 
+**Two surfaces are explicit exceptions to §1.6 (ACC-8).** Both look like leaks and neither is:
+
+- **The block list in Settings** (`/u/settings/blocked/`) queries `Block` unfiltered. It exists
+  to show you the people you have blocked — filtering it would hide exactly those people and
+  leave no way to unblock anyone.
+- **The unblock view** resolves its target without the visibility filter, for the same reason:
+  while the block stands, that user is a 404 to you, so the normal lookup would make the block
+  permanent.
+
+These are the only two places in the app that look a user up without the filter. Anything else
+that does is a bug.
+
 ### 1.6 The visibility convention — every seat must follow this
 
 Block is symmetric and global, which means roughly a dozen read paths need filtering, owned by
@@ -643,6 +655,23 @@ Without this rule a post shows "12 comments" above 11 rendered ones the first ti
 deletes a comment — a bug that looks like a caching problem and isn't. The reconciliation task
 (rule 4) computes counts over `deleted_at__isnull=True` rows, so it agrees with this rule rather
 than fighting it.
+
+**Hard deletes need the same rule, and it was missing (ACC-6).** `Follow` is hard-deleted in
+three places, and every one of them moves two counters on two different profiles:
+
+| Action | Effect |
+|---|---|
+| Follow hard-deleted — unfollow, block (**both directions**), anonymisation (**all edges**) | follower's `Profile.following_count` **−1** and the followed user's `Profile.follower_count` **−1**, in the same `transaction.atomic()` as the delete |
+
+Anonymisation is the expensive one: it drops every edge the leaving user had in both
+directions, so it is an N-row counter update across everyone they touched. Skip it and follower
+counts drift permanently on every block and every account deletion, repaired only by the weekly
+reconciliation task — up to a week of visibly wrong numbers on real profiles.
+
+Implemented once in `accounts/services.py`; **views never write `Follow` or `Block` directly.**
+The decrement uses `Greatest(F(field) - 1, 0)`, not a bare `F() - 1`: these are
+`PositiveIntegerField`s, so a decrement against an already-drifted zero is an `IntegrityError`
+and a 500 on the button, not a cosmetic slip.
 
 ### 7.2 Counters are global, never viewer-relative
 

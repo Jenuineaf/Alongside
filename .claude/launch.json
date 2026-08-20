@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "alongside-mockups",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5173", "--directory", "C:/Users/JENNIE/OneDrive/Documents/Alongside"],
-      "port": 5173
+      "name": "alongside",
+      "runtimeExecutable": "C:\\Users\\JENNIE\\AppData\\Local\\Temp\\claude\\C--Users-JENNIE-OneDrive-Documents-Alongside\\5f17f667-bdee-470d-ad54-9f39b88a842b\\scratchpad\\venv\\Scripts\\python.exe",
+      "runtimeArgs": ["manage.py", "runserver", "127.0.0.1:8010"],
+      "port": 8010
     }
   ]
 }
