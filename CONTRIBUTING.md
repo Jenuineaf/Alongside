@@ -47,6 +47,11 @@ pytest · Ruff
 
 ## Seats
 
-Architect · Designer · DevOps · QA & Seed Data · Accounts & Profiles · Posts & Feed ·
-Discovery · Social · Messaging · Trust & Safety
+**Active:** Architect (schema + migrations) · Designer (design system + screens) ·
+Builder (all feature development) · QA & Seed Data · DevOps (infra, part-time)
+
+The six feature seats — Accounts & Profiles, Posts & Feed, Discovery, Social, Messaging,
+Trust & Safety — were **merged into Builder** once the schema review finished. Their reviews
+live in `docs/review/` and remain the reference for each area. The split existed to review the
+data model from six angles in parallel; for sequential build work it was coordination cost.
 
