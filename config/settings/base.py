@@ -73,6 +73,7 @@ LOCAL_APPS = [
     "accounts",
     "posts",
     "discovery",
+    "social",
     "messaging",
     "notifications",
     "moderation",
@@ -152,17 +153,20 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# allauth. Defaults set by the Architect so `accounts` 0001 can migrate; the
-# Accounts & Profiles seat owns the flows and requests changes through Jeni.
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = env("ACCOUNT_EMAIL_VERIFICATION", default="optional")
 ACCOUNT_UNIQUE_EMAIL = True
 
-# allauth derives a username from the email on Google sign-in, which can produce
-# values our [a-z0-9_]{3,30} validator rejects (dots, plus signs, uppercase,
-# length). The Accounts seat owns the adapter that normalises and de-duplicates
-# — data-model.md §10.
+# Without these four lines allauth uses its own adapter and forms, and everything
+# in accounts/adapters.py and accounts/forms.py is dead code: usernames derived
+# from Google go back to failing the [a-z0-9_]{3,30} validator (data-model.md
+# §10) and `display_name` is never collected at signup.
+ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountAdapter"
+ACCOUNT_FORMS = {"signup": "accounts.forms.SignupForm"}
+SOCIALACCOUNT_FORMS = {"signup": "accounts.forms.SocialSignupForm"}
+
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
