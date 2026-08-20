@@ -1,0 +1,41 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Delete account — the confirmation step.
+
+  GET renders this; only POST starts the clock (testing.md §6: every
+  irreversible action is POST-and-confirmed, never a link a prefetcher can
+  follow).
+
+  The copy states what actually happens per ADR-0001 rather than what "delete"
+  usually implies. Being vague here would be the dishonest option: the account
+  row survives, and the person deserves to know that before they press it.
+{% endcomment %}
+
+{% block title %}Delete account{% endblock %}
+
+{% block app_content %}
+<div class="bg-white p-4">
+  <h1 class="text-[22px] font-semibold leading-7 text-balance text-ink-900">Delete your account</h1>
+
+  <div class="mt-4 flex flex-col gap-3 text-[15px] leading-relaxed text-ink-800">
+    <p><b>You have 30 days to change your mind.</b> Nothing is removed until then, and logging
+      back in at any point cancels it.</p>
+    <p>After 30 days we permanently remove your name, photo, bio, links, interests and skills,
+      and your email address. Your login stops working.</p>
+    <p><b>Your ideas, comments and messages stay up, shown as [deleted].</b> They're part of
+      other people's threads — a conversation shouldn't become a monologue because one person
+      left.</p>
+  </div>
+
+  <div class="mt-4">
+    {% include "components/_banner.html" with kind="warning" title="This isn't the same as logging out" body="If you just want a break, log out instead — your account stays exactly as it is." %}
+  </div>
+
+  <form method="post" class="mt-5 flex flex-col gap-2">
+    {% csrf_token %}
+    {% include "components/_button.html" with label="Delete my account" variant="danger" full=True %}
+    {% url 'accounts:settings' as settings_url %}
+    {% include "components/_button.html" with label="Keep my account" href=settings_url variant="ghost" full=True %}
+  </form>
+</div>
+{% endblock app_content %}

@@ -1,0 +1,38 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Settings → Blocked people.
+
+  THE ONE AUTHENTICATED LIST THAT MUST NOT BE BLOCK-FILTERED (ACC-8,
+  data-model.md §1.5). Everywhere else `visible_to()` hides these people; here
+  it would hide exactly the ones the screen exists to show and leave no way to
+  unblock anyone. If you are here to "fix a leak", this is not one.
+{% endcomment %}
+
+{% block title %}Blocked people{% endblock %}
+
+{% block app_content %}
+<div class="bg-white">
+  {% for block in blocks %}
+    <div class="flex items-center gap-3 border-b border-ink-200 p-4">
+      {% include "components/_avatar.html" with user=block.blocked %}
+      <div class="min-w-0 flex-1">
+        <p class="truncate text-sm font-semibold text-ink-900">{{ block.blocked.name }}</p>
+        <p class="truncate text-xs text-ink-600">Blocked {{ block.created_at|timesince }} ago</p>
+      </div>
+      <form method="post" action="{% url 'accounts:unblock' block.blocked.username %}">
+        {% csrf_token %}
+        {% include "components/_button.html" with label="Unblock" variant="secondary" %}
+      </form>
+    </div>
+  {% empty %}
+    {% include "components/_empty_state.html" with icon="people" title="You haven't blocked anyone" body="If someone's bothering you, blocking them hides you both from each other completely — profiles, ideas, comments and messages." %}
+  {% endfor %}
+</div>
+
+{% if blocks %}
+  <p class="px-4 py-4 text-xs leading-relaxed text-ink-600">
+    Unblocking makes you visible to each other again and brings back any chat history.
+    It does not restore follows — you'd each need to follow again.
+  </p>
+{% endif %}
+{% endblock app_content %}

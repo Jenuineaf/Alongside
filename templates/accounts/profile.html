@@ -1,0 +1,177 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Screen 7 — Profile. Public: no login wall (CLAUDE.md rule 7).
+
+  Layout from design/mockups/v5-remaining-screens.html §7. Skills and what
+  they've built sit above the post list on purpose — someone else's profile has
+  to answer "is this person worth messaging?" before anything else.
+
+  Follow-with-a-note follows the Designer's flow: the follow lands on the first
+  tap, then the note is offered. Asking for the note first would put a textarea
+  in front of a one-tap action.
+{% endcomment %}
+
+{% block title %}{{ person.name }}{% endblock %}
+
+{% block app_content %}
+<div class="bg-white p-4">
+
+  <div class="flex items-start gap-4">
+    {% include "components/_avatar.html" with user=person size="lg" %}
+    <div class="min-w-0 flex-1">
+      <h1 class="truncate text-[22px] font-semibold leading-7 text-ink-900">{{ person.name }}</h1>
+      {% if profile.headline or profile.occupation or profile.city %}
+        <p class="text-sm text-ink-700">
+          {% firstof profile.headline profile.occupation as line %}
+          {{ line }}{% if line and profile.city %} · {% endif %}{{ profile.city }}
+        </p>
+      {% endif %}
+      <p class="mt-1 text-xs text-ink-600">
+        <a href="{% url 'accounts:followers' person.username %}" class="hover:underline">
+          <b class="text-ink-900 tabular-nums">{{ profile.follower_count }}</b>
+          follower{{ profile.follower_count|pluralize }}</a> ·
+        <a href="{% url 'accounts:following' person.username %}" class="hover:underline">
+          <b class="text-ink-900 tabular-nums">{{ profile.following_count }}</b> following</a>
+      </p>
+    </div>
+  </div>
+
+  {% if profile.bio %}
+    <p class="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-ink-800">{{ profile.bio }}</p>
+  {% endif %}
+
+  {% if profile.work_done %}
+    <div class="mt-4">
+      <p class="text-xs font-bold uppercase tracking-wide text-ink-600">What they've built</p>
+      <p class="mt-1.5 whitespace-pre-line text-[15px] leading-relaxed text-ink-800">{{ profile.work_done }}</p>
+    </div>
+  {% endif %}
+
+  {% if profile.github_url or profile.portfolio_url or profile.website_url %}
+    {# rel="nofollow noopener ugc" on all three: these are user-supplied URLs on
+       a public page, which is exactly what `ugc` is for, and `noopener` keeps
+       the opened tab from touching ours. #}
+    <div class="mt-3 flex flex-wrap gap-2">
+      {% if profile.github_url %}
+        <a href="{{ profile.github_url }}" rel="nofollow noopener ugc" target="_blank"
+           class="inline-flex h-11 items-center rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800 hover:bg-ink-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">GitHub</a>
+      {% endif %}
+      {% if profile.portfolio_url %}
+        <a href="{{ profile.portfolio_url }}" rel="nofollow noopener ugc" target="_blank"
+           class="inline-flex h-11 items-center rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800 hover:bg-ink-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Portfolio</a>
+      {% endif %}
+      {% if profile.website_url %}
+        <a href="{{ profile.website_url }}" rel="nofollow noopener ugc" target="_blank"
+           class="inline-flex h-11 items-center rounded-lg border border-ink-300 px-3 text-xs font-semibold text-ink-800 hover:bg-ink-50
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">Website</a>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if skills or profile.custom_skills %}
+    <div class="mt-4">
+      <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Can fill these roles</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        {% for role in skills %}
+          {% include "components/_chip_role.html" with role=role %}
+        {% endfor %}
+        {% for skill in profile.custom_skills %}
+          {% include "components/_chip_role.html" with label=skill %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {# ── Actions ─────────────────────────────────────────────────────────── #}
+  <div class="mt-4 flex gap-2">
+    {% if is_self %}
+      {% url 'accounts:profile_edit' as edit_url %}
+      {% include "components/_button.html" with label="Edit profile" href=edit_url variant="secondary" full=True %}
+      <a href="{% url 'accounts:settings' %}" aria-label="Settings"
+         class="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-ink-300 text-ink-800 hover:bg-ink-50
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+        {% include "components/_icon.html" with name="settings" %}
+      </a>
+    {% elif user.is_authenticated %}
+      {% if is_following %}
+        <form method="post" action="{% url 'accounts:unfollow' person.username %}" class="flex-1">
+          {% csrf_token %}
+          {% include "components/_button.html" with label="Following" variant="secondary" full=True %}
+        </form>
+      {% else %}
+        <form method="post" action="{% url 'accounts:follow' person.username %}" class="flex-1">
+          {% csrf_token %}
+          {% include "components/_button.html" with label="Follow" full=True %}
+        </form>
+      {% endif %}
+      <a href="{% url 'messaging:start' person.pk %}"
+         class="{% include 'components/_btn_class.html' with variant='secondary' full=True %} flex-1">Message</a>
+    {% else %}
+      {% url 'account_login' as login_url %}
+      {% include "components/_button.html" with label="Log in to follow" href=login_url full=True %}
+    {% endif %}
+  </div>
+
+  {% if is_following and not is_self %}
+    {# The Designer's follow-note step. Shown after the follow exists, never before. #}
+    <details class="mt-3 rounded-xl border border-ink-200 p-3">
+      <summary class="cursor-pointer text-sm font-semibold text-brand-700">
+        Say why you followed {{ person.name }}
+      </summary>
+      <form method="post" action="{% url 'accounts:follow_note' person.username %}" class="mt-3">
+        {% csrf_token %}
+        {% include "components/_field.html" with field=follow_note_form.note rows=3 %}
+        <div class="mt-3">
+          {% include "components/_button.html" with label="Send note" full=True %}
+        </div>
+      </form>
+    </details>
+  {% endif %}
+
+  {% if user.is_authenticated and not is_self %}
+    <form method="post" action="{% url 'accounts:block' person.username %}" class="mt-3"
+          onsubmit="return confirm('Block {{ person.name|escapejs }}? You won\'t see each other anywhere on Alongside.');">
+      {% csrf_token %}
+      <button type="submit"
+              class="inline-flex h-11 items-center text-sm font-semibold text-ink-600 hover:text-bad-700
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+        Block {{ person.name }}
+      </button>
+    </form>
+  {% endif %}
+</div>
+
+{# ── Their ideas ────────────────────────────────────────────────────────── #}
+<div class="mt-2 border-b border-ink-200 bg-white px-4 py-3">
+  <p class="text-sm font-semibold text-ink-900">
+    Ideas <span class="tabular-nums text-ink-600">{{ profile.post_count }}</span>
+  </p>
+</div>
+
+{% for post in posts %}
+  <article class="border-b border-ink-200 bg-white p-4">
+    <h2 class="text-balance text-lg font-semibold leading-snug">
+      <a href="{{ post.get_absolute_url }}" class="hover:underline
+         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ post.title }}</a>
+    </h2>
+    <div class="mt-2 flex flex-wrap items-center gap-2">
+      {% include "components/_badges.html" with post=post show_stage=False show_commitment=False %}
+      <span class="text-xs text-ink-600">
+        {{ post.spark_count }} spark{{ post.spark_count|pluralize }} ·
+        {{ post.comment_count }} comment{{ post.comment_count|pluralize }}
+      </span>
+    </div>
+  </article>
+{% empty %}
+  <div class="bg-white">
+    {% if is_self %}
+      {% url 'posts:create' as create_url %}
+      {% include "components/_empty_state.html" with icon="plus" title="You haven't posted an idea yet" body="You don't need it fully formed. Half the ideas here started as a paragraph and a question." action_label="Post your first idea" action_url=create_url %}
+    {% else %}
+      {% include "components/_empty_state.html" with icon="explore" title="No ideas yet" body="They haven't posted anything so far. Follow them and you'll see the first one." %}
+    {% endif %}
+  </div>
+{% endfor %}
+{% endblock app_content %}

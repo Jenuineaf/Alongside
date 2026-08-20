@@ -174,6 +174,54 @@ class User(AbstractUser):
             return "[deleted]"
         return self.display_name or self.username
 
+    @property
+    def initials(self) -> str:
+        """Two letters for `components/_avatar.html`.
+
+        The avatar component treats initials-on-a-tint as the real design and a
+        photo as the exception, so this renders far more often than any image
+        does. Anonymised accounts get a dash rather than the initials of a name
+        we have promised to remove.
+        """
+        if self.anonymised_at:
+            return "—"
+        source = self.display_name.strip() or self.username
+        words = [word for word in source.split() if word]
+        if len(words) >= 2:
+            return (words[0][0] + words[1][0]).upper()
+        return source[:2].upper()
+
+    @property
+    def avatar_url(self) -> str:
+        """Adapter for `components/_avatar.html`, which reads `user.avatar_url`.
+
+        The image itself lives on `Profile` (two fields and a precedence rule —
+        data-model.md §1.2.1). Rather than teach every template that, the user
+        object answers the question the component asks.
+
+        **Callers must `select_related("profile")`.** Without it this is one
+        query per rendered user, which on a 20-card feed is the N+1 that
+        `testing.md` §5.5 exists to catch. `Profile` is created in the same
+        transaction as the user, so the fallback below is for the unsaved
+        in-memory case, not for real rows.
+        """
+        profile = getattr(self, "profile", None)
+        return profile.avatar_display_url if profile else ""
+
+    def get_absolute_url(self) -> str:
+        from django.urls import reverse
+
+        return reverse("accounts:profile", kwargs={"username": self.username})
+
+    @property
+    def headline(self) -> str:
+        """One-line bio under the name on cards.
+
+        Same `select_related("profile")` requirement as `avatar_url`.
+        """
+        profile = getattr(self, "profile", None)
+        return profile.headline if profile else ""
+
 
 class ProfileQuerySet(BlockAwareQuerySetMixin, models.QuerySet):
     # People search surfaces other users, so it needs the block filter. The path

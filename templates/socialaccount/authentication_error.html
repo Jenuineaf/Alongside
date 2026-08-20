@@ -1,0 +1,27 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% comment %}
+  Google sign-in failed — Accounts seat.
+
+  Deliberately vague about the cause: the underlying errors are OAuth state
+  mismatches and provider misconfiguration, none of which the person can act on.
+  Two routes out instead, because the second one — you already have a password
+  account on this email — is the most common real reason to land here.
+{% endcomment %}
+
+{% block head_title %}Google sign-in didn't work{% endblock %}
+
+{% block entry %}
+  <h1 class="text-[22px] font-semibold leading-7 text-balance text-ink-900">Google sign-in didn't work</h1>
+  <p class="mt-3 text-base leading-relaxed text-ink-800">
+    Something went wrong on the way back from Google. Nothing was created and nothing was lost.
+  </p>
+  <p class="mt-3 text-sm text-ink-700">
+    If you already signed up with an email and password, log in that way instead.
+  </p>
+
+  {% url 'account_login' as login_url %}
+  <div class="mt-5 flex flex-col gap-2">
+    {% include "components/_button.html" with label="Back to log in" href=login_url full=True %}
+    {% include "components/_button.html" with label="Browse ideas instead" href="/" variant="ghost" full=True %}
+  </div>
+{% endblock entry %}

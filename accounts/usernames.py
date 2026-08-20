@@ -24,7 +24,11 @@ import unicodedata
 
 from django.contrib.auth import get_user_model
 
-from accounts.validators import RESERVED_USERNAME_PREFIXES, RESERVED_USERNAMES
+from accounts.validators import (
+    RESERVED_USERNAME_PREFIXES,
+    RESERVED_USERNAMES,
+    USERNAME_REGEX,
+)
 
 MIN_LENGTH = 3
 MAX_LENGTH = 30
@@ -77,15 +81,28 @@ def normalise_username(raw: str | None) -> str:
     return value[:MAX_LENGTH].rstrip("_")
 
 
-def is_available(username: str) -> bool:
-    """Is this username well-formed, unreserved, and unused?
+def is_allowed(username: str) -> bool:
+    """Is this username structurally usable, ignoring whether anyone has it?
 
-    Touches the database. The length and reserved checks come first so the
-    common rejections cost no query.
+    Pure, no database. Separated from `is_available` because the two failures
+    need different responses: a *taken* name can be fixed with a numeric suffix,
+    a *disallowed* one cannot — `deleted_1`, `deleted_2`, `deleted_3` are all
+    equally forbidden, so suffixing a reserved stem loops until it gives up.
     """
     if not MIN_LENGTH <= len(username) <= MAX_LENGTH:
         return False
-    if username in RESERVED_USERNAMES or username.startswith(RESERVED_USERNAME_PREFIXES):
+    if not re.fullmatch(USERNAME_REGEX, username):
+        return False
+    return not (username in RESERVED_USERNAMES or username.startswith(RESERVED_USERNAME_PREFIXES))
+
+
+def is_available(username: str) -> bool:
+    """Is this username well-formed, unreserved, and unused?
+
+    Touches the database — but only after the free checks have passed, so the
+    common rejections cost no query.
+    """
+    if not is_allowed(username):
         return False
     return not get_user_model().objects.filter(username=username).exists()
 
@@ -106,6 +123,14 @@ def generate_unique_username(*candidates: str | None) -> str:
         ),
         FALLBACK_STEM,
     )
+
+    # A reserved *prefix* cannot be escaped by suffixing: `deleted_1`,
+    # `deleted_2` and `deleted_ab12cd` are all equally forbidden, so a Google
+    # account called "Deleted 1" would burn every attempt below and then raise.
+    # Reserved whole words are different — `admin` is taken but `admin_2` is
+    # free — so those are left to the loop.
+    if stem.startswith(RESERVED_USERNAME_PREFIXES):
+        stem = FALLBACK_STEM
 
     if is_available(stem):
         return stem
