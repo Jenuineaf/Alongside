@@ -1,0 +1,22 @@
+{% comment %}
+  HTMX response wrapper for the comment thread. Not for use in a page.
+
+  The thread sits in the article; the comment tally sits in the sticky bar at
+  the bottom of the screen. One HTMX swap cannot reach two places, so the
+  fragment carries the tally as an out-of-band update: HTMX pulls any top-level
+  element with `hx-swap-oob` out of the response and swaps it onto the matching
+  id wherever that lives in the document.
+
+  Without this, adding a comment updates the heading and the thread while the
+  icon in the sticky bar still shows the old number until the next full page
+  render — the same half-updated screen the save button had when it answered 204.
+
+  The OOB element must be a TOP-LEVEL element of the response, which is the only
+  reason this file exists rather than the attribute living inside the section.
+
+  `hx-swap-oob` is ignored on a normal page render, so post detail includes
+  `social/_comment_section.html` directly and never this file.
+{% endcomment %}
+{% include "social/_comment_section.html" %}
+<span id="post-comment-tally" hx-swap-oob="true"
+      class="text-sm font-semibold tabular-nums">{{ comments|length }}</span>

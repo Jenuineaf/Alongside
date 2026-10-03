@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_GET
 
 from posts.models import Post, PostRole, PostSpark, PostStatus, SavedPost
+from social.forms import CommentForm
+from social.queries import visible_comments
 
 
 def _feed_queryset(user=None):
@@ -75,16 +77,31 @@ def feed(request):
 
 @require_GET
 def detail(request, slug):
-    """Screen 6 — post detail."""
-    post = get_object_or_404(
-        _feed_queryset(request.user).prefetch_related("comments__author__profile"),
-        slug=slug,
-    )
+    """Screen 6 — post detail, comment thread included.
+
+    The thread comes from `social.queries.visible_comments()` rather than the
+    `comments__author__profile` prefetch this view started with. That prefetch
+    was a leak: it is not block-filtered, so a blocked person's comments
+    rendered in full on a page whose every other element respected ADR-0002.
+    The helper also annotates `is_sparked` per viewer and orders oldest-first.
+
+    It is materialised into a list because the fragment renders its length
+    twice — the heading and the sticky bar's tally (§7.2) — and a queryset would
+    be two more `COUNT`s.
+    """
+    post = get_object_or_404(_feed_queryset(request.user), slug=slug)
+    comments = list(visible_comments(post, request.user))
+
     return render(
         request,
         "posts/detail.html",
         {
             "post": post,
+            "comments": comments,
+            "comment_form": CommentForm(),
+            # Mirrors social.views: signed in, and not one of the shared demo
+            # logins whose password is printed on the landing page (§1.1.1).
+            "can_comment": request.user.is_authenticated and not request.user.is_public_demo,
         },
     )
 

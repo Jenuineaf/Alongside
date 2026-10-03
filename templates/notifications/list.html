@@ -1,0 +1,67 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Screen 12 — Alerts. Markup from the approved mockup in
+  design/mockups/v5-remaining-screens.html (§11 & 12).
+
+  Context:
+    unread / earlier   lists of Notification, newest first, already grouped by
+                       the view. A `new_follower` row may carry .follow_note.
+
+  Three triggers in v1 and two of them exist today: new comment and new
+  follower. New DM arrives with Phase 5, which is why there is no case for it
+  below — and why the database rejects the row until then
+  (notification_kind_targets).
+
+  "New" and "Earlier" are unread and read, not two time buckets. Opening this
+  screen does not mark anything read: both dedup rules key on is_read=False, so
+  "Mark all read" is the dedup reset as well as the obvious control.
+{% endcomment %}
+
+{% block title %}Alerts{% endblock %}
+
+{% block app_content %}
+
+<div class="flex h-14 items-center justify-between border-b border-ink-200 bg-white px-4">
+  <h1 class="text-lg font-bold text-ink-900">Alerts</h1>
+  {% if unread %}
+    <form method="post" action="{% url 'notifications:mark_all_read' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="-mr-2 inline-flex h-11 items-center rounded-lg px-2 text-sm font-semibold text-brand-700 hover:bg-brand-50
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+        Mark all read
+      </button>
+    </form>
+  {% endif %}
+</div>
+
+{% if unread %}
+  <div class="border-b border-ink-200 bg-ink-50 px-4 py-2">
+    <p class="text-xs font-bold uppercase tracking-wide text-ink-600">New</p>
+  </div>
+  {% for notification in unread %}
+    {% include "notifications/_row.html" with notification=notification is_unread=True %}
+  {% endfor %}
+{% endif %}
+
+{% if earlier %}
+  <div class="border-b border-ink-200 bg-ink-50 px-4 py-2">
+    <p class="text-xs font-bold uppercase tracking-wide text-ink-600">Earlier</p>
+  </div>
+  {% for notification in earlier %}
+    {% include "notifications/_row.html" with notification=notification %}
+  {% endfor %}
+{% endif %}
+
+{% if not unread and not earlier %}
+  {# Says WHY it is empty and gives exactly one way out, as a real button      #}
+  {# (design-system.md §4.5). For a brand-new user this screen IS the product: #}
+  {# an empty bell that only said "No notifications" would read as a dead app  #}
+  {# rather than a new account.                                                #}
+  <div class="bg-white">
+    {% url 'posts:create' as create_url %}
+    {% include "components/_empty_state.html" with icon="bell" title="Nothing yet" body="When somebody comments on your idea, follows you or sends you a message, it turns up here. Post an idea and this fills up fast." action_label="Post your idea" action_url=create_url %}
+  </div>
+{% endif %}
+
+{% endblock app_content %}

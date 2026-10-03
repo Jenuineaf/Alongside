@@ -102,15 +102,9 @@
           <span class="sr-only">comments</span>
         </a>
 
-        <button type="button"
-                hx-post="{% url 'social:save' post.pk %}" hx-swap="outerHTML"
-                aria-pressed="{% if post.is_saved %}true{% else %}false{% endif %}"
-                aria-label="{% if post.is_saved %}Remove “{{ post.title }}” from saved{% else %}Save “{{ post.title }}” for later{% endif %}"
-                class="grid h-11 w-11 place-items-center rounded-full hover:bg-ink-100
-                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
-                       {% if post.is_saved %}text-brand-700{% else %}text-ink-600{% endif %}">
-          {% include "components/_icon.html" with name="save" filled=post.is_saved %}
-        </button>
+        {# Moved to its own partial so social.views.save can render it back on #}
+        {# toggle — the markup is unchanged. See components/_save.html.        #}
+        {% include "components/_save.html" with post=post %}
       </div>
 
       {% if show_message|default_if_none:True and post.author != request.user %}

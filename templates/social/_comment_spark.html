@@ -1,0 +1,56 @@
+{% comment %}
+  Spark on a comment — the small sibling of components/_spark.html.
+
+    {% include "social/_comment_spark.html" with comment=comment %}
+
+  Params:
+    comment   needs .pk, .spark_count and .is_sparked.
+
+  Same mechanism as the post spark: hx-post toggles, the view returns this
+  partial, HTMX swaps it outerHTML, so the count comes from the server.
+
+  It follows every rule in design-system.md §4.4 rather than inventing a
+  variant:
+    · burnt orange (spark-*) and nowhere else,
+    · aria-pressed carries the state, icon goes outline→solid so it survives
+      greyscale,
+    · the count is announced politely, on its own,
+    · 44px tap target.
+
+  TWO DELIBERATE DIFFERENCES from the post control, both for the same reason —
+  a thread has a dozen of these and the post has one:
+    1. The icon is 16px and the count is text-xs, so a comment spark never
+       competes with the post's own Spark in the sticky bar.
+    2. The 44px target is the button's HEIGHT only; it is not padded out
+       sideways. §7 asks for 44 on anything that changes state, and height is
+       where the thumb misses — a row of wide pills down a thread would read as
+       a list of buttons with comments attached.
+
+  The v1 mockup drew this control at h-8 in brand green. Both were pre-palette:
+  h-8 predates §7's 44px floor for state changes, and brand green predates the
+  rule that Spark is the one place burnt orange appears. If the Designer wants
+  the quieter green back, that is a §4.4 amendment, not a local override.
+
+  Vocabulary: it is a Spark. Never a like.
+{% endcomment %}
+<button type="button"
+        hx-post="{% url 'social:comment_spark' comment.pk %}"
+        hx-swap="outerHTML"
+        aria-pressed="{% if comment.is_sparked %}true{% else %}false{% endif %}"
+        aria-label="{% if comment.is_sparked %}Remove your spark from {{ comment.author.name }}'s comment{% else %}Spark {{ comment.author.name }}'s comment{% endif %}"
+        class="inline-flex h-11 items-center gap-1 rounded-full px-2 transition-colors
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2
+               {% if comment.is_sparked %}text-spark-700{% else %}text-ink-600 hover:text-spark-700{% endif %}">
+  {% if comment.is_sparked %}
+    <svg viewBox="0 0 24 24" class="h-4 w-4 fill-spark-500" aria-hidden="true">
+      <path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/>
+    </svg>
+  {% else %}
+    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1L12 3z"/>
+    </svg>
+  {% endif %}
+  <span class="text-xs font-semibold tabular-nums" aria-live="polite">{{ comment.spark_count }}</span>
+  <span class="sr-only">sparks</span>
+</button>
