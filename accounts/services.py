@@ -51,6 +51,20 @@ def follow(follower, following, note: str = "") -> tuple[Follow, bool]:
     if created:
         _bump(follower.pk, "following_count", 1)
         _bump(following.pk, "follower_count", 1)
+        # Second of spec §4.6's three triggers. Only on a real new edge: a
+        # re-press that `get_or_create` collapsed must not re-notify, for the
+        # same reason it must not re-count (§7 rule 5 / S3).
+        #
+        # Repeat follows from the same person collapse into one unread entry
+        # (S5, ruled by Jeni) — the rule lives in the notifications service, not
+        # here, because the constraint it relies on is on that table.
+        #
+        # Imported inside the function: `notifications.models` imports
+        # `posts.models`, and an import at the top of this module would make
+        # Accounts depend on both at load time.
+        from notifications import services as notification_services
+
+        notification_services.notify_new_follower(follower, following)
     return edge, created
 
 
@@ -77,18 +91,25 @@ def block(blocker, blocked) -> tuple[Block, bool]:
        counters moved (§7.1, ACC-6). Unblocking does not restore them.
     3. Both users' cached block sets are invalidated (ADR-0003 action item 5).
 
+    4. Notifications where either party is the other's `actor` are deleted,
+       in both directions (ADR-0002). This was deferred when the model did not
+       exist; it lands with the Social phase. The bell is also
+       `visible_to()`-filtered on `actor` (S9), so the delete is the permanent
+       half and the filter is the half that still holds if the delete is ever
+       missed.
+
     What deliberately does **not** happen: nothing deletes a `Message` or a
     `Conversation`. Hiding chat is a filter, so unblocking restores the thread
     for free, and there must be no delete path anywhere (ADR-0002).
-
-    Notification cleanup — deleting rows where the other party is `actor` — is
-    also required by ADR-0002 but belongs to the Social phase, since the model
-    does not exist yet. Tracked in the report rather than silently skipped.
     """
     edge, created = Block.objects.get_or_create(blocker=blocker, blocked=blocked)
 
     if created:
         _drop_follows_between(blocker, blocked)
+
+        from notifications import services as notification_services
+
+        notification_services.drop_between(blocker, blocked)
         invalidate_block_cache(blocker, blocked)
 
     return edge, created

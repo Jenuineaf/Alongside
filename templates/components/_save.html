@@ -1,0 +1,33 @@
+{% comment %}
+  Save (bookmark) — the partial the save endpoint returns.
+
+    {% include "components/_save.html" with post=post %}
+
+  Params:
+    post   needs .pk and .is_saved (annotated per request).
+
+  Extracted VERBATIM from the save button that was inline in
+  components/_post_card.html — same classes, same aria, same icon call — so
+  that `social.views.save` has something to render back. Nothing about the
+  design changed in the move.
+
+  Why it had to move: the endpoint used to answer 204 No Content, which HTMX
+  reads as "make no swap", so the bookmark was really saved but the icon stayed
+  hollow until the next full page render. That reads as a broken button.
+
+  Same contract as components/_spark.html: hx-post toggles, the view returns
+  this partial, HTMX swaps it outerHTML, so the state comes from the server.
+
+  Unlike Spark, a save is PRIVATE — it is never visible to anyone else and it
+  shows no count, which is why this is brand-coloured rather than spark-*.
+  Burnt orange belongs to Spark alone (design-system.md §4.4 rule 1).
+{% endcomment %}
+<button type="button"
+        hx-post="{% url 'social:save' post.pk %}" hx-swap="outerHTML"
+        aria-pressed="{% if post.is_saved %}true{% else %}false{% endif %}"
+        aria-label="{% if post.is_saved %}Remove “{{ post.title }}” from saved{% else %}Save “{{ post.title }}” for later{% endif %}"
+        class="grid h-11 w-11 place-items-center rounded-full hover:bg-ink-100
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600
+               {% if post.is_saved %}text-brand-700{% else %}text-ink-600{% endif %}">
+  {% include "components/_icon.html" with name="save" filled=post.is_saved %}
+</button>

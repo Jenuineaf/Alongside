@@ -1,0 +1,69 @@
+{% comment %}
+  One comment in a thread.
+
+    {% include "social/_comment.html" with comment=comment %}
+
+  Params:
+    comment   needs .pk, .author, .body, .created_at, .spark_count and
+              .is_sparked (annotated per request by social/queries.py).
+
+  Built from the approved comment thread in
+  design/mockups/v1-design-system-feed-post.html — 32px avatar, name, relative
+  time, body, spark. It lives in social/ rather than components/ because it is a
+  feature partial, not part of the shared system. Designer: fold it into the
+  index if you want it there.
+
+  `[deleted]` is not special-cased beyond the link: `User.name` and `.initials`
+  already return the tombstone for an anonymised account (ADR-0001), and the row
+  is meant to stay in the thread — a two-person exchange must not become a
+  monologue because one person left. The name stops being a link because the
+  profile itself 404s after a scrub (accounts/views.py), and a dead link is a
+  worse answer than plain text.
+
+  The author link is NOT wrapped around the whole row: that swallows the spark
+  button and the delete control, and makes the thread unusable with a keyboard.
+{% endcomment %}
+<li class="flex items-start gap-2.5">
+
+  <span class="shrink-0">
+    {% include "components/_avatar.html" with user=comment.author size="sm" %}
+  </span>
+
+  <div class="min-w-0 flex-1">
+    <p class="flex flex-wrap items-baseline gap-x-1.5 text-sm">
+      {% if comment.author.is_anonymised %}
+        <span class="font-semibold text-ink-600">{{ comment.author.name }}</span>
+      {% else %}
+        <a href="{{ comment.author.get_absolute_url }}"
+           class="font-semibold text-ink-900 hover:underline
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">{{ comment.author.name }}</a>
+      {% endif %}
+      <span class="text-ink-600">·
+        <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }} ago</time>
+      </span>
+    </p>
+
+    {# `whitespace-pre-line` rather than the `linebreaks` filter: the newlines  #}
+    {# the person typed are kept by CSS, and the body stays a plain escaped     #}
+    {# string with no HTML in it at any point.                                  #}
+    <p class="mt-0.5 whitespace-pre-line text-[15px] leading-6 text-ink-800">{{ comment.body }}</p>
+
+    <div class="-ml-1 mt-0.5 flex items-center gap-1">
+      {% include "social/_comment_spark.html" with comment=comment %}
+
+      {% if user.is_authenticated and comment.author_id == user.pk %}
+        <button type="button"
+                hx-post="{% url 'social:comment_delete' comment.pk %}"
+                hx-target="#comment-section"
+                hx-swap="outerHTML"
+                hx-confirm="Delete this comment? It disappears from the thread for everyone."
+                class="inline-flex h-11 items-center rounded-full px-2 text-xs font-semibold text-ink-600
+                       hover:bg-ink-100 hover:text-bad-700
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+          Delete
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+</li>

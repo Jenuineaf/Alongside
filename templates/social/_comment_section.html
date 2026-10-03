@@ -1,0 +1,99 @@
+{% comment %}
+  The comment thread on post detail — heading, form, list.
+
+    {% include "social/_comment_section.html" %}
+
+  Reads from the context, not from `with` params, because the three comment
+  endpoints in social/views.py re-render this same fragment as their response:
+    post          the Post.
+    comments      a LIST (not a queryset — the length is rendered twice).
+    comment_form  a CommentForm.
+    can_comment   signed in and allowed to write (the public demo is not).
+
+  `id="comment-section"` is the HTMX target for every change to the thread, and
+  `#comments` is the anchor the feed card's comment icon links to. Both sit on
+  this element; moving either breaks a link somewhere else.
+
+  THE COUNT IN THE HEADING IS THE LENGTH OF THE RENDERED LIST, never
+  `post.comment_count`. Those two legitimately disagree: counters are global
+  (ADR-0002 — a viewer-relative count would leak how many comments a blocked
+  person wrote), while this list is block-filtered. §7.2 resolves it by having
+  post detail render what it fetched, so the heading always matches the rows
+  underneath it. The denormalised number is for feed cards, which never appear
+  on the same screen as the thread — and for the sticky bar's tally, which this
+  fragment therefore updates out of band when the thread changes.
+
+  Which is also why the thread is unpaginated (S13): page it, and "8 comments"
+  sits above 8 of 40.
+{% endcomment %}
+<section id="comment-section" class="mt-8 border-t border-ink-200 pt-6">
+
+  <h2 id="comments" class="scroll-mt-16 text-base font-bold text-ink-900">
+    Suggestions &amp; comments{% if comments %}
+      <span class="ml-0.5 font-semibold tabular-nums text-ink-600">{{ comments|length }}</span>
+    {% endif %}
+  </h2>
+  <p class="mt-0.5 text-xs text-ink-600">You don't have to join to be useful.</p>
+
+  {% if can_comment %}
+    <form class="mt-4 flex flex-col gap-3"
+          method="post"
+          action="{% url 'social:comment_create' post.pk %}"
+          hx-post="{% url 'social:comment_create' post.pk %}"
+          hx-target="#comment-section"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+      {% include "components/_field.html" with field=comment_form.body rows=3 %}
+      <div>
+        {% include "components/_button.html" with label="Comment" busy_label="Posting…" %}
+      </div>
+    </form>
+
+  {% elif user.is_authenticated %}
+    {# The public demo account: spark and save yes, comment no (§1.1.1). Say so #}
+    {# rather than hiding the form and leaving a gap — and the endpoint 403s    #}
+    {# regardless, because a hidden control is not a permission.                #}
+    <div class="mt-4 rounded-xl border border-ink-200 bg-ink-50 p-4">
+      <p class="text-sm font-bold text-ink-900">You're on the demo account</p>
+      <p class="mt-1 text-sm text-ink-700">
+        It can browse, spark and save. Commenting needs an account of your own —
+        everyone shares this one.
+      </p>
+      <a href="{% url 'account_signup' %}"
+         class="mt-3 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+        Create an account
+      </a>
+    </div>
+
+  {% else %}
+    <div class="mt-4 rounded-xl border border-brand-200 bg-brand-50 p-4">
+      <p class="text-sm font-bold text-brand-900">Join the conversation</p>
+      <p class="mt-1 text-sm text-ink-800">
+        You can read everything without an account. Sparking, commenting and
+        messaging need one.
+      </p>
+      <a href="{% url 'account_signup' %}"
+         class="mt-3 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+        Create an account
+      </a>
+    </div>
+  {% endif %}
+
+  {% if comments %}
+    <ul class="mt-6 flex list-none flex-col gap-5">
+      {% for comment in comments %}
+        {% include "social/_comment.html" with comment=comment %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    {# Not components/_empty_state.html: that is for a whole screen, and here  #}
+    {# the way out is the form sitting directly above this line.               #}
+    <p class="mt-6 text-sm leading-relaxed text-ink-600">
+      Nobody has commented yet. A suggestion is as useful as an offer to join —
+      most people here started with one.
+    </p>
+  {% endif %}
+
+</section>

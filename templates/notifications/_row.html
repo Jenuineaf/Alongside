@@ -1,0 +1,68 @@
+{% comment %}
+  One row on the Alerts screen.
+
+    {% include "notifications/_row.html" with notification=n is_unread=True %}
+
+  Params:
+    notification   needs .kind, .actor, .post, .comment, .created_at and,
+                   for a follow, the optional .follow_note the view attaches.
+    is_unread      truthy → tinted ground and the dot.
+
+  The whole row is a link, which is right here and wrong on a post card: a
+  notification has exactly one destination and nothing else to press, so there
+  is no nested control for the anchor to swallow.
+
+  Every branch renders the actor's name in bold as the subject of a sentence,
+  which is why `notification_kind_targets` requires a non-null actor for both
+  kinds rather than leaving this template to cope with a blank subject.
+
+  NO `[deleted]` BRANCH, and that is not an oversight: anonymisation
+  hard-deletes every notification where the departing user is the actor
+  (ADR-0001, §8.1), so a row whose actor is a tombstone cannot exist. If that
+  ever changes, this file needs a case for it — the row would link to a profile
+  that 404s.
+{% endcomment %}
+<a href="{% if notification.kind == 'new_comment' %}{{ notification.post.get_absolute_url }}#comments{% else %}{{ notification.actor.get_absolute_url }}{% endif %}"
+   class="flex items-start gap-3 border-b border-ink-200 p-4 hover:bg-ink-50
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-inset
+          {% if is_unread %}bg-brand-50{% else %}bg-white{% endif %}">
+
+  <span class="shrink-0">
+    {% include "components/_avatar.html" with user=notification.actor %}
+  </span>
+
+  <div class="min-w-0 flex-1">
+
+    {% if notification.kind == "new_comment" %}
+      <p class="text-sm leading-relaxed text-ink-900">
+        <b>{{ notification.actor.name }}</b> commented on
+        <b>{{ notification.post.title|truncatechars:60 }}</b>
+      </p>
+      {% if notification.comment %}
+        <p class="mt-0.5 line-clamp-2 text-sm text-ink-700">{{ notification.comment.body }}</p>
+      {% endif %}
+
+    {% elif notification.kind == "new_follower" %}
+      <p class="text-sm leading-relaxed text-ink-900">
+        <b>{{ notification.actor.name }}</b> followed you
+      </p>
+      {% if notification.follow_note %}
+        {# The note is the whole reason this one is worth opening — the        #}
+        {# Designer's words. Quoted, set apart, and never truncated.          #}
+        <div class="mt-1.5 rounded-lg border-l-2 border-brand-300 bg-white px-3 py-2">
+          <p class="text-sm leading-relaxed text-ink-800">“{{ notification.follow_note }}”</p>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <p class="mt-1 text-xs text-ink-600">
+      <time datetime="{{ notification.created_at|date:'c' }}">{{ notification.created_at|timesince }} ago</time>
+    </p>
+  </div>
+
+  {% if is_unread %}
+    <span class="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-brand-700" aria-hidden="true"></span>
+    <span class="sr-only">Unread</span>
+  {% endif %}
+
+</a>
