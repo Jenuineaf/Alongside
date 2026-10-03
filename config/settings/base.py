@@ -112,6 +112,13 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Puts `unread_alerts` (an int) in the context of every template so
+                # the bell badge in `components/_tab_bar.html` renders on every
+                # authenticated page. The Architect owns this line; the **Builder
+                # seat owns `notifications/context_processors.py` itself** — the
+                # contract is a callable `unread_alerts(request)` returning
+                # `{"unread_alerts": int}`.
+                "notifications.context_processors.unread_alerts",
             ],
         },
     },
