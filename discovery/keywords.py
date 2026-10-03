@@ -15,7 +15,6 @@ It is **not** a search engine. Postgres full-text search does the ranking
 it.
 """
 
-import re
 import unicodedata
 
 # Capped to match `Post.keywords`' element `max_length=40`. A longer token is
@@ -52,10 +51,23 @@ NOISE_WORDS = frozenset(
     }
 )
 
-# Keeps intra-word hyphens and apostrophes ("bike-repair", "don't") and splits on
-# everything else. `\w` under Unicode also keeps non-Latin scripts, which matters:
-# the demo corpus is Indian and "ಕನ್ನಡ" must survive tokenisation.
-_TOKEN = re.compile(r"[^\w'-]+", re.UNICODE)
+# Characters that belong INSIDE a word: letters, digits, and — the part that is
+# easy to get wrong — combining marks.
+#
+# The obvious `re.split(r"[^\w'-]+")` is wrong for this corpus. Python's `\w`
+# does not match non-spacing marks (category Mn), and in Kannada the vowel signs
+# and the virama are exactly that: "ಕನ್ನಡ" tokenised that way comes out as
+# ["ಕನ", "ನಡ"], so the flagship seeded post is unfindable in its own language.
+# Splitting on Unicode category instead handles every script the same way.
+_WORD_CATEGORIES = frozenset({"Lu", "Ll", "Lt", "Lm", "Lo", "Nd", "Nl", "No", "Mn", "Mc"})
+
+# Intra-word punctuation worth keeping: "bike-repair", "don't".
+_WORD_PUNCTUATION = frozenset("'-")
+
+# Scripts below this codepoint fold their accents (Latin + the combining
+# diacriticals block); everything above it is left alone — see `_normalise`.
+# 0x0370 is the start of the Greek block.
+_LATIN_FOLD_CEILING = 0x0370
 
 
 def extract_keywords(*sources: str) -> list[str]:
@@ -79,7 +91,7 @@ def extract_keywords(*sources: str) -> list[str]:
     for source in sources:
         if not source:
             continue
-        for raw in _TOKEN.split(source):
+        for raw in _tokenize(source):
             token = _normalise(raw)
             if not token or token in seen:
                 continue
@@ -93,15 +105,42 @@ def extract_keywords(*sources: str) -> list[str]:
     return keywords
 
 
+def _tokenize(text: str):
+    """Split on anything that is not part of a word, in any script."""
+    token: list[str] = []
+
+    for char in text:
+        if char in _WORD_PUNCTUATION or unicodedata.category(char) in _WORD_CATEGORIES:
+            token.append(char)
+        elif token:
+            yield "".join(token)
+            token = []
+
+    if token:
+        yield "".join(token)
+
+
 def _normalise(token: str) -> str:
-    """Case-fold, strip accents, trim punctuation, and cap the length.
+    """Case-fold, fold Latin accents, trim punctuation, and cap the length.
 
     NFKD then dropping combining marks is the standard way to fold accents in
     Python, and it has to agree with the `english_unaccent` text search
     configuration — if the stored keyword keeps its accent and the query does
     not, the keyword never matches and the failure is silent.
+
+    **It is applied to Latin script only.** Outside Latin, combining marks are
+    not accents: Kannada and Devanagari build syllables out of them, so
+    stripping them is not "café → cafe", it is destroying the word. Postgres'
+    `unaccent` dictionary draws the same line — its rules are Latin, and other
+    scripts pass through untouched — so this keeps both halves of the search
+    agreeing with each other.
     """
-    folded = unicodedata.normalize("NFKD", token.casefold())
+    lowered = token.casefold()
+
+    if any(ord(char) >= _LATIN_FOLD_CEILING for char in lowered):
+        return lowered.strip("'-")[:MAX_KEYWORD_LENGTH]
+
+    folded = unicodedata.normalize("NFKD", lowered)
     stripped = "".join(char for char in folded if not unicodedata.combining(char))
     # Leading/trailing hyphens and apostrophes are punctuation the tokeniser
     # kept because they can also be intra-word.

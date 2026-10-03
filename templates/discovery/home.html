@@ -1,0 +1,51 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Screen 4 — Home, the personalised feed.
+
+  Context:
+    sections            FeedSection objects from discovery/feed.py, in tier
+                        order. Only non-empty tiers are passed.
+    prompt_onboarding   they never finished the flow.
+
+  HOME NEVER USES AN EMPTY STATE (design-system.md §4.5). The cascade means it
+  is never empty, and each run of posts carries a LABELLED DIVIDER saying where
+  they came from. Drop the labels and tier 3 looks like a broken personalised
+  feed instead of a deliberate fallback — which is the entire difference
+  between "this app doesn't know me" and "follow a few people and this gets
+  better".
+{% endcomment %}
+
+{% block title %}Home{% endblock %}
+
+{% block app_content %}
+
+{% if prompt_onboarding %}
+  <div class="border-b border-ink-200 bg-brand-50 p-4">
+    <p class="text-sm font-bold text-brand-900">Tell us what you're into</p>
+    <p class="mt-1 text-sm text-ink-800">
+      Three questions, all skippable. It's what makes this feed yours.
+    </p>
+    <a href="{% url 'discovery:onboarding' %}"
+       class="mt-3 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      Set up my feed
+    </a>
+  </div>
+{% endif %}
+
+{% for section in sections %}
+  <div class="flex flex-col gap-0.5 border-b border-ink-200 bg-ink-50 px-4 py-2">
+    <p class="text-xs font-bold uppercase tracking-wide text-ink-600">{{ section.label }}</p>
+    {% if section.note %}
+      <p class="text-xs text-ink-600">{{ section.note }}</p>
+    {% endif %}
+  </div>
+
+  <div class="divide-y divide-ink-200">
+    {% for post in section.posts %}
+      {% include "components/_post_card.html" with post=post %}
+    {% endfor %}
+  </div>
+{% endfor %}
+
+{% endblock app_content %}

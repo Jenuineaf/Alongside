@@ -6,14 +6,79 @@
 {% block app_content %}
 <div class="border-b border-ink-200 bg-white px-4 py-3">
   <h1 class="text-lg font-bold text-ink-900">All ideas</h1>
-  <p class="mt-0.5 text-sm text-ink-700">Browse everything — filter and search coming with Discovery.</p>
+  <p class="mt-0.5 text-sm text-ink-700">
+    Everything people are looking for help with. Filter by the role you can fill.
+  </p>
 </div>
+
+{% comment %}
+  Filters are a GET form, so a filtered view is a URL somebody can send to a
+  friend — which is the point of keeping the feed public at all.
+
+  Role is the first filter because it is the one a joiner actually scans for,
+  and it is exact-match on a curated slug. Topic tags are deliberately NOT
+  filterable: they are free text, and a filter over drifting vocabulary
+  silently halves its own result set (ADR-0004).
+{% endcomment %}
+<form method="get" action="{% url 'posts:feed' %}"
+      class="flex gap-2 overflow-x-auto border-b border-ink-200 bg-white px-4 py-2.5">
+  <label class="sr-only" for="filter-role">Role needed</label>
+  <select name="role" id="filter-role" onchange="this.form.submit()"
+          class="h-11 shrink-0 rounded-full border border-ink-300 bg-white px-3 text-sm font-semibold text-ink-800
+                 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+    <option value="">Any role</option>
+    {% for role in roles %}
+      <option value="{{ role.slug }}" {% if active.role == role.slug %}selected{% endif %}>{{ role.name }}</option>
+    {% endfor %}
+  </select>
+
+  <label class="sr-only" for="filter-stage">Stage</label>
+  <select name="stage" id="filter-stage" onchange="this.form.submit()"
+          class="h-11 shrink-0 rounded-full border border-ink-300 bg-white px-3 text-sm font-semibold text-ink-800
+                 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+    <option value="">Any stage</option>
+    {% for value, label in stages %}
+      <option value="{{ value }}" {% if active.stage == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <label class="sr-only" for="filter-commitment">Commitment</label>
+  <select name="commitment" id="filter-commitment" onchange="this.form.submit()"
+          class="h-11 shrink-0 rounded-full border border-ink-300 bg-white px-3 text-sm font-semibold text-ink-800
+                 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+    <option value="">Any commitment</option>
+    {% for value, label in commitments %}
+      <option value="{{ value }}" {% if active.commitment == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <label class="sr-only" for="filter-sort">Sort</label>
+  <select name="sort" id="filter-sort" onchange="this.form.submit()"
+          class="h-11 shrink-0 rounded-full border border-ink-300 bg-white px-3 text-sm font-semibold text-ink-800
+                 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30">
+    <option value="new" {% if sort == "new" %}selected{% endif %}>Newest</option>
+    <option value="sparked" {% if sort == "sparked" %}selected{% endif %}>Most sparked</option>
+  </select>
+
+  {# No-JS fallback: the selects submit on change, this submits for everyone else. #}
+  <noscript>
+    <button type="submit" class="h-11 shrink-0 rounded-full bg-brand-700 px-4 text-sm font-semibold text-white">Apply</button>
+  </noscript>
+</form>
 
 <div class="divide-y divide-ink-200">
   {% for post in posts %}
     {% include "components/_post_card.html" with post=post show_message=False %}
   {% empty %}
-    {% include "components/_empty_state.html" with title="No ideas yet" body="Be the first to post — or run the demo seed command." cta_label="Post your idea" cta_href="/ideas/new/" %}
+    {% if has_filters %}
+      {# Blames the filters, never the user (§4.5 rule 3) — and filters cause #}
+      {# this far more often than the words do.                               #}
+      {% url 'posts:feed' as clear_url %}
+      {% include "components/_empty_state.html" with icon="explore" title="No ideas match those filters" body="Nothing here fits that combination yet. Widening the role or the stage usually turns some up." action_label="Clear filters" action_url=clear_url %}
+    {% else %}
+      {% url 'posts:create' as create_url %}
+      {% include "components/_empty_state.html" with icon="plus" title="No ideas yet" body="Nobody has posted one. If you have something you want help building, you'd be first." action_label="Post your idea" action_url=create_url %}
+    {% endif %}
   {% endfor %}
 </div>
 {% endblock app_content %}
