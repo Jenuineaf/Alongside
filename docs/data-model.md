@@ -648,13 +648,28 @@ Soft-deleted rows are invisible to users, so **they do not count**:
 | Comment soft-deleted | `Post.comment_count` **−1** |
 | Post soft-deleted | author's `Profile.post_count` **−1**; every `Tag.post_count` on it **−1** |
 | Post soft-deleted | its sparks/saves/comments are **not** touched — the rows survive for moderation, but the post is gone from every list so its counters are moot |
+| Post **or** comment soft-deleted | every `Notification` pointing at it is **hard-deleted**, in the same `transaction.atomic()` as the soft delete — `Notification.objects.filter(post=post).delete()` / `.filter(comment=comment).delete()` (S8, ruled by Jeni 3 Oct 2026). **Undelete does not restore them** |
 | Message soft-deleted | no counter |
-| Undelete | reverse each of the above |
+| Undelete | reverse each of the above — **except the notification row**, which does not reverse |
 
 Without this rule a post shows "12 comments" above 11 rendered ones the first time anyone
 deletes a comment — a bug that looks like a caching problem and isn't. The reconciliation task
 (rule 4) computes counts over `deleted_at__isnull=True` rows, so it agrees with this rule rather
 than fighting it.
+
+**Why the notification rule lives here and not in §8.** It is the same class of bug as a counter
+on an invisible object. A `new_comment` notification is CASCADE on `post` and `comment`, and
+**CASCADE never fires for a soft delete** — so left alone the bell renders a row linking to
+content that is gone, and if that row is unread it inflates the count permanently for something
+that will never be there. An unread bell badge that can never be cleared is exactly "12 comments
+above 11 rendered ones", one surface over.
+
+**It is also the one asymmetric rule in this table.** Every other rule above reverses cleanly on
+undelete, because the counter is a number and the number goes back. Notifications are
+hard-deleted (§8), so the rows are gone: an undeleted comment is visible again and nobody is
+re-notified about it. Recorded as a known, accepted cost rather than left to be rediscovered as a
+bug. The write is the Builder seat's, in `social/services.py`; the post-level sweep covers that
+post's `new_comment` rows too, because every one of them carries `post` as well as `comment`.
 
 **Hard deletes need the same rule, and it was missing (ACC-6).** `Follow` is hard-deleted in
 three places, and every one of them moves two counters on two different profiles:
@@ -785,7 +800,21 @@ migration graph actually produces — asserted, not assumed.
 | 5 | **`accounts` 0003_profile_and_graph** | `Profile`, `ProfileSkill`, `ProfileInterest`, `Follow`, `Block`, + `Profile` GIN and `User` trigram indexes |
 | 6 | **`posts` 0003_post_and_attachments** | `Post`, `PostTag`, `PostRole`, `PostImage` and all feed/filter indexes |
 | 7 | **`posts` 0004_comments_sparks_saves** | `Comment`, `PostSpark`, `CommentSpark`, `SavedPost` |
-| — | *(pending)* | `messaging` 0001, `notifications` 0001, `moderation` 0001 |
+| 8 | **`notifications` 0001_initial** | `Notification` — **without** the `conversation` FK. Depends on `posts` 0004 (for `Comment`; `Post` comes transitively via 0004 → 0003) and on `AUTH_USER_MODEL`. Hand-written, **not yet applied to any database** |
+| — | *(pending)* | `messaging` 0001, `notifications` 0002, `moderation` 0001 |
+
+**Why `notifications` 0001 could not wait for `messaging`.** `messaging` 0001 is blocked on
+Jeni's decision **E** (unread dot or number — §12.4), which determines whether
+`ConversationParticipant` carries an `unread_count` column and a partial index. So there is no
+`messaging.Conversation` table to point a foreign key at, and a migration cannot declare a
+dependency on one that does not exist. Phase 4 needs the bell working now, and the two kinds it
+needs — `new_comment` and `new_follower` — reference nothing in `messaging`. So 0001 ships the
+table without `conversation`, and **`notifications` 0002 lands alongside `messaging` 0001** with
+three things at once: the `conversation` FK, the `new_message` kind (one `AlterField` on `kind`
+plus a rewritten `notification_kind_targets` check constraint), and the S4 unread-DM
+`UniqueConstraint(recipient, conversation) WHERE kind='new_message' AND is_read=false`. Until
+then `notification_kind_targets` is what stops a `new_message` row being written at all: its
+branches are exhaustive, so the database rejects any `kind` not listed.
 
 `django.contrib.sites` and allauth's own migrations interleave automatically after step 1.
 
@@ -848,6 +877,8 @@ Schema change requests go: seat → Jeni → Architect → this document → mig
 The eight reviews in `docs/review/` produced ~100 findings. This section records the ones that
 changed the schema, so no seat has to diff the models against §1–§8 to find out what moved.
 Eleven product decisions are still open with Jeni; §12.4 lists what is blocked on them.
+
+**Social findings S5 (collapse repeat follow notifications) and S8 (hard-delete a notification when its post or comment is soft-deleted) are now ruled yes by Jeni, 3 Oct 2026, and S7's `notification_kind_targets` check constraint shipped — all three are in `notifications` 0001 (written, not yet applied to a database).**
 
 ### 12.1 Fields added or changed
 
