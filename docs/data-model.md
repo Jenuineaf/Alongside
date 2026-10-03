@@ -585,9 +585,13 @@ query is `visible_to()`-filtered as a second line of defence.
 
 ### 6.1 `Report`
 
+**Shipped and verified against real Postgres, 3 Oct 2026** — `moderation` 0001 (`Report`)
+and 0002 (the `demo_moderator` Group). Decisions **H** and **I** closed the same day; both
+are recorded below and in `moderation/models.py`.
+
 | Field | Type | Notes |
 |---|---|---|
-| `reporter` | FK → User, SET_NULL, null | Report survives the reporter deleting their account |
+| `reporter` | FK → User, SET_NULL, null | **Required at the application layer, nullable at the database layer** — see below |
 | `reported_user` | FK → User, CASCADE, null | Exactly one of these three is set |
 | `post` | FK → Post, CASCADE, null | |
 | `comment` | FK → Comment, CASCADE, null | |
@@ -600,9 +604,70 @@ query is `visible_to()`-filtered as a second line of defence.
 | `created_at` | indexed | |
 
 - `CheckConstraint`: exactly one of `reported_user` / `post` / `comment` is non-null
-- `Index(status, -created_at)` — the admin queue, oldest-open first
+  (`report_exactly_one_target`) — an explicit three-way OR, because Django has no
+  count-style shortcut, and `condition=` not the deprecated `check=` on Django 5.2
+- `Index(status, -created_at)` (`report_queue_idx`) — the admin queue, oldest-open first.
+  **`status` carries no separate `db_index`**: this composite leads with it, so the index
+  Django would build for the column is a strict prefix of one we already build (the ACC-4
+  rule, same as `Notification.recipient`). The queue's real query is
+  `WHERE status='open' ORDER BY created_at`, which Postgres serves as a *backward* scan of
+  this index — verified, §12.5
 - **Conditional** `UniqueConstraint(reporter, post)` / `(reporter, comment)` /
-  `(reporter, reported_user)` **with `condition=Q(status__in=["open", "reviewing"])`**
+  `(reporter, reported_user)` **with `condition=Q(status__in=["open", "reviewing"])`**,
+  plus `<target>__isnull=False` in each condition (TS-4 — see below). Names:
+  `uniq_open_report_per_post` / `_comment` / `_user`
+
+#### Decision H — sign-in is required to report ✅ *(Jeni, 3 Oct 2026)*
+
+`CLAUDE.md` rule 7 names post / follow / spark / comment / DM as the gated actions and is
+silent on reporting, so this was Jeni's call. **Reporting requires an account.** It is what
+gives the three anti-brigading constraints something to key on: with anonymous reports,
+NULL reporters never collide in a unique index, so all three stop working at once, and the
+rate limiter falls back to an IP that behind Render's proxy may be one shared key for every
+visitor (TS-9).
+
+**`reporter` stays `SET_NULL, null=True` anyway, and that is not a contradiction.** The two
+things are different questions:
+
+| Reading | Verdict |
+|---|---|
+| "Reports can be anonymous, so `reporter` is optional" | ❌ No — Decision H. The report view is login-gated, so the column is never written NULL in practice |
+| "Then make it `null=False`" | ❌ Also no — a report must survive the reporter deleting their account (ADR-0001). `CASCADE` deletes the evidence; `null=False` blocks the deletion path |
+
+So: **required at the application layer, nullable at the database layer.** Under ADR-0001 a
+`User` row is never hard-deleted, so `SET_NULL` will in practice almost never fire — it is
+the correct floor, not the expected path. Do not "simplify" it to either `CASCADE` or
+`null=False`; the reasoning is on the field in `moderation/models.py` so it is one grep away.
+
+#### Decision I — a `demo_moderator` Group ✅ *(Jeni, 3 Oct 2026)*
+
+Created in **`moderation` 0002**, a data migration, so it exists identically in dev, CI and
+production with no step anybody can forget. Closes QA finding 6.
+
+The problem: `testing.md` §7.5 publishes a staff account's credentials on the login screen
+so the moderation queue is demonstrable in a portfolio piece, and `User.is_public_demo` is
+an **application-layer** permission check that **Django admin never consults**. Without the
+Group, anyone reading the login screen could open `/admin/` and empty the database.
+
+| Granted | Why |
+|---|---|
+| `moderation.view_report` | See the queue, open a report |
+| `moderation.change_report` | Set `status`, write `resolution_note`, run the three queue actions — the whole job (§6.1: no `ModerationAction` model) |
+
+Nothing else — in particular **no `add_report`** (reports come from the form), **no
+`delete_report`** (the report is the evidence that justifies the action taken on it, and
+`LogEntry` is the audit trail standing in for `ModerationAction`), and **no permission on
+`Post`, `Comment` or `User`**. The queue stays fully workable without the last of those
+because the reported content is rendered read-only on the report page itself
+(`ReportAdmin.target_preview`). The seed command puts `demo.mod@` in the Group with
+`is_staff=True`, `is_superuser=False`; it does not create the Group.
+
+> **Note for whoever edits that migration:** Django creates `Permission` rows in a
+> `post_migrate` signal, which runs *after* the whole plan — so on a fresh database
+> `moderation.view_report` does not exist yet when 0002 runs. The migration `get_or_create`s
+> the `ContentType` and both `Permission` rows itself. That is safe, not duplicative:
+> `create_permissions()` keys on `(content_type, codename)` with `get_or_create`, so
+> `post_migrate` finds them and leaves them alone. Verified on a fresh database, §12.5.
 
 #### Why the unique constraints are conditional
 
@@ -612,11 +677,55 @@ dismisses it, the post gets worse, and that person can never report it again. Th
 makes the constraint match the intent, and it is a partial unique index in Postgres, so it
 costs nothing.
 
+**Each condition also carries `<target>__isnull=False`** (TS-4). This closes a trap rather
+than changing behaviour. Postgres treats NULLs as distinct in a unique index, which is *why*
+three separate constraints can coexist: on a user-report `post IS NULL`, so
+`(reporter, post)` never collides. Nobody had written that down, and Django 5.1+ ships
+`UniqueConstraint(nulls_distinct=False)` — the day someone sets that flag, reasonably
+believing they are tightening things, **every user-report in the system collides on
+`(reporter, NULL)` and only one person can ever report anyone.** With the predicate explicit,
+each index is scoped by intent instead of by an accident of NULL semantics, and that flag
+becomes harmless.
+
+These stop duplicate reports of the **same** target only. One account can still flood the
+queue with fifty different targets; that is the rate limiter's job, and Decision H is what
+lets it key on `user` instead of a proxy-shared IP. **Rate-limit scope now includes reports**
+(TS-9/§2) — Builder's, no schema implication.
+
 No `ModerationAction` model in v1 — `status` + `resolution_note` + `reviewed_by` on the report is
 enough for a Django-admin queue. Rate limiting is `django-ratelimit` against Redis; no table.
+`Report` carries **no `deleted_at`**: it is the evidence that justifies everyone else's soft
+delete (§8), so it is not itself soft-deleted.
 
 **Moderation queries deliberately bypass `visible_to()`.** A moderator must see blocked and
-soft-deleted content or the queue is blind (ADR-0003).
+soft-deleted content or the queue is blind (ADR-0003). So `moderation/models.py` has **no
+`BlockAwareQuerySetMixin` and no `all_objects`** — the only app in the project without the
+mixin, deliberately, with the reason stated in the module docstring so nobody "fixes" it.
+A moderator reviewing a harassment report has usually been blocked by the person they are
+reviewing; a block-filtered queue hides exactly the rows it exists to show.
+
+#### 6.1.1 The queue is Django admin — `moderation/admin.py`
+
+§6.1 says `status` + `resolution_note` + `reviewed_by` is enough, so there is **no custom
+moderation UI in v1** and no `moderation/urls.py`. Four things in that file are load-bearing:
+
+| Thing | Why |
+|---|---|
+| `get_queryset()` uses **`all_objects`** on `Post` / `Comment` | TS-12. Those models declare `objects = Active*Manager()` **first** on purpose — Django builds reverse related managers from `_default_manager`, so reordering them would make `post.comments.all()` return soft-deleted comments on the public post page. The bypass therefore belongs per-admin, not on the model |
+| Hard delete **refused** on `Post` / `Comment` | TS-13. `Report.post` / `.comment` are `CASCADE`, which never fires through the product because both soft-delete — but admin offers a hard delete by default, so actioning a report by deleting the post would cascade away the record of the action. Takedown is an action calling `posts.services.soft_delete_post` / `social.services.soft_delete_comment`, which also move the §7.1 counters. `deleted_at` is read-only in both admins for the same reason |
+| Queue actions loop and call `log_change()` | `QuerySet.update()` writes no `LogEntry`, and `LogEntry` is the entire reason §6.1 can say "no `ModerationAction` model". A bulk update would quietly drop the audit trail that decision rests on |
+| `reason` / `details` / `reporter` / target are **read-only** | A moderator who could edit those could rewrite the complaint they are ruling on. `status` + `resolution_note` are the only editable fields; `reviewed_by` / `reviewed_at` are stamped by `save_model()` and the actions, never typed |
+
+**`Post` and `Comment` are registered in `moderation/admin.py` and nowhere else**, because
+admin is purely a moderation surface in this product (spec §4.7) — there is no author-facing
+admin. A later `posts/admin.py` registering either model raises `AlreadyRegistered`: extend
+these classes, or move them and keep the `get_queryset` override.
+
+`ReportAdmin.target_preview` renders the reported content inline and read-only. That is what
+lets Decision I's Group hold two permissions and nothing else, and it is also the **partial**
+answer to TS-3: it warns when the target was edited after the report was filed
+(`target.updated_at > report.created_at`) and when it is already soft-deleted. It is **not** a
+substitute for TS-3's `target_snapshot` — see §12.6.
 
 ---
 
@@ -800,8 +909,14 @@ migration graph actually produces — asserted, not assumed.
 | 5 | **`accounts` 0003_profile_and_graph** | `Profile`, `ProfileSkill`, `ProfileInterest`, `Follow`, `Block`, + `Profile` GIN and `User` trigram indexes |
 | 6 | **`posts` 0003_post_and_attachments** | `Post`, `PostTag`, `PostRole`, `PostImage` and all feed/filter indexes |
 | 7 | **`posts` 0004_comments_sparks_saves** | `Comment`, `PostSpark`, `CommentSpark`, `SavedPost` |
-| 8 | **`notifications` 0001_initial** | `Notification` — **without** the `conversation` FK. Depends on `posts` 0004 (for `Comment`; `Post` comes transitively via 0004 → 0003) and on `AUTH_USER_MODEL`. Hand-written, **not yet applied to any database** |
-| — | *(pending)* | `messaging` 0001, `notifications` 0002, `moderation` 0001 |
+| 8 | **`moderation` 0001_initial** | `Report`, its check constraint, `report_queue_idx` and the three conditional uniques. Generated by `makemigrations`. Depends on `posts` 0004 (for `Comment`) and on `AUTH_USER_MODEL` |
+| 9 | **`moderation` 0002_demo_moderator_group** | Data migration: the `demo_moderator` Group (Decision I). Depends on `auth` 0012 and `contenttypes` 0002 — **both added by hand**, because the migration writes those tables and Django cannot infer it |
+| 10 | **`notifications` 0001_initial** | `Notification` — **without** the `conversation` FK. Depends on `posts` 0004 (for `Comment`; `Post` comes transitively via 0004 → 0003) and on `AUTH_USER_MODEL`. Hand-written |
+| — | *(pending)* | `messaging` 0001, `notifications` 0002 |
+
+Steps 8–10 are ordered as the graph actually resolves them (`moderation` before
+`notifications`), not by app name. Nothing couples the two, so the order is incidental —
+asserted here only because §10 is meant to be what the plan does rather than what it ought to.
 
 **Why `notifications` 0001 could not wait for `messaging`.** `messaging` 0001 is blocked on
 Jeni's decision **E** (unread dot or number — §12.4), which determines whether
@@ -871,8 +986,8 @@ Schema change requests go: seat → Jeni → Architect → this document → mig
 
 ## 12. Schema review changes — what shipped, and what is still pending
 
-**Status: `accounts` and `posts` are migrated and verified against real Postgres.
-`messaging`, `notifications` and `moderation` are not yet written.**
+**Status: `accounts`, `posts`, `notifications` and `moderation` are migrated and verified
+against real Postgres. `messaging` is not yet written** (blocked on Decision E, §12.4).
 
 The eight reviews in `docs/review/` produced ~100 findings. This section records the ones that
 changed the schema, so no seat has to diff the models against §1–§8 to find out what moved.
@@ -972,9 +1087,11 @@ Pass the instance — `invalidate_block_cache(request.user, other)` — and the 
 |---|---|
 | **E** — unread dot or number | `ConversationParticipant.unread_count` and its partial index. `messaging` 0001 cannot be finalised |
 | **F** — require ≥1 role/tag, caps | Form and serializer validation only. The `Open to anyone / not sure yet` role **is already seeded**, so the escape hatch exists either way |
-| **H** — sign-in to report | `Report.reporter` nullability semantics, and whether the anti-brigading constraint holds at all |
-| **I** — demo staff account | Whether a `demo_moderator` Group goes in a data migration |
 | **A** — grace-window visibility | Whether pending-deletion content is hidden from anonymous viewers, which reaches into ADR-0003's anonymous fast path |
+
+**Closed 3 Oct 2026:** **H** — sign-in is required to report, `Report.reporter` stays
+`SET_NULL, null=True` for a different reason (§6.1). **I** — yes, a `demo_moderator` Group in
+a data migration (§6.1). Both shipped in `moderation` 0001/0002.
 
 Everything else in §12 is settled and shipped.
 
@@ -997,3 +1114,45 @@ here is common to both):
 
 **Not verified:** anything requiring Redis. The block cache falls back to a local cache in the
 smoke test; CI has a real Redis service.
+
+#### `moderation` 0001 + 0002, 3 Oct 2026 (30 checks, all passing)
+
+Run against the same throwaway PostgreSQL 18 cluster, on a **database created empty** so the
+whole chain in §10 was exercised in order, plus `makemigrations --check --dry-run` clean:
+
+- `report_exactly_one_target` rejects **zero**, **two** and **three** targets, and accepts
+  each of the three single-target shapes
+- a second **open** report on the same post raises `uniq_open_report_per_post`; after the
+  first is **dismissed**, re-reporting the same post **succeeds** — §9.1 finding 2, both
+  directions, which is the whole reason the constraint is conditional
+- all three uniques are **partial** indexes in `pg_indexes`, and each predicate contains
+  `IS NOT NULL` (TS-4). One reporter against two different users, and two reporters against
+  the same user, all stay open — the NULL-distinctness the three constraints rely on
+- `WHERE status='open' ORDER BY created_at` over 20k rows with 100 open plans as an
+  **Index Scan Backward using `report_queue_idx`** with `Index Cond: status='open'` and **no
+  Sort node** — the "oldest-open first" claim, measured
+- the `demo_moderator` Group holds **exactly** `moderation.view_report` and
+  `moderation.change_report`; no `add_*` or `delete_*` on anything. `post_migrate` ran after
+  the data migration and created `add_report` / `delete_report` **without duplicating** the
+  two rows the migration made
+- `Report.target` resolves a **soft-deleted** post, while `Post.objects` still hides it
+- `PostModerationAdmin.get_queryset()` returns the soft-deleted post (ADR-0003); both
+  soft-delete admins refuse `has_delete_permission` (TS-13); `ReportAdmin` refuses add
+- `target_preview` renders the "already soft-deleted" warning; `Report.objects` has **no**
+  `visible_to` attribute, i.e. the block filter is genuinely absent rather than inherited
+
+
+### 12.6 Open with Jeni, raised by the moderation build
+
+Two items from `docs/review/trust-safety.md` that §6.1 does **not** contain. Both are columns,
+not models, and neither is blocking the Builder's report form — but TS-3 is the one that
+cannot be added later with any value.
+
+| # | Ask | Status |
+|---|---|---|
+| **TS-3** | `Report.target_snapshot = TextField(blank=True)` — title + body, or comment body, captured once at report time | **Not shipped.** Not in §6.1, and adding a column the approved contract does not list is a product decision, not an Architect one. The hole is real: posts are editable, so someone can post something abusive, get reported, and edit it innocuous before review. `ReportAdmin.target_preview` now warns when the target was edited after the report was filed, which tells a moderator the text on screen may not be the text that was reported — it does **not** tell them what it said. **Impossible to back-fill:** by the time we want it, the original text is gone |
+| **TS-5** | `Report.action_taken = CharField(20, choices, blank=True)` — `none` / `content_removed` / `user_warned` / `user_suspended` | **Not shipped**, and the review itself calls it the first thing to cut. Without it, "has this account been warned before?" is a free-text search through `resolution_note`. One column, not a model |
+
+Also noted, not asked for: the queue's `status` has no transition rules, so a report can go
+`actioned` → `open`. Harmless at one-moderator scale and the `LogEntry` trail records it.
+Worth a rule only if a second moderator ever exists.
