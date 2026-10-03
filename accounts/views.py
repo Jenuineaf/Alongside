@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_GET, require_POST
 
 from accounts import services
@@ -195,7 +196,7 @@ def follow(request, username):
     if created:
         messages.success(request, f"You're following {person.name}. They've been notified.")
 
-    return redirect(person.get_absolute_url())
+    return redirect(_safe_next(request, person.get_absolute_url()))
 
 
 @require_POST
@@ -354,6 +355,26 @@ def cancel_deletion(request):
 
 
 # ── Shared guard ────────────────────────────────────────────────────────────
+
+
+def _safe_next(request, fallback: str) -> str:
+    """Where to land after a follow. Defaults to the profile.
+
+    Onboarding needs it: following somebody from the suggestions there would
+    otherwise dump the user on that person's profile with the flow abandoned at
+    step 3 — the one step that writes `onboarding_completed_at`.
+
+    `url_has_allowed_host_and_scheme` is not optional. A bare
+    `redirect(request.POST["next"])` is an open redirect: anyone could post a
+    form at this endpoint with `next=https://example.com` and bounce a signed-in
+    user off-site from a URL that looks like ours.
+    """
+    target = request.POST.get("next") or ""
+    if target and url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return target
+    return fallback
 
 
 def _refuse_public_demo(request) -> bool:

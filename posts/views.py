@@ -66,18 +66,10 @@ def landing(request):
     )
 
 
-@require_GET
-def feed(request):
-    """Screen 5 — public explore feed (all ideas)."""
-    posts = _feed_queryset(request.user)[:20]
-    return render(
-        request,
-        "posts/feed.html",
-        {
-            "posts": posts,
-            "tab_active": "explore",
-        },
-    )
+# Screen 5 (the feed) and screen 4 (Home) are `discovery.views.explore` and
+# `discovery.views.home` — see `posts/urls.py`. They live there because the
+# filters, the ranking and the cascade are Discovery's, and a feed view that
+# only knew how to list newest-first was the placeholder they replaced.
 
 
 @require_GET
