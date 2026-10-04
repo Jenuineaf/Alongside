@@ -24,14 +24,19 @@ and all three are deliberate:
    FKs below are `CASCADE`, but CASCADE never fires for a soft delete — the
    deleting code does it explicitly. See the note on `post` / `comment`.
 
-**`new_message` and the `conversation` FK are not here yet.** `messaging` 0001
-cannot be finalised while Jeni's decision E is open (§12.4), so there is no
-`messaging.Conversation` to point a foreign key at and `notifications` 0001 cannot
-depend on a migration that does not exist. Phase 4 ships `new_comment` and
-`new_follower`; `new_message`, the `conversation` FK and the S4 unread-DM unique
-constraint all land together in `notifications` 0002 alongside `messaging` 0001.
-The `notification_kind_targets` check constraint below is what stops a
-`new_message` row being written in the meantime — see its comment.
+**`new_message`, `stale_nudge` and the `conversation` FK landed in `notifications`
+0002 on 4 Oct 2026**, alongside `messaging` 0001. None of them could be in 0001:
+`messaging` 0001 was itself blocked on Jeni's decision E (unread dot or number,
+§12.4), so there was no `messaging.Conversation` to point a foreign key at, and a
+migration cannot declare a dependency on one that does not exist. Phase 4 shipped
+`new_comment` and `new_follower` without them.
+
+Decision E is now closed — **a number** — so 0002 carried four things at once: the
+`conversation` FK, the `new_message` kind, the S4 unread-DM unique constraint, and
+`stale_nudge` (TS-2, which is Designer GAP 13 found twice), folded into the same
+migration so the nudge needs no 0003. Until 0002 the `notification_kind_targets`
+check constraint was what stopped a `new_message` row being written at all; it is
+rewritten below to admit both new kinds, and it is still what stops a fifth.
 """
 
 from datetime import timedelta
@@ -42,6 +47,7 @@ from django.db.models import F, Q
 from django.utils.translation import gettext_lazy as _
 
 from accounts.blocking import BlockAwareQuerySetMixin
+from messaging.models import Conversation
 from posts.models import Comment, Post
 
 # Dedup window for rule 1 (§5.2). A **double-submit guard, not a burst guard**.
@@ -62,11 +68,20 @@ COMMENT_NOTIFICATION_DEDUP_WINDOW = timedelta(seconds=60)
 
 
 class NotificationKind(models.TextChoices):
-    """The triggers that exist. Spec §4.6 lists exactly three.
+    """The triggers that exist. Spec §4.6 lists three; `stale_nudge` is a fourth.
 
-    `NEW_MESSAGE = "new_message"` is the third and is **absent on purpose** until
-    the `conversation` FK exists (see the module docstring). Adding it is one line
-    here, one `AlterField`, and one rewritten check constraint in 0002.
+    `NEW_MESSAGE` and `STALE_NUDGE` both arrived in 0002 (4 Oct 2026) — see the
+    module docstring for why neither could be in 0001.
+
+    `STALE_NUDGE` is the one kind **no user action produces**, and the one that
+    carries **no actor** (TS-2, which is Designer GAP 13 found independently by a
+    second seat; the name is theirs, adopted over Trust & Safety's own `post_nudge`
+    so there is one name rather than two). Spec §4.8 makes the nudge one of three
+    named anti-ghosting countermeasures, and the trigger side of it was complete —
+    `Post.is_stale`, `Post.nudged_at`, `Post.last_activity_at` — while the delivery
+    side did not exist: `kind` *is* the delivery channel, email digests are Phase 2,
+    and so the job could mark a post stale and tell nobody. This is precisely the
+    case `Notification.actor` was left nullable for.
 
     There is deliberately **no `new_spark`** ✅ (§9 Q9). Sparks are a stranger's one
     click; notifying on them is noise, and notifications are the retention engine,
@@ -75,6 +90,8 @@ class NotificationKind(models.TextChoices):
 
     NEW_COMMENT = "new_comment", _("New comment")
     NEW_FOLLOWER = "new_follower", _("New follower")
+    NEW_MESSAGE = "new_message", _("New message")
+    STALE_NUDGE = "stale_nudge", _("Still looking for teammates?")
 
 
 class NotificationQuerySet(BlockAwareQuerySetMixin, models.QuerySet):
@@ -118,10 +135,12 @@ class Notification(models.Model):
         related_name="notifications",
         db_index=False,
     )
-    # Nullable so a future system-generated kind (Designer's GAP 13 `stale_nudge`
-    # is the obvious candidate) needs no migration on this column. Every kind that
-    # exists today has a real person as its actor, which the check constraint
-    # enforces per kind — see `notification_kind_targets`.
+    # Nullable so a system-generated kind needs no migration on this column — and
+    # as of 0002 that is no longer hypothetical. `stale_nudge` (TS-2 / GAP 13) is
+    # the kind this nullability was reserved for, and its branch of the check
+    # constraint **requires** the actor to be NULL: nobody did it, the job did.
+    # Every other kind has a real person as its actor and its branch requires one.
+    # Per kind, enforced — see `notification_kind_targets`.
     #
     # Index kept (unlike `recipient`): no composite leads with `actor`, and
     # anonymisation and account deletion both sweep by actor.
@@ -177,8 +196,28 @@ class Notification(models.Model):
         null=True,
         blank=True,
     )
-    # `conversation` FK → `messaging.Conversation` lands in `notifications` 0002.
-    # See the module docstring for why it cannot land here.
+    # Landed in 0002 (4 Oct 2026), with the `new_message` kind and the S4 unique
+    # constraint it keys on.
+    #
+    # `CASCADE`, and unlike `post` and `comment` above **this one behaves normally**:
+    # a `Conversation` carries no `deleted_at` — ADR-0002 hides a thread with a
+    # filter rather than deleting it — so there is no soft-delete path to intercept
+    # and no sweep for the Builder to write. Nothing in v1 deletes a conversation at
+    # all, so in practice the row and its notifications go away together or not at
+    # all. Do **not** add a `Notification.objects.filter(conversation=…).delete()`
+    # rule by analogy with the S8 one above; there is no event to hang it on.
+    #
+    # The FK's own index is kept. No composite on this model leads with
+    # `conversation`, and the S4 partial unique leads with `recipient`, so this is
+    # not the ACC-4 duplicate case — it is what makes "this conversation's
+    # notifications" a lookup.
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        null=True,
+        blank=True,
+    )
 
     # ── State ────────────────────────────────────────────────────────────────
     #
@@ -226,10 +265,17 @@ class Notification(models.Model):
             # the one surface that renders for every logged-in user on every page.
             # §6.1 already does exactly this for `Report`.
             #
-            #   kind           | required            | must be null
-            #   ---------------+---------------------+---------------------------
-            #   new_comment    | comment, post, actor| (conversation, in 0002)
-            #   new_follower   | actor               | post, comment (+ conversation)
+            # **Rewritten in 0002** (4 Oct 2026) to add the `new_message` and
+            # `stale_nudge` branches and to pin `conversation` on the two that
+            # existed. All four branches now name all four nullable columns, so
+            # every kind is fully specified rather than partly:
+            #
+            #   kind          | required            | must be NULL
+            #   --------------+---------------------+--------------------------
+            #   new_comment   | actor, post, comment| conversation
+            #   new_follower  | actor               | post, comment, conversation
+            #   new_message   | actor, conversation | post, comment
+            #   stale_nudge   | post                | **actor**, comment, conversation
             #
             # `new_comment` requires `post` as well as `comment` because the Alerts
             # row reads "<b>X</b> commented on <b>your bike-repair log idea</b>" —
@@ -238,22 +284,38 @@ class Notification(models.Model):
             # covers. It is also what makes the post-level sweep in the S8 rule
             # above sufficient on its own.
             #
-            # `actor` is required by both branches, which goes one step beyond S7's
-            # table: both kinds render the actor's name in bold as the subject of
-            # the sentence, so a null actor is the same unrenderable row S7 is
-            # about. It does not conflict with `notification_not_self` tolerating
-            # nulls — the first kind with a genuinely null actor (`stale_nudge`)
-            # simply adds its own branch here, which this constraint has to be
-            # rewritten for anyway.
+            # `actor` is required by three of the four branches, which goes one step
+            # beyond S7's table: each of those kinds renders the actor's name in bold
+            # as the subject of the sentence, so a null actor is the same
+            # unrenderable row S7 is about.
             #
-            # **This is also what keeps `new_message` out of the table until 0002.**
-            # The branches are exhaustive by construction: any `kind` value that is
-            # not listed fails the whole condition, so the database rejects a
-            # `new_message` row outright. `choices` could not do that — it is
-            # validated in forms and `full_clean()` only, and the fan-out path is
-            # `objects.create()`, which never calls it. Without this constraint a
-            # mis-aimed Phase 5 branch could write rows that the Alerts template
-            # has no case for, and they would sit in the unread count forever.
+            # **`stale_nudge` inverts that, and deliberately** (TS-2 / GAP 13). It is
+            # system-generated — there is no person behind it — so its branch
+            # requires `actor IS NULL` rather than tolerating it. Do **not** widen
+            # the other three branches to accommodate the nudge; a `new_comment` row
+            # with no actor is still unrenderable, and the per-kind table is the
+            # whole mechanism. This is also why `notification_not_self` above is
+            # written to pass on a null actor instead of rejecting one: in Postgres a
+            # CHECK fails only on FALSE, and `recipient_id != NULL` is NULL, which
+            # passes. Both halves were confirmed by TS-2 and by Designer GAP 13.
+            #
+            # **`stale_nudge` is the one kind with no dedup constraint, and it needs
+            # none.** The nudge job sets `Post.nudged_at` and selects only posts
+            # where it is NULL, so the job's own query is the guard — one nudge per
+            # post per stale cycle, enforced upstream of this table. Every other kind
+            # has a constraint because every other kind is triggered by a person who
+            # can repeat the action; nobody can repeat this one.
+            # (`Post.touch_activity()` clears `nudged_at`, which is what makes a
+            # second cycle possible at all — TS-10.)
+            #
+            # **The branches stay exhaustive by construction**, which is the property
+            # that kept `new_message` out of the table before 0002 and now keeps a
+            # fifth kind out: any `kind` value not listed here fails the whole
+            # condition, so the database rejects the row outright. `choices` cannot
+            # do that — it is validated in forms and `full_clean()` only, and the
+            # fan-out path is `objects.create()`, which never calls it. Without this
+            # constraint a mis-aimed branch could write rows the Alerts template has
+            # no case for, and they would sit in the unread count forever.
             models.CheckConstraint(
                 condition=(
                     Q(
@@ -261,12 +323,28 @@ class Notification(models.Model):
                         actor__isnull=False,
                         post__isnull=False,
                         comment__isnull=False,
+                        conversation__isnull=True,
                     )
                     | Q(
                         kind=NotificationKind.NEW_FOLLOWER,
                         actor__isnull=False,
                         post__isnull=True,
                         comment__isnull=True,
+                        conversation__isnull=True,
+                    )
+                    | Q(
+                        kind=NotificationKind.NEW_MESSAGE,
+                        actor__isnull=False,
+                        conversation__isnull=False,
+                        post__isnull=True,
+                        comment__isnull=True,
+                    )
+                    | Q(
+                        kind=NotificationKind.STALE_NUDGE,
+                        actor__isnull=True,
+                        post__isnull=False,
+                        comment__isnull=True,
+                        conversation__isnull=True,
                     )
                 ),
                 name="notification_kind_targets",
@@ -303,10 +381,40 @@ class Notification(models.Model):
                 condition=Q(kind=NotificationKind.NEW_FOLLOWER, is_read=False),
                 name="uniq_unread_follow_notification_per_actor",
             ),
-            # The S4 twin — `UniqueConstraint(recipient, conversation)` where
-            # `kind="new_message" AND is_read=false` — lands in 0002 with the
-            # `conversation` FK. It cannot be written here: there is no column to
-            # put it on.
+            # **S4 — the unread-DM dedup rule, landed in 0002** with the
+            # `conversation` FK it keys on. §5.2 rule 2: do not create a second
+            # `new_message` for a conversation that already has an unread one for
+            # that recipient — bump the existing row's `created_at` instead. It is
+            # the more important of the two dedup rules, because without it a
+            # ten-message burst produces ten bell entries and buries every other
+            # notification the user has. Ten messages in one conversation is one
+            # thing the user needs to know about, not ten.
+            #
+            # **Why it is a constraint and not just the rule** (`social.md` S4): as
+            # documented the rule is `SELECT` then `INSERT` with nothing underneath
+            # it. Two messages milliseconds apart, or two Gunicorn workers, both see
+            # zero unread rows and both insert — and the burst is simultaneously the
+            # scenario the rule exists to prevent and the scenario most likely to
+            # trigger the race. Retrofitting it later would mean a migration *plus* a
+            # de-dup data cleanup.
+            #
+            # Partial, so it costs almost nothing and scopes itself away from the
+            # other three kinds. NULL conversations do not collide in a Postgres
+            # unique index, so the rows of every other kind are unaffected and future
+            # group chat is too.
+            #
+            # Same fan-out shape as the S5 constraint above — `.update()` first,
+            # create on zero rows, catch `IntegrityError` and re-`update()` — and the
+            # same `auto_now_add` footgun applies: the bump works **only** through
+            # `QuerySet.update()`.
+            #
+            # Name kept verbatim from `docs/review/social.md` S4 so the review and
+            # the schema match on a grep.
+            models.UniqueConstraint(
+                fields=["recipient", "conversation"],
+                condition=Q(kind=NotificationKind.NEW_MESSAGE, is_read=False),
+                name="uniq_unread_dm_notification_per_conversation",
+            ),
         ]
         indexes = [
             # The Alerts screen (screen 12), newest first.
