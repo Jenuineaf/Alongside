@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% comment %}
+  403. Rare by design — most "you can't do that" cases in this app are a 404
+  instead, because a 403 confirms the thing exists (ADR-0002, and every view
+  that resolves somebody who may have blocked you).
+
+  What genuinely lands here: the public demo accounts trying to write.
+{% endcomment %}
+
+{% block title %}Not allowed{% endblock %}
+
+{% block content %}
+<div class="mx-auto flex max-w-sm flex-col items-center px-2 py-16 text-center">
+  <div class="grid h-12 w-12 place-items-center rounded-full bg-ink-100 text-ink-600">
+    {% include "components/_icon.html" with name="alert-circle" class="h-6 w-6" %}
+  </div>
+  <h1 class="mt-3 text-xl font-semibold text-ink-900">You can't do that here</h1>
+  <p class="mt-1.5 text-sm leading-relaxed text-ink-700">
+    This account doesn't have access to that. If you're on the shared demo
+    login, signing up takes a moment and lifts every restriction.
+  </p>
+  <a href="{% url 'account_signup' %}"
+     class="mt-5 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+    Create an account
+  </a>
+</div>
+{% endblock content %}

@@ -26,6 +26,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 
+from moderation.limits import RATE_COMMENT, rate_limit
 from posts.models import Comment, Post
 from social import services
 from social.forms import CommentForm
@@ -160,6 +161,7 @@ def save(request, pk):
 
 @require_POST
 @login_required
+@rate_limit(RATE_COMMENT)
 def comment_create(request, pk):
     """Add a comment to a post.
 

@@ -1,0 +1,80 @@
+{% extends "layouts/app_shell.html" %}
+{% comment %}
+  Screen 10 — the conversation list.
+
+  Context: rows — {conversation, other, unread}, newest activity first.
+
+  Every column it renders is denormalised onto Conversation on purpose
+  (last_message_at, last_message_preview) so this list is one query and no
+  aggregate over Message — it is the screen people open most often after the
+  feed.
+
+  The unread badge is a NUMBER, not a dot (decision E, Jeni 3 Oct 2026).
+{% endcomment %}
+
+{% block title %}Messages{% endblock %}
+
+{% block app_content %}
+
+<div class="border-b border-ink-200 bg-white px-4 py-3">
+  <h1 class="text-lg font-bold text-ink-900">Messages</h1>
+</div>
+
+{% if rows %}
+  <div class="divide-y divide-ink-200 bg-white">
+    {% for row in rows %}
+      <a href="{% url 'messaging:thread' row.conversation.pk %}"
+         class="flex items-start gap-3 p-4 hover:bg-ink-50
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-inset
+                {% if row.unread %}bg-brand-50{% endif %}">
+        {% include "components/_avatar.html" with user=row.other %}
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-baseline justify-between gap-2">
+            <p class="truncate text-sm font-semibold text-ink-900">{{ row.other.name }}</p>
+            {% if row.conversation.last_message_at %}
+              <span class="shrink-0 text-xs text-ink-600">
+                <time datetime="{{ row.conversation.last_message_at|date:'c' }}">{{ row.conversation.last_message_at|timesince }}</time>
+              </span>
+            {% endif %}
+          </div>
+
+          {# The context strip — GAP 11. Anyone can message anyone with no      #}
+          {# request gate, so the receiver's first question is always "why is   #}
+          {# this person messaging me", and this is the answer.                 #}
+          {#                                                                    #}
+          {# "Started about", per ADR-0005: one conversation per pair forever,  #}
+          {# so a pair who move on to a second idea would make "About: <first>" #}
+          {# wrong. And posts are soft-deleted, so the FK still resolves after  #}
+          {# a removal — hence the branch.                                      #}
+          {% if row.conversation.origin_post %}
+            <p class="mt-0.5 truncate text-xs {% if row.conversation.origin_post.deleted_at %}italic text-ink-600{% else %}text-brand-800{% endif %}">
+              Started about:
+              {% if row.conversation.origin_post.deleted_at %}
+                an idea that has since been removed
+              {% else %}
+                {{ row.conversation.origin_post.title }}
+              {% endif %}
+            </p>
+          {% endif %}
+
+          <p class="mt-0.5 truncate text-sm text-ink-700">
+            {% firstof row.conversation.last_message_preview "No messages yet" %}
+          </p>
+        </div>
+
+        {% if row.unread %}
+          <span class="mt-1 grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-brand-700 px-1.5 text-[11px] font-bold text-white tabular-nums">
+            {{ row.unread }}
+          </span>
+          <span class="sr-only">{{ row.unread }} unread</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  {% url 'posts:feed' as browse_url %}
+  {% include "components/_empty_state.html" with icon="messages" title="No conversations yet" body="Find an idea you'd want to help with and say hello. Most people reply — nobody posts here hoping to be left alone." action_label="Browse ideas" action_url=browse_url %}
+{% endif %}
+
+{% endblock app_content %}

@@ -23,6 +23,7 @@ from accounts import services
 from accounts.blocking import blocked_user_ids
 from accounts.forms import FollowNoteForm, ProfileForm
 from accounts.models import Block, Follow
+from moderation.limits import RATE_FOLLOW, rate_limit
 from posts.models import Post
 
 User = get_user_model()
@@ -178,6 +179,7 @@ def profile_edit(request):
 
 @require_POST
 @login_required
+@rate_limit(RATE_FOLLOW)
 def follow(request, username):
     """One tap, instant, no approval.
 
