@@ -175,6 +175,33 @@ class Report(models.Model):
     # `reason="other"`.
     details = models.TextField(_("details"), blank=True)
 
+    # ── What the target said when it was reported ────────────────────────────
+    #
+    # **TS-3, ruled in by Jeni on 4 Oct 2026** (§12.6, and the Architect seat's own
+    # recommendation there). Written **once, at report time**, by the Builder's report
+    # view — a copy of the reported text: a post's title plus body, or a comment's
+    # body. Never updated afterwards; that is the entire point.
+    #
+    # Posts are editable, so the sequence this closes is: someone posts something
+    # abusive → gets reported → edits it innocuous before anyone reviews it → the
+    # moderator rules on content that no longer exists and dismisses a real report.
+    # `ReportAdmin.target_preview` already warns when the target was edited after the
+    # report was filed, which tells a moderator the text on screen may not be the text
+    # that was reported — it does not tell them what it said. This column is what
+    # tells them.
+    #
+    # **It cannot be back-filled.** By the time anybody wants it, the original text is
+    # gone; there is no source to recover it from. That is why it is the one item in
+    # §12.6 that could not wait, and why it ships before the first report is ever
+    # filed rather than when the queue first gets busy.
+    #
+    # `blank=True` and no cap: this is a verbatim copy of content whose own limits are
+    # form-level (§0), so capping the snapshot would mean truncating evidence. Empty
+    # is legal and means "filed before this column existed", not "the target was
+    # empty" — no `CheckConstraint` requires it, because no constraint can distinguish
+    # those two and a report with no snapshot is still a valid report.
+    target_snapshot = models.TextField(_("target snapshot"), blank=True)
+
     # ── What we did about it ─────────────────────────────────────────────────
     #
     # No `db_index=True` on `status`, even though §6.1 says "indexed": the
