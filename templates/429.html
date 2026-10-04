@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% comment %}
+  429 — rate limited. Reached through `config.views.permission_denied`, which
+  tells a `Ratelimited` apart from a genuine 403 and sends people here instead.
+
+  The copy says what happened and what to do, and does not apologise
+  (design-system.md §5). It also does not accuse: almost everybody who sees
+  this page hit a limit by being enthusiastic, not by being a spammer.
+{% endcomment %}
+
+{% block title %}Slow down a moment{% endblock %}
+
+{% block content %}
+<div class="mx-auto flex max-w-sm flex-col items-center px-2 py-16 text-center">
+  <div class="grid h-12 w-12 place-items-center rounded-full bg-warn-50 text-warn-600">
+    {% include "components/_icon.html" with name="alert-triangle" class="h-6 w-6" %}
+  </div>
+  <h1 class="mt-3 text-xl font-semibold text-ink-900">That's a lot at once</h1>
+  <p class="mt-1.5 text-sm leading-relaxed text-ink-700">
+    You've hit a limit we put there to keep spam off the feed. Give it an hour
+    and you can carry on — nothing you've already posted is affected.
+  </p>
+  <a href="{% url 'posts:feed' %}"
+     class="mt-5 inline-flex h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+    Browse ideas
+  </a>
+</div>
+{% endblock content %}

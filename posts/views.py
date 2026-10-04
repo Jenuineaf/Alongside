@@ -12,6 +12,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_GET, require_POST
 
+from moderation.limits import RATE_POST, rate_limit
 from posts import services
 from posts.forms import PostForm
 from posts.models import Post, PostRole, PostSpark, PostStatus, SavedPost
@@ -104,6 +105,7 @@ def detail(request, slug):
 
 
 @login_required
+@rate_limit(RATE_POST)
 def create(request):
     """Screen 7 — publish an idea.
 

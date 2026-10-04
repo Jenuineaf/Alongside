@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% comment %}
+  Screen 11 — one conversation.
+
+  Context: conversation · other · messages_list (oldest first) · form
+
+  No tab bar: a chat thread is a place you are *in*, and the composer needs the
+  bottom of the screen.
+
+  THE CONTEXT STRIP IS THE POINT OF THIS SCREEN (GAP 11). Anyone can DM anyone
+  with no request gate — the receiver decides whether to open it — so the first
+  thing the page has to answer is "why is this person messaging me". Without
+  `origin_post` that question has no answer anywhere in the product.
+
+  Send-and-refresh, not WebSockets (Jeni, 3 Oct 2026). The form posts and the
+  page comes back; `hx-boost`-free and deliberately plain, so it works with
+  JavaScript off.
+{% endcomment %}
+
+{% block title %}{{ other.name }}{% endblock %}
+
+{% block content %}
+<div class="-mx-4 -my-6 flex min-h-[calc(100dvh-0px)] flex-col bg-white">
+
+  <header class="sticky top-0 z-40 flex h-14 items-center gap-2 border-b border-ink-200 bg-white px-2">
+    <a href="{% url 'messaging:list' %}" aria-label="Back to messages"
+       class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-800 hover:bg-ink-100
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_icon.html" with name="chevron-left" class="h-6 w-6" %}
+    </a>
+
+    <a href="{{ other.get_absolute_url }}"
+       class="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_avatar.html" with user=other size="sm" %}
+      <span class="min-w-0">
+        <span class="block truncate text-sm font-semibold text-ink-900">{{ other.name }}</span>
+        <span class="block truncate text-xs text-ink-600">{{ other.headline }}</span>
+      </span>
+    </a>
+
+    <a href="{% url 'moderation:report_user' other.username %}" aria-label="Report {{ other.name }}"
+       class="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink-600 hover:bg-ink-100
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_icon.html" with name="more" %}
+    </a>
+  </header>
+
+  {% comment %}
+    The context strip — GAP 11, and ADR-0005 settles its wording.
+
+    "STARTED ABOUT", not "About". `dyad_key` is unique per pair, so there is
+    exactly one conversation between two people forever; if they go on to
+    discuss a second idea, "About: <the first one>" is confidently wrong while
+    "Started about" stays true. One word, and it is what makes the field honest.
+
+    It also has to survive the idea being removed. Posts are SOFT-deleted, so
+    `SET_NULL` never fires and the FK still resolves — the strip would otherwise
+    link to a 404.
+  {% endcomment %}
+  {% if conversation.origin_post %}
+    {% if conversation.origin_post.deleted_at %}
+      <div class="flex items-center gap-2 border-b border-ink-200 bg-ink-50 px-4 py-2.5">
+        <span class="shrink-0 text-xs font-bold uppercase tracking-wide text-ink-600">Started about</span>
+        <span class="min-w-0 flex-1 truncate text-sm italic text-ink-600">an idea that has since been removed</span>
+      </div>
+    {% else %}
+      <a href="{{ conversation.origin_post.get_absolute_url }}"
+         class="flex items-center gap-2 border-b border-brand-200 bg-brand-50 px-4 py-2.5
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-inset">
+        <span class="shrink-0 text-xs font-bold uppercase tracking-wide text-brand-800">Started about</span>
+        <span class="min-w-0 flex-1 truncate text-sm text-ink-800">{{ conversation.origin_post.title }}</span>
+        {% include "components/_icon.html" with name="chevron-down" class="h-4 w-4 shrink-0 -rotate-90 text-brand-700" %}
+      </a>
+    {% endif %}
+  {% endif %}
+
+  <div class="flex flex-1 flex-col justify-end gap-2 p-4">
+    {% for message in messages_list %}
+      {% if message.sender_id == user.pk %}
+        <div class="flex justify-end">
+          <p class="max-w-[80%] whitespace-pre-line rounded-2xl rounded-br-sm bg-brand-700 px-3.5 py-2.5 text-[15px] leading-relaxed text-white">{{ message.body }}</p>
+        </div>
+      {% else %}
+        <div class="flex justify-start">
+          <p class="max-w-[80%] whitespace-pre-line rounded-2xl rounded-bl-sm bg-ink-100 px-3.5 py-2.5 text-[15px] leading-relaxed text-ink-900">{{ message.body }}</p>
+        </div>
+      {% endif %}
+      <p class="{% if message.sender_id == user.pk %}text-right{% endif %} -mt-1 text-[11px] text-ink-600">
+        <time datetime="{{ message.created_at|date:'c' }}">{{ message.created_at|date:"j M, H:i" }}</time>
+      </p>
+    {% empty %}
+      <div class="flex flex-1 flex-col items-center justify-center px-6 text-center">
+        <p class="text-base font-semibold text-ink-900">Say hello</p>
+        <p class="mt-1.5 max-w-xs text-sm leading-relaxed text-ink-700">
+          {% if conversation.origin_post %}
+            Tell {{ other.name }} what you'd bring to it. Most people reply.
+          {% else %}
+            Nobody posts here hoping to be left alone.
+          {% endif %}
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post" action="{% url 'messaging:send' conversation.pk %}"
+        class="sticky bottom-0 flex items-end gap-2 border-t border-ink-200 bg-white p-3">
+    {% csrf_token %}
+    <label for="{{ form.body.id_for_label }}" class="sr-only">{{ form.body.label }}</label>
+    <textarea name="{{ form.body.html_name }}" id="{{ form.body.id_for_label }}" rows="1" required
+              placeholder="Say hello…"
+              class="max-h-32 min-h-11 w-full flex-1 resize-y rounded-2xl border border-ink-300 px-3.5 py-2.5 text-base text-ink-900 placeholder:text-ink-600
+                     focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30"></textarea>
+    <button type="submit" aria-label="Send"
+            class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-700 text-white
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2">
+      {# Paper plane, drawn inline: it is the only place in the product that    #}
+      {# needs one, so it does not earn a slot in the icon set.                 #}
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 12l16-8-6 16-2.5-6L4 12z"/>
+      </svg>
+    </button>
+  </form>
+
+</div>
+{% endblock content %}

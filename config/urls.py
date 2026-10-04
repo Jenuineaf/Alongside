@@ -31,14 +31,24 @@ urlpatterns = [
     path("messages/", include("messaging.urls")),
     path("notifications/", include("notifications.urls")),
     path("s/", include("social.urls")),
+    # Reporting. Moderation itself is Django admin (§6.1) — there is no review
+    # UI to route here.
+    path("report/", include("moderation.urls")),
+    # Scheduled jobs, machine-only. GitHub Actions cron POSTs here with a
+    # shared secret because Render's free tier has no always-on worker to run
+    # Celery Beat (deployment.md §4).
+    path("internal/cron/", include("moderation.cron_urls")),
     # Last: owns "" (landing) and would otherwise shadow the prefixes above.
     path("", include("posts.urls")),
 ]
 
-# Still to land with their phases:
-#   path("report/", include("moderation.urls")),
-#   path("internal/cron/", include("moderation.cron_urls")),  # deployment.md §4
-#   path("api/", include("config.api_urls")),   # DRF — tech-stack.md §0
+# django-ratelimit raises `Ratelimited`, which is a 403 by default — misleading
+# for a limit that will lift on its own in an hour. 429 says "later", which is
+# both true and what a client can act on.
+handler403 = "config.views.permission_denied"
+
+# Still to land with its phase:
+#   path("api/", include("config.api_urls"))   # DRF — tech-stack.md §0
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -125,6 +125,77 @@ def notify_new_follower(follower, following) -> Notification | None:
         return None
 
 
+def notify_new_message(recipient, actor, conversation) -> Notification | None:
+    """Tell somebody they have a new DM. Dedup rule 2 (§5.2) — the important one.
+
+    Unlike the comment rule, this **is** a burst guard, and deliberately so: ten
+    messages in one conversation is one thing the user needs to know about, not
+    ten. Without it, a burst produces ten bell entries and buries every other
+    notification they have. That was the rule missing from the first draft of
+    the data model, and the Social review called it the more important of the
+    two.
+
+    Update-first, create-on-zero-rows, catch-and-re-update — the same shape as
+    the follow rule, made structurally correct rather than hopefully correct by
+    the S4 partial unique constraint. In a message burst, two workers racing
+    both see zero unread rows and both insert; in exactly the scenario the rule
+    exists to prevent.
+
+    `.update()`, never load-mutate-save: `created_at` is `auto_now_add`, so a
+    `.save()` bump silently does nothing and the collapsed notification sorts to
+    the bottom of the bell.
+    """
+    if recipient.pk == actor.pk:
+        return None
+
+    unread = Notification.objects.filter(
+        recipient=recipient,
+        conversation=conversation,
+        kind=NotificationKind.NEW_MESSAGE,
+        is_read=False,
+    )
+
+    if unread.update(created_at=Now()):
+        return None
+
+    try:
+        with transaction.atomic():
+            return Notification.objects.create(
+                recipient=recipient,
+                actor=actor,
+                kind=NotificationKind.NEW_MESSAGE,
+                conversation=conversation,
+            )
+    except IntegrityError:
+        unread.update(created_at=Now())
+        return None
+
+
+def notify_stale_nudge(post) -> Notification | None:
+    """Ask a post's author whether they are still looking (TS-2 / Designer GAP 13).
+
+    The one notification kind with **no actor**: nothing did this, the system
+    noticed. `notification_not_self` tolerates a null actor for exactly this
+    case, and `notification_kind_targets` gives `stale_nudge` its own branch
+    requiring `post` and forbidding an actor — so a row that claims a person
+    sent it cannot be written.
+
+    No dedup rule and no constraint behind it, unlike every other kind. The job
+    sets `nudged_at` and only selects posts where it is NULL, so the candidate
+    query is itself the guard: one nudge per post per stale cycle.
+
+    The Alerts screen renders this as a warning banner with "Yes, still
+    looking" and "Team formed" — the two buttons are the whole point, because a
+    nudge nobody can answer is just a worse way of demoting somebody.
+    """
+    return Notification.objects.create(
+        recipient=post.author,
+        actor=None,
+        kind=NotificationKind.STALE_NUDGE,
+        post=post,
+    )
+
+
 # ── Deleting ────────────────────────────────────────────────────────────────
 #
 # Notifications are the one model in the project that is HARD-deleted (§8), plus

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% comment %}
+  Report a post, a comment or a person.
+
+  Context: form · label (what is being reported) · back (where Cancel goes)
+
+  Deliberately plain. This is not a screen anybody wants to be on, so it says
+  what it needs, takes one choice and one optional paragraph, and gets out of
+  the way. No illustration, no reassurance copy beyond what is true.
+
+  It does NOT say what will happen to the reported account — we don't know yet,
+  and promising an outcome we might not deliver is worse than saying nothing.
+{% endcomment %}
+
+{% block title %}Report{% endblock %}
+
+{% block content %}
+<div class="-mx-4 -my-6 flex min-h-[calc(100dvh-0px)] flex-col bg-white">
+
+  <header class="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-ink-200 bg-white px-2">
+    <a href="{{ back }}" aria-label="Cancel"
+       class="grid h-11 w-11 place-items-center rounded-full text-ink-800 hover:bg-ink-100
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+      {% include "components/_icon.html" with name="close" %}
+    </a>
+    <span class="text-sm font-semibold">Report</span>
+    <span class="h-11 w-11"></span>
+  </header>
+
+  <form method="post" class="flex flex-1 flex-col gap-6 p-4">
+    {% csrf_token %}
+
+    <div>
+      <h1 class="text-xl font-semibold text-ink-900">Report this</h1>
+      <p class="mt-1 text-sm leading-relaxed text-ink-700">
+        You're reporting <b class="text-ink-900">{{ label|truncatechars:70 }}</b>.
+        A moderator reads every report.
+      </p>
+    </div>
+
+    <fieldset>
+      <legend class="text-sm font-medium text-ink-800">{{ form.reason.label }}</legend>
+      {% if form.reason.errors %}
+        <p class="mt-1.5 flex items-start gap-1.5 text-xs font-medium text-bad-700">
+          {% include "components/_icon.html" with name="alert-circle" class="h-4 w-4 shrink-0" %}
+          <span>{{ form.reason.errors|join:" " }}</span>
+        </p>
+      {% endif %}
+      <div class="mt-2 flex flex-col gap-2">
+        {% for choice in form.reason %}
+          <label class="cursor-pointer">
+            {{ choice.tag }}
+            <span class="flex min-h-12 items-center rounded-xl border border-ink-300 px-4 text-sm font-semibold text-ink-800
+                         peer-focus-visible:ring-2 peer-focus-visible:ring-brand-600 peer-focus-visible:ring-offset-2
+                         peer-checked:border-brand-700 peer-checked:bg-brand-50 peer-checked:text-brand-900">
+              {{ choice.choice_label }}
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    {% include "components/_field.html" with field=form.details rows=4 %}
+
+    <div class="mt-auto flex flex-col gap-2 border-t border-ink-200 pt-5">
+      {% include "components/_button.html" with label="Send report" full=True busy_label="Sending…" %}
+      <a href="{{ back }}"
+         class="inline-flex h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold text-ink-600 hover:bg-ink-100
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600">
+        Cancel
+      </a>
+    </div>
+  </form>
+
+</div>
+{% endblock content %}
