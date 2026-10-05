@@ -14,10 +14,6 @@ from django.views.decorators.http import require_GET, require_POST
 
 from moderation.limits import RATE_POST, rate_limit
 from posts import services
-# The published demo credentials live with the seed that creates them, so the
-# login prompt and the account can never disagree again.
-from posts.management.commands._seed_corpus import DEMO_ACCOUNTS
-from posts.management.commands.seed_demo import SEED_PASSWORD
 from posts.forms import PostForm
 from posts.models import Post, PostRole, PostSpark, PostStatus, SavedPost
 from social.forms import CommentForm
@@ -56,6 +52,30 @@ def _feed_queryset(user=None):
     return queryset
 
 
+def _demo_credentials() -> dict:
+    """The credentials the landing page publishes (`product-spec.md` §5.3).
+
+    Read from the seed that creates the account, never restated here. The two
+    had already drifted — the page advertised "buildtogether" while `seed_demo`
+    set something else — so the one screen whose entire job is letting a
+    stranger in was publishing a password that did not work. Nothing failed and
+    no test went red; the only symptom was a visitor being told their password
+    was wrong on the first screen they ever saw.
+
+    **Imported inside the function on purpose.** `_seed_corpus` is ~110KB of
+    hand-written content, and a module-level import would load all of it into
+    every web worker at startup for the sake of two strings — on a free tier
+    that splits ~512MB three ways (`deployment.md` §4).
+    """
+    from posts.management.commands._seed_corpus import DEMO_ACCOUNTS
+    from posts.management.commands.seed_demo import SEED_PASSWORD
+
+    return {
+        "demo_email": DEMO_ACCOUNTS["demo"]["email"],
+        "demo_password": SEED_PASSWORD,
+    }
+
+
 @require_GET
 def landing(request):
     """Screen 1 — public landing. Real posts before any sign-up prompt."""
@@ -65,14 +85,7 @@ def landing(request):
         "posts/landing.html",
         {
             "posts": posts,
-            # Read from the seed, never restated here. These two had already
-            # drifted apart: the page advertised "buildtogether" while
-            # `seed_demo` set something else, so the one screen whose entire job
-            # is letting a stranger in was publishing a password that did not
-            # work. Importing the constants makes that impossible rather than
-            # merely fixed.
-            "demo_email": DEMO_ACCOUNTS["demo"]["email"],
-            "demo_password": SEED_PASSWORD,
+            **_demo_credentials(),
         },
     )
 
