@@ -14,6 +14,10 @@ from django.views.decorators.http import require_GET, require_POST
 
 from moderation.limits import RATE_POST, rate_limit
 from posts import services
+# The published demo credentials live with the seed that creates them, so the
+# login prompt and the account can never disagree again.
+from posts.management.commands._seed_corpus import DEMO_ACCOUNTS
+from posts.management.commands.seed_demo import SEED_PASSWORD
 from posts.forms import PostForm
 from posts.models import Post, PostRole, PostSpark, PostStatus, SavedPost
 from social.forms import CommentForm
@@ -61,8 +65,14 @@ def landing(request):
         "posts/landing.html",
         {
             "posts": posts,
-            "demo_email": "demo@alongside.app",
-            "demo_password": "buildtogether",
+            # Read from the seed, never restated here. These two had already
+            # drifted apart: the page advertised "buildtogether" while
+            # `seed_demo` set something else, so the one screen whose entire job
+            # is letting a stranger in was publishing a password that did not
+            # work. Importing the constants makes that impossible rather than
+            # merely fixed.
+            "demo_email": DEMO_ACCOUNTS["demo"]["email"],
+            "demo_password": SEED_PASSWORD,
         },
     )
 
