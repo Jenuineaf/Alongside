@@ -81,7 +81,7 @@ cp .env.example .env     # set SECRET_KEY and DATABASE_URL
 ### The demo data
 
 ```bash
-python manage.py seed_demo [--users 20] [--posts 45] [--seed 20260731] [--reset] [--yes]
+python manage.py seed_demo [--users 20] [--posts 45] [--seed 20260731] [--reset] [--yes] [--quiet]
 ```
 
 Hand-authored, not generated: ~60 real idea posts and ~20 written bios. `Faker.text()` produces
