@@ -17,7 +17,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from accounts import services
 from accounts.blocking import blocked_user_ids
@@ -72,7 +72,7 @@ def _profile_posts(request, author):
     )
 
 
-@require_GET
+@require_safe
 def profile(request, username):
     """Screen 7 — public, no login wall."""
     person = _get_visible_user(request, username)
@@ -100,7 +100,7 @@ def profile(request, username):
     )
 
 
-@require_GET
+@require_safe
 def followers(request, username):
     person = _get_visible_user(request, username)
     return render(
@@ -115,7 +115,7 @@ def followers(request, username):
     )
 
 
-@require_GET
+@require_safe
 def following(request, username):
     person = _get_visible_user(request, username)
     return render(
@@ -276,7 +276,7 @@ def unblock(request, username):
 
 
 @login_required
-@require_GET
+@require_safe
 def blocked_list(request):
     """Settings → Blocked people.
 
@@ -301,7 +301,7 @@ def blocked_list(request):
 
 
 @login_required
-@require_GET
+@require_safe
 def settings(request):
     """Screen 13."""
     profile_obj = request.user.profile

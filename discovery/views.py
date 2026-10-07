@@ -19,7 +19,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.utils import timezone
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_safe
 
 from accounts.models import Profile, ProfileInterest
 from discovery import search as search_lib
@@ -33,7 +33,7 @@ SUGGESTED_FOLLOW_COUNT = 6
 ONBOARDING_STEPS = 3
 
 
-@require_GET
+@require_safe
 @login_required
 def home(request):
     """Screen 4 — the personalised feed, with the cascade behind it."""
@@ -53,7 +53,7 @@ def home(request):
     )
 
 
-@require_GET
+@require_safe
 def explore(request):
     """Screen 5 — the public feed, now with Discovery's filters.
 
@@ -95,7 +95,7 @@ def explore(request):
     )
 
 
-@require_GET
+@require_safe
 def search(request):
     """Screen 9 — search results. Posts **and** people (spec §4.3).
 

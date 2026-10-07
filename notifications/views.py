@@ -10,7 +10,7 @@ nothing here an anonymous visitor could be shown, so this is one of the few
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from accounts.models import Follow
 from notifications import services
@@ -22,7 +22,7 @@ from notifications.models import Notification, NotificationKind
 ALERTS_LIMIT = 50
 
 
-@require_GET
+@require_safe
 @login_required
 def list_notifications(request):
     """The Alerts list, grouped New / Earlier as the Designer drew it.

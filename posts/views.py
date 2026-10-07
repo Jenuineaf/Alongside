@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef, Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from moderation.limits import RATE_POST, rate_limit
 from posts import services
@@ -76,7 +76,7 @@ def _demo_credentials() -> dict:
     }
 
 
-@require_GET
+@require_safe
 def landing(request):
     """Screen 1 — public landing. Real posts before any sign-up prompt."""
     posts = list(_feed_queryset(request.user)[:2])
@@ -96,7 +96,7 @@ def landing(request):
 # only knew how to list newest-first was the placeholder they replaced.
 
 
-@require_GET
+@require_safe
 def detail(request, slug):
     """Screen 6 — post detail, comment thread included.
 

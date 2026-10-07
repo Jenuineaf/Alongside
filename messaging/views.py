@@ -19,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from accounts.blocking import blocked_user_ids
 from messaging import services
@@ -33,7 +33,7 @@ User = get_user_model()
 THREAD_PAGE_SIZE = 100
 
 
-@require_GET
+@require_safe
 @login_required
 def list_conversations(request):
     """Screen 10 — every thread, newest activity first.
@@ -67,7 +67,7 @@ def list_conversations(request):
     )
 
 
-@require_GET
+@require_safe
 @login_required
 def thread(request, pk):
     """Screen 11 — one conversation. Opening it marks it read."""
