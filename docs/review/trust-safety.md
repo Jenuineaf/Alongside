@@ -361,7 +361,7 @@ Recorded so nobody re-opens them.
 ## 4 · One ownership conflict to settle
 
 `data-model.md` §11 assigns **"the 30-day anonymise job" (ADR-0001) to Trust & Safety.**
-`team-prompts.md` line 48 and my seat brief don't mention it — they say report, moderation queue,
+The seat roster and my own brief don't mention it — they say report, moderation queue,
 rate limiting, stale-post job. ADR-0001 is an Accounts decision about Accounts data.
 
 I'll take it if Jeni wants — it's a scheduled job and I own the scheduled-job path. But it needs

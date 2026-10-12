@@ -22,7 +22,7 @@ def make_user(django_user_model, username="ananya_iyer", **kwargs):
     )
 
 
-# ── Public read access (CLAUDE.md rule 7) ───────────────────────────────────
+# ── Public read access (CONTRIBUTING.md rule 7) ───────────────────────────────────
 
 
 def test_profile_is_public(client, django_user_model):

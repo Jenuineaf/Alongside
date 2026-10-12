@@ -1,6 +1,6 @@
 """Notifications — the return loop.
 
-Owned by the Architect (`CLAUDE.md` rule 2). The Builder seat reads and writes this
+Owned by the Architect (`CONTRIBUTING.md` rule 2). The Builder seat reads and writes this
 table (bell count, Alerts screen, fan-out on comment and follow) and does not edit
 this file. Schema changes go seat → Jeni → Architect → `docs/data-model.md` →
 migration.

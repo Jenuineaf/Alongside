@@ -253,7 +253,7 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 # ── DRF ─────────────────────────────────────────────────────────────────────
 
 # A small, documented JSON API over posts and search — tech-stack.md §0.
-# Public read access is non-negotiable (CLAUDE.md rule 7), so the default
+# Public read access is non-negotiable (CONTRIBUTING.md rule 7), so the default
 # permission is read-only-for-anonymous rather than authenticated-only.
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [

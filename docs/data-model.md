@@ -221,7 +221,7 @@ Two things that are deliberate and must not be "fixed":
   reasoning in ADR-0002.
 - **Block is a soft barrier, not a security control.** The feed is public, so a blocked person
   can log out and read public content. That is an accepted consequence of public browsing
-  (`CLAUDE.md` rule 7), **not** a bug — and the wrong fix for it is a login wall, which would
+  (`CONTRIBUTING.md` rule 7), **not** a bug — and the wrong fix for it is a login wall, which would
   destroy the product. ADR-0002 spells this out.
 
 **Two surfaces are explicit exceptions to §1.6 (ACC-8).** Both look like leaks and neither is:
@@ -797,7 +797,7 @@ are recorded below and in `moderation/models.py`.
 
 #### Decision H — sign-in is required to report ✅ *(Jeni, 3 Oct 2026)*
 
-`CLAUDE.md` rule 7 names post / follow / spark / comment / DM as the gated actions and is
+`CONTRIBUTING.md` rule 7 names post / follow / spark / comment / DM as the gated actions and is
 silent on reporting, so this was Jeni's call. **Reporting requires an account.** It is what
 gives the three anti-brigading constraints something to key on: with anonymous reports,
 NULL reporters never collide in a unique index, so all three stop working at once, and the

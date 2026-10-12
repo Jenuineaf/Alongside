@@ -1,6 +1,6 @@
 """Posts & Feed models — the core object of the product.
 
-Owned by the Architect (`CLAUDE.md` rule 2). The Posts & Feed, Discovery, Social
+Owned by the Architect (`CONTRIBUTING.md` rule 2). The Posts & Feed, Discovery, Social
 and Trust & Safety seats all read and write these tables; none of them edit this
 file. Schema changes go seat → Jeni → Architect → `docs/data-model.md` → migration.
 
@@ -212,7 +212,7 @@ class ActivePostManager(models.Manager.from_queryset(PostQuerySet)):
 class Post(models.Model):
     """An idea, plus the roles needed to build it.
 
-    Stage, commitment and status are the anti-ghosting design (`CLAUDE.md`), not
+    Stage, commitment and status are the anti-ghosting design (`CONTRIBUTING.md`), not
     decoration: mismatched expectations are the documented #1 killer in this
     category, so these fields are load-bearing.
     """

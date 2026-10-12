@@ -73,7 +73,7 @@ in a migration that has not been committed. It will never be cheaper.
 
 ### 🔴 ACC-2 — the follow note has no path to the notification that should display it
 
-The optional follow note is in `CLAUDE.md`'s vocabulary section and `product-spec.md` §4.4
+The optional follow note is in `CONTRIBUTING.md`'s vocabulary section and `product-spec.md` §4.4
 ("Follow — one-way, instant, optional note"). §1.4 models it correctly:
 `note = CharField(200), blank`.
 

@@ -730,7 +730,7 @@ before touching Render.
   call for Phase 0–1 — no build step, nothing to configure, the Designer edits a palette file
   and reloads. It has to become a compiled stylesheet before the portfolio deploy: the CDN
   prints a console warning in production and adds a render-blocking round trip on exactly the
-  mid-range Android phones CLAUDE.md rule 6 targets. When that happens the Node build joins the
+  mid-range Android phones CONTRIBUTING.md rule 6 targets. When that happens the Node build joins the
   Dockerfile as a stage; `.gitignore` already reserves `/static/css/tailwind.output.css`. Not
   urgent, not forgotten.
 - **HTMX and Alpine are also CDN-loaded**, pinned to exact versions (`htmx.org@2.0.4`,

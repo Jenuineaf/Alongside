@@ -48,3 +48,12 @@ node_modules/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Seat scaffolding — local to the build process, deliberately not in the public
+# repo. `.claude/agents/` are Claude Code sub-agent definitions and
+# `docs/team-prompts.md` is the seat roster they came from; both describe how
+# this was built rather than what was built, and CONTRIBUTING.md is the
+# public-facing version of the same rules. Kept on disk, out of git, so the two
+# cannot drift apart again.
+.claude/agents/
+docs/team-prompts.md

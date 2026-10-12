@@ -44,7 +44,7 @@ def test_the_landing_page_shows_those_same_credentials(client):
 
 
 def test_the_landing_page_is_public_and_shows_real_posts(client):
-    """CLAUDE.md rule 7 — the first impression must not be a login wall."""
+    """CONTRIBUTING.md rule 7 — the first impression must not be a login wall."""
     response = client.get(reverse("posts:landing"))
 
     assert response.status_code == 200

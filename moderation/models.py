@@ -1,6 +1,6 @@
 """Trust & Safety models — the report, and the queue that works it.
 
-Owned by the Architect (`CLAUDE.md` rule 2). The **Builder seat** owns the report
+Owned by the Architect (`CONTRIBUTING.md` rule 2). The **Builder seat** owns the report
 form, the "Report" buttons, the rate limiting and the stale-post job, and reads and
 writes this table; it does not edit this file. Schema changes go seat → Jeni →
 Architect → `docs/data-model.md` → migration.
@@ -12,7 +12,7 @@ is cited inline so the reasoning is one grep away.
 
 **Two of Jeni's open decisions (§12.4) closed on 3 Oct 2026, and both land here.**
 
-*Decision H — sign-in is required to report* (§12.4, TS-9). `CLAUDE.md` rule 7 names
+*Decision H — sign-in is required to report* (§12.4, TS-9). `CONTRIBUTING.md` rule 7 names
 post / follow / spark / comment / DM as the gated actions and is silent on reporting,
 so this was Jeni's to rule and she has: **report requires an account.** It is what
 gives the three anti-brigading constraints below something to key on — with anonymous

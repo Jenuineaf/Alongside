@@ -338,7 +338,7 @@ def test_post_detail_shows_the_thread_and_a_matching_tally(client, post, author,
 
 
 def test_anonymous_sees_the_thread_and_no_form(client, post, joiner):
-    """CLAUDE.md rule 7 — reading never needs an account."""
+    """CONTRIBUTING.md rule 7 — reading never needs an account."""
     services.add_comment(joiner, post, "Readable without signing in.")
 
     body = client.get(post.get_absolute_url()).content.decode()

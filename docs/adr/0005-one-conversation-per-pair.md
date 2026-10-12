@@ -9,7 +9,7 @@ chat thread, conversation list) · QA (seeded threads) · Trust & Safety (first-
 ## Context
 
 The core loop of Alongside is *find an idea → message the person who posted it*
-(`product-spec.md` §3.4). `CLAUDE.md` rule: **anyone can DM anyone**, with no request gate — the
+(`product-spec.md` §3.4). `CONTRIBUTING.md` rule: **anyone can DM anyone**, with no request gate — the
 receiver decides whether to open it. That design choice has a direct consequence on the receiver's
 side: **the first question a stranger's DM raises is always "why is this person messaging me?"**
 

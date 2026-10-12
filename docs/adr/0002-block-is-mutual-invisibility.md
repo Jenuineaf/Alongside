@@ -45,7 +45,7 @@ For an **authenticated** viewer V and a block-related user O:
 | Search (people) | O never appears in V's people-search results. Symmetric |
 
 **Anonymous visitors are unaffected.** Block is a property of a logged-in viewer's session.
-This preserves the non-negotiable public read access (`CLAUDE.md` rule 7) and keeps the
+This preserves the non-negotiable public read access (`CONTRIBUTING.md` rule 7) and keeps the
 public feed query — the most-hit query in the app — completely free of block logic.
 
 **Unblocking is a full restore** of everything except the rows deleted at block time (follows
@@ -74,7 +74,7 @@ deletion, and blocking: **users lose access; the data survives.**
 
 **This is deliberate and must not be "fixed" later.**
 
-Alongside's feed, posts and profiles are readable **without an account** — `CLAUDE.md` rule 7
+Alongside's feed, posts and profiles are readable **without an account** — `CONTRIBUTING.md` rule 7
 calls this non-negotiable, and `product-spec.md` §5.2 makes it a condition of the product
 working at all. It follows directly that a blocked person can log out, or open a private
 window, and read any public content — including the profile and posts of the person who

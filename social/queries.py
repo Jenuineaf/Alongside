@@ -25,7 +25,7 @@ def visible_comments(post, viewer):
     2. **`is_sparked` per viewer**, as one `EXISTS` for the whole thread rather
        than one query per comment. Anonymous viewers skip it entirely — the
        attribute is then simply absent, which is falsy in a template, and the
-       public page does no visibility work at all (`CLAUDE.md` rule 7).
+       public page does no visibility work at all (`CONTRIBUTING.md` rule 7).
     3. **Oldest first**, which matches `comment_post_idx` column for column, so
        the thread is an index scan with no sort — and reads correctly: a reply
        below the thing it replies to.

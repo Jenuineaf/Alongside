@@ -21,7 +21,7 @@ design — it is a hope, and it will fail on the view someone writes at 1am in P
 
 Constraints:
 
-- Anonymous requests must stay completely free of block logic (`CLAUDE.md` rule 7 — the public
+- Anonymous requests must stay completely free of block logic (`CONTRIBUTING.md` rule 7 — the public
   feed is the most-hit query in the app).
 - Blocks are rare per user. A typical user has 0; a heavy user might have 20. The set is small.
 - Redis is already in the stack as the cache (`tech-stack.md` §3), so a cache is free to use.

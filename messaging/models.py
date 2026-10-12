@@ -1,6 +1,6 @@
 """Messaging models — the conversation, its participants, and the messages in it.
 
-Owned by the Architect (`CLAUDE.md` rule 2). The **Builder seat** owns the chat UI,
+Owned by the Architect (`CONTRIBUTING.md` rule 2). The **Builder seat** owns the chat UI,
 the conversation list, the send path and the creation chokepoint described below, and
 reads and writes these tables; it does not edit this file. Schema changes go
 seat → Jeni → Architect → `docs/data-model.md` → migration.

@@ -3,7 +3,7 @@
 Private by definition, so these are login-required reads — one of the few in a
 product whose default is public.
 
-**Anyone can message anyone. There is no request gate** (`CLAUDE.md`): the
+**Anyone can message anyone. There is no request gate** (`CONTRIBUTING.md`): the
 receiver decides whether to open it. That is a deliberate product call and it
 puts weight on the context strip — since nobody has approved anything, "why is
 this person messaging me" is the first thing every thread has to answer, which

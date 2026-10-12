@@ -171,7 +171,7 @@ def test_blocked_profile_is_still_public_when_logged_out(client, alice, bob):
     """Deliberate, and pinned so nobody "fixes" it with a login wall.
 
     Block is a soft barrier scoped to the authenticated experience; the feed is
-    public and that is non-negotiable (ADR-0002 "soft barrier", CLAUDE.md rule 7).
+    public and that is non-negotiable (ADR-0002 "soft barrier", CONTRIBUTING.md rule 7).
     """
     services.block(alice, bob)
 

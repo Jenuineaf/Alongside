@@ -23,7 +23,7 @@ def unread_alerts(request):
 
     **Anonymous returns an empty dict before any I/O**, which matters more than
     it looks: the public feed and the landing page are the most-hit queries in
-    the app and `CLAUDE.md` rule 7 makes them non-negotiable, so they must not
+    the app and `CONTRIBUTING.md` rule 7 makes them non-negotiable, so they must not
     acquire two count queries just because a context processor exists. The tab
     bar defaults both to 0, and anonymous visitors get
     `components/_guest_tab_bar.html` anyway, which has neither badge.

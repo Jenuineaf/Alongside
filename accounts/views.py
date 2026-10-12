@@ -2,7 +2,7 @@
 
 Three rules run through all of it:
 
-1. **Profiles are public** (`CLAUDE.md` rule 7, spec §5.2). Anonymous visitors
+1. **Profiles are public** (`CONTRIBUTING.md` rule 7, spec §5.2). Anonymous visitors
    see them. Sign-in is only needed to follow, block or message.
 2. **Block is symmetric and 404s** (ADR-0002). Not 403 — a 403 confirms the
    account exists, which tells a blocked person exactly what they wanted to know.

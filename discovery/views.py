@@ -7,7 +7,7 @@ module is the thin layer that turns a request into their arguments.
 
 Two rules run through it:
 
-1. **Public read access is non-negotiable** (`CLAUDE.md` rule 7). Search and the
+1. **Public read access is non-negotiable** (`CONTRIBUTING.md` rule 7). Search and the
    filtered feed work signed out. Only Home and onboarding need an account —
    Home because it is personalised to you, onboarding because it edits your
    profile.

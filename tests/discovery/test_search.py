@@ -1,6 +1,6 @@
 """Full-text search, keyword extraction, and the filters.
 
-Search is public (`CLAUDE.md` rule 7) and covers posts **and people**
+Search is public (`CONTRIBUTING.md` rule 7) and covers posts **and people**
 (spec §4.3), deliberately not comments (§9 Q11).
 
 The accent test is the one worth explaining. `accounts` 0002 creates an

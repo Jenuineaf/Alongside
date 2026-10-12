@@ -628,7 +628,7 @@ def test_posts_per_author_follows_a_power_law(seeded):
 def test_some_posts_are_already_team_formed(seeded):
     """The brief names this: "a few posts already marked team formed".
 
-    `status` is one of the three anti-ghosting fields (`CLAUDE.md`), so a demo
+    `status` is one of the three anti-ghosting fields (`CONTRIBUTING.md`), so a demo
     where every post is still `looking` fails to show the design the product is
     built around.
     """

@@ -66,7 +66,7 @@ URL. So an unfiltered badge counts a conversation with somebody you have blocked
 in the product, while that test stays green forever.
 
 Both counts return an empty dict for anonymous visitors before any I/O — the public feed is the
-most-hit query in the app and `CLAUDE.md` rule 7 makes it non-negotiable.
+most-hit query in the app and `CONTRIBUTING.md` rule 7 makes it non-negotiable.
 
 ---
 

@@ -3,7 +3,7 @@
 **Seat:** Builder · **Phase:** 4 (roadmap §Part 2) · **Status:** comments, sparks, saves and
 in-app notifications all written. **Nothing has been run** — see §5.
 
-`docs/` is the only shared memory (`CLAUDE.md` rule 1), so everything here is something another
+`docs/` is the only shared memory (`CONTRIBUTING.md` rule 1), so everything here is something another
 seat can trip over. The schema reasoning behind all of it is `docs/review/social.md` — that
 review remains the reference for this area.
 
@@ -147,7 +147,7 @@ the collapsed notification sorts to the *bottom* of the bell.
 `notifications/context_processors.py::unread_alerts` puts the count in every template's context,
 registered by the Architect in `config/settings/base.py`. **It returns an empty dict for
 anonymous visitors before any I/O** — the public feed and landing page are the most-hit queries
-in the app and `CLAUDE.md` rule 7 makes them non-negotiable, so they must not acquire a count
+in the app and `CONTRIBUTING.md` rule 7 makes them non-negotiable, so they must not acquire a count
 query just because a context processor exists.
 
 ### 3.4 What is deliberately absent

@@ -12,7 +12,7 @@ Three properties this module has to preserve, in order of importance:
 
 1. **Anonymous is free.** `blocked_user_ids(AnonymousUser)` returns an empty
    frozenset without touching Redis or Postgres. The public feed is the most-hit
-   query in the app and `CLAUDE.md` rule 7 makes it non-negotiable — it must carry
+   query in the app and `CONTRIBUTING.md` rule 7 makes it non-negotiable — it must carry
    no visibility logic at all.
 2. **An empty block set is also free** (D11). The overwhelming majority of logged-in
    users have blocked nobody; without a short-circuit every authenticated feed query

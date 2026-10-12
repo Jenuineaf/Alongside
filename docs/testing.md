@@ -333,7 +333,7 @@ Every destructive cell also asserts the object is unchanged afterwards (§2.3).
 
 ### 5.3 `test_public_access.py` — the login wall never comes back
 
-`product-spec.md` §5.2 and `CLAUDE.md` rule 7 call public read access non-negotiable. It is
+`product-spec.md` §5.2 and `CONTRIBUTING.md` rule 7 call public read access non-negotiable. It is
 also exactly the kind of thing that breaks by accident when someone adds `LoginRequiredMixin`
 to a base view.
 

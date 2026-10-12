@@ -356,4 +356,4 @@ rewrite.
 ---
 
 **Status:** waiting on Jeni for §3, and on the Architect for §2. Not writing code until the
-migration is locked (`CLAUDE.md` rule 5).
+migration is locked (`CONTRIBUTING.md` rule 5).

@@ -436,7 +436,7 @@ class Block(models.Model):
       unblocking restores the thread with no restore code path at all.
     * Block is a soft barrier, not an access control. The feed is public, so a
       blocked person can log out and read public content. That is an accepted
-      consequence of `CLAUDE.md` rule 7, and the wrong fix for it is a login wall.
+      consequence of `CONTRIBUTING.md` rule 7, and the wrong fix for it is a login wall.
     """
 
     blocker = models.ForeignKey(

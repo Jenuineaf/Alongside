@@ -302,7 +302,7 @@ def test_mark_all_read_is_post_only(client, author):
 
 
 def test_the_badge_is_free_for_anonymous_visitors(client, post, joiner):
-    """CLAUDE.md rule 7 — the public feed must not acquire a count query just
+    """CONTRIBUTING.md rule 7 — the public feed must not acquire a count query just
     because a context processor exists."""
     from notifications.context_processors import unread_alerts
 
